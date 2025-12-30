@@ -1,314 +1,565 @@
-// ===== SCRIPT.JS - VERSÃO MELHORADA E CORRIGIDA =====
+// ============================================
+// CREATIVE CODEX - SCRIPT OTIMIZADO PARA MOBILE
+// ============================================
 
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
+    'use strict';
+    
+    // ===== CONFIGURAÇÕES GERAIS =====
+    const config = {
+        mobileBreakpoint: 768,
+        scrollOffset: 80,
+        animationDuration: 300
+    };
     
     // ===== ELEMENTOS DO DOM =====
-    const menuToggle = document.querySelector('.menu-toggle');
-    const navMenu = document.querySelector('.nav-menu');
-    const navLinks = document.querySelectorAll('.nav-link');
-    const backToTop = document.querySelector('.back-to-top');
-    const navProgress = document.querySelector('.nav-progress');
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const projectCards = document.querySelectorAll('.project-card');
-    const currentYear = document.getElementById('current-year');
-    const whatsappForm = document.getElementById('whatsapp-form');
-    const whatsappFloat = document.querySelector('.whatsapp-float');
+    const DOM = {
+        menuToggle: document.querySelector('.menu-toggle'),
+        navMenu: document.querySelector('.nav-menu'),
+        navLinks: document.querySelectorAll('.nav-link'),
+        backToTop: document.querySelector('.back-to-top'),
+        navProgress: document.querySelector('.nav-progress'),
+        filterButtons: document.querySelectorAll('.filter-btn'),
+        projectCards: document.querySelectorAll('.project-card'),
+        currentYear: document.getElementById('current-year'),
+        whatsappForm: document.getElementById('whatsapp-form'),
+        whatsappFloat: document.querySelector('.whatsapp-float'),
+        sections: document.querySelectorAll('section'),
+        partnersSlider: document.querySelector('.partners-slider'),
+        addProjectCard: document.querySelector('.add-project')
+    };
     
-    // ===== MENU MOBILE =====
-    if (menuToggle) {
-        menuToggle.addEventListener('click', function() {
-            this.classList.toggle('active');
-            navMenu.classList.toggle('active');
-            document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
-        });
-    }
+    // ===== SISTEMA DE LOG (DEBUG) =====
+    const log = {
+        info: (msg) => console.log(`ℹ️ ${msg}`),
+        error: (msg) => console.error(`❌ ${msg}`),
+        success: (msg) => console.log(`✅ ${msg}`)
+    };
     
-    // Fechar menu ao clicar em link
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            menuToggle.classList.remove('active');
-            navMenu.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    });
-    
-    // ===== MENU ATIVO AO SCROLL + PROGRESS BAR =====
-    const sections = document.querySelectorAll('section');
-    
-    function updateActiveSection() {
-        let scrollPosition = window.scrollY + 200;
+    // ===== UTILITÁRIOS =====
+    const utils = {
+        isMobile: () => window.innerWidth < config.mobileBreakpoint,
         
-        // Atualizar barra de progresso
-        const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const progress = (window.scrollY / totalHeight) * 100;
-        if (navProgress) {
-            navProgress.style.width = `${progress}%`;
+        debounce: (func, wait) => {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        },
+        
+        throttle: (func, limit) => {
+            let inThrottle;
+            return function() {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            };
         }
+    };
+    
+    // ===== MENU MOBILE - CORRIGIDO =====
+    function initMobileMenu() {
+        if (!DOM.menuToggle || !DOM.navMenu) return;
         
-        // Atualizar menu ativo
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
-            const sectionId = section.getAttribute('id');
+        const toggleMenu = () => {
+            DOM.menuToggle.classList.toggle('active');
+            DOM.navMenu.classList.toggle('active');
             
-            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === `#${sectionId}`) {
-                        link.classList.add('active');
+            // Corrigido: controlar overflow apenas no mobile
+            if (utils.isMobile()) {
+                document.body.style.overflow = DOM.navMenu.classList.contains('active') ? 'hidden' : '';
+            }
+        };
+        
+        // Toggle ao clicar no botão
+        DOM.menuToggle.addEventListener('click', toggleMenu);
+        
+        // Fechar ao clicar em link - CORRIGIDO
+        DOM.navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (DOM.navMenu.classList.contains('active')) {
+                    DOM.menuToggle.classList.remove('active');
+                    DOM.navMenu.classList.remove('active');
+                    if (utils.isMobile()) {
+                        document.body.style.overflow = '';
                     }
-                });
-            }
-        });
-        
-        // Botão voltar ao topo
-        if (backToTop) {
-            if (window.scrollY > 500) {
-                backToTop.classList.add('visible');
-            } else {
-                backToTop.classList.remove('visible');
-            }
-        }
-    }
-    
-    window.addEventListener('scroll', updateActiveSection);
-    updateActiveSection(); // Inicializar
-    
-    // ===== BOTÃO VOLTAR AO TOPO =====
-    if (backToTop) {
-        backToTop.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-    }
-    
-    // ===== FILTRO PORTFÓLIO =====
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // Atualizar botões ativos
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            const filterValue = this.getAttribute('data-filter');
-            
-            // Filtrar projetos
-            projectCards.forEach(card => {
-                const categories = card.getAttribute('data-category').split(' ');
-                
-                if (filterValue === 'all' || categories.includes(filterValue)) {
-                    card.style.display = 'block';
-                    setTimeout(() => {
-                        card.style.opacity = '1';
-                        card.style.transform = 'scale(1)';
-                    }, 10);
-                } else {
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.9)';
-                    setTimeout(() => {
-                        card.style.display = 'none';
-                    }, 300);
                 }
             });
         });
-    });
+        
+        // Fechar ao clicar fora - NOVO E CORRIGIDO
+        document.addEventListener('click', (e) => {
+            if (!DOM.navMenu.classList.contains('active')) return;
+            
+            const isClickInsideMenu = DOM.navMenu.contains(e.target);
+            const isClickOnToggle = DOM.menuToggle.contains(e.target);
+            
+            if (!isClickInsideMenu && !isClickOnToggle) {
+                DOM.menuToggle.classList.remove('active');
+                DOM.navMenu.classList.remove('active');
+                if (utils.isMobile()) {
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+        
+        // Fechar ao redimensionar para desktop
+        window.addEventListener('resize', utils.debounce(() => {
+            if (!utils.isMobile() && DOM.navMenu.classList.contains('active')) {
+                DOM.menuToggle.classList.remove('active');
+                DOM.navMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }, 250));
+        
+        log.success('Menu mobile inicializado');
+    }
     
-    // ===== FORMULÁRIO WHATSAPP =====
-    if (whatsappForm) {
-        whatsappForm.addEventListener('submit', function(e) {
+    // ===== SCROLL E PROGRESS BAR - CORRIGIDO =====
+    function initScrollEffects() {
+        if (!DOM.sections.length) return;
+        
+        const updateOnScroll = () => {
+            const scrollPosition = window.scrollY + 100;
+            
+            // Progress bar
+            if (DOM.navProgress) {
+                const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const progress = totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
+                DOM.navProgress.style.width = `${progress}%`;
+            }
+            
+            // Menu ativo - CORRIGIDO
+            DOM.sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                const sectionId = section.getAttribute('id');
+                
+                if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                    DOM.navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${sectionId}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+            
+            // Botão voltar ao topo
+            if (DOM.backToTop) {
+                DOM.backToTop.classList.toggle('visible', window.scrollY > 500);
+            }
+        };
+        
+        // Usar throttle para performance
+        window.addEventListener('scroll', utils.throttle(updateOnScroll, 100));
+        updateOnScroll(); // Inicializar
+        
+        // Botão voltar ao topo
+        if (DOM.backToTop) {
+            DOM.backToTop.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+        
+        log.success('Efeitos de scroll inicializados');
+    }
+    
+    // ===== FILTRO DE PORTFÓLIO - CORRIGIDO =====
+    function initPortfolioFilter() {
+        if (!DOM.filterButtons.length || !DOM.projectCards.length) return;
+        
+        // Adicionar CSS para animação
+        const style = document.createElement('style');
+        style.textContent = `
+            .project-card {
+                transition: opacity 0.3s ease, transform 0.3s ease;
+            }
+            .project-card.hidden {
+                opacity: 0;
+                transform: scale(0.95);
+                pointer-events: none;
+                position: absolute;
+                visibility: hidden;
+            }
+            .project-card.visible {
+                opacity: 1;
+                transform: scale(1);
+                position: relative;
+                visibility: visible;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Inicializar todos como visíveis
+        DOM.projectCards.forEach(card => {
+            card.classList.add('visible');
+        });
+        
+        DOM.filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Atualizar botões ativos
+                DOM.filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filterValue = this.getAttribute('data-filter');
+                
+                // Filtrar projetos - CORRIGIDO
+                DOM.projectCards.forEach(card => {
+                    const categories = card.getAttribute('data-category').split(' ');
+                    
+                    if (filterValue === 'all' || categories.includes(filterValue)) {
+                        card.classList.remove('hidden');
+                        setTimeout(() => {
+                            card.classList.add('visible');
+                        }, 10);
+                    } else {
+                        card.classList.remove('visible');
+                        setTimeout(() => {
+                            card.classList.add('hidden');
+                        }, 10);
+                    }
+                });
+            });
+        });
+        
+        log.success('Filtro de portfólio inicializado');
+    }
+    
+    // ===== FORMULÁRIO WHATSAPP - CORRIGIDO =====
+    function initWhatsAppForm() {
+        if (!DOM.whatsappForm) return;
+        
+        DOM.whatsappForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Pegar valores do formulário
             const formData = new FormData(this);
             const data = Object.fromEntries(formData);
             
-            // Validar campos obrigatórios
+            // Validação
             if (!data.name || !data.service || !data.message) {
                 alert('Por favor, preencha todos os campos obrigatórios (*)');
                 return;
             }
             
-            // Formatar a mensagem para WhatsApp (sem emojis, com traços)
+            // Formatar mensagem
             const whatsappMessage = 
-                `- NOVA PROPOSTA - CREATIVE CODEX -\n\n` +
-                `- Nome: ${data.name}\n` +
-                `- Projeto: ${data.service}\n` +
-                `- Orçamento: ${data.budget || 'Ainda não definido'}\n\n` +
-                `- Mensagem:\n${data.message}\n\n` +
-                `Enviado através do site Creative Codex`;
+                `*NOVA PROPOSTA - CREATIVE CODEX*\n\n` +
+                `👤 *Nome:* ${data.name}\n` +
+                `🎯 *Projeto:* ${data.service}\n` +
+                `💰 *Orçamento:* ${data.budget || 'A definir'}\n\n` +
+                `📝 *Mensagem:*\n${data.message}\n\n` +
+                `_Enviado através do site Creative Codex_`;
             
-            // Seu número de WhatsApp (com código do país)
             const phoneNumber = '5516997837454';
-            
-            // Criar URL do WhatsApp
-            const encodedMessage = encodeURIComponent(whatsappMessage);
-            const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+            const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
             
             // Feedback visual
             const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            const originalBgColor = submitBtn.style.backgroundColor;
+            const originalHTML = submitBtn.innerHTML;
             
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Abrindo WhatsApp...';
             submitBtn.disabled = true;
             
-            // Pequeno delay para mostrar o feedback
+            // Abrir WhatsApp
             setTimeout(() => {
-                // Abrir WhatsApp em nova aba
-                window.open(whatsappURL, '_blank');
+                const newWindow = window.open(whatsappURL, '_blank');
                 
-                // Mudar botão para sucesso
-                submitBtn.innerHTML = '<i class="fas fa-check"></i> WhatsApp Aberto!';
-                submitBtn.style.backgroundColor = '#25D366';
-                
-                // Resetar após 3 segundos
-                setTimeout(() => {
-                    this.reset();
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.style.backgroundColor = originalBgColor;
+                if (newWindow) {
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> WhatsApp Aberto!';
+                    submitBtn.style.backgroundColor = '#25D366';
+                    
+                    // Resetar após 2 segundos
+                    setTimeout(() => {
+                        this.reset();
+                        submitBtn.innerHTML = originalHTML;
+                        submitBtn.style.backgroundColor = '';
+                        submitBtn.disabled = false;
+                    }, 2000);
+                } else {
+                    // Fallback se popup for bloqueado
+                    submitBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Clique para abrir';
+                    submitBtn.onclick = () => window.open(whatsappURL, '_blank');
                     submitBtn.disabled = false;
-                }, 3000);
-            }, 500);
+                }
+            }, 800);
         });
+        
+        log.success('Formulário WhatsApp inicializado');
     }
     
-    // ===== WHATSAPP FLOAT =====
-    if (whatsappFloat) {
-        whatsappFloat.addEventListener('click', function(e) {
+    // ===== WHATSAPP FLOAT - CORRIGIDO =====
+    function initWhatsAppFloat() {
+        if (!DOM.whatsappFloat) return;
+        
+        DOM.whatsappFloat.addEventListener('click', function(e) {
             e.preventDefault();
             
-            // Mensagem padrão sem emojis, com traços
             const defaultMessage = 
-                `- Olá! Gostaria de conversar sobre um projeto. -\n\n` +
+                `👋 *Olá! Gostaria de conversar sobre um projeto.*\n\n` +
                 `Encontrei você através do site Creative Codex.\n\n` +
                 `Podemos conversar?`;
             
             const phoneNumber = '5516997837454';
             const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(defaultMessage)}`;
             
-            // Abrir em nova aba
-            window.open(whatsappURL, '_blank');
-        });
-    }
-    
-    // ===== ANIMAÇÃO AO SCROLL =====
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animated');
+            // Tenta abrir em nova aba, fallback para mesma aba
+            const newWindow = window.open(whatsappURL, '_blank');
+            if (!newWindow) {
+                window.location.href = whatsappURL;
             }
         });
-    }, observerOptions);
+        
+        log.success('Botão WhatsApp flutuante inicializado');
+    }
     
-    // Observar elementos para animação
-    document.querySelectorAll('.service-card, .project-card, .skill-card, .tech-icon, .partner-logo').forEach(el => {
-        observer.observe(el);
-    });
+    // ===== SCROLL SUAVE - CORRIGIDO =====
+    function initSmoothScroll() {
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                
+                // Ignorar links especiais
+                if (href === '#' || href.includes('javascript:') || href.includes('mailto:') || href.includes('tel:')) {
+                    return;
+                }
+                
+                // Verificar se é link interno
+                if (href.startsWith('#') && href.length > 1) {
+                    e.preventDefault();
+                    
+                    const targetId = href.substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement) {
+                        // Fechar menu mobile se aberto
+                        if (DOM.navMenu && DOM.navMenu.classList.contains('active')) {
+                            DOM.menuToggle.classList.remove('active');
+                            DOM.navMenu.classList.remove('active');
+                            if (utils.isMobile()) {
+                                document.body.style.overflow = '';
+                            }
+                        }
+                        
+                        // Calcular offset - CORRIGIDO PARA MOBILE
+                        const offset = config.scrollOffset;
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - offset;
+                        
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                        
+                        // Atualizar URL sem recarregar
+                        history.pushState(null, null, href);
+                    }
+                }
+            });
+        });
+        
+        log.success('Scroll suave inicializado');
+    }
+    
+    // ===== ANIMAÇÕES AO SCROLL - OTIMIZADO =====
+    function initScrollAnimations() {
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+            
+            // Observar apenas elementos importantes
+            document.querySelectorAll('.service-card, .project-card:not(.add-project), .skill-card, .tech-icon').forEach(el => {
+                observer.observe(el);
+            });
+        }
+        
+        // Animação inicial do hero - SIMPLIFICADA
+        setTimeout(() => {
+            document.querySelectorAll('.hero-badge, .hero-title, .hero-description, .hero-actions').forEach((el, i) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 100 + (i * 100));
+            });
+        }, 300);
+        
+        log.success('Animações inicializadas');
+    }
     
     // ===== ANO ATUAL =====
-    if (currentYear) {
-        currentYear.textContent = new Date().getFullYear();
+    function initCurrentYear() {
+        if (DOM.currentYear) {
+            DOM.currentYear.textContent = new Date().getFullYear();
+        }
     }
     
-    // ===== INTERAÇÕES DOS PROJETOS =====
-    document.querySelectorAll('.project-view').forEach(button => {
-        button.addEventListener('click', function(e) {
-            // O link já tem target="_blank", então não precisamos fazer nada
-            // Apenas garantir que o clique não seja bloqueado
+    // ===== PARCEIROS SLIDER - OTIMIZADO =====
+    function initPartnersSlider() {
+        if (!DOM.partnersSlider) return;
+        
+        const sliderTrack = DOM.partnersSlider.querySelector('.slider-track');
+        if (!sliderTrack) return;
+        
+        // Ajustar velocidade baseado no dispositivo
+        const adjustSpeed = () => {
+            const speed = utils.isMobile() ? 40 : 30;
+            sliderTrack.style.animationDuration = `${speed}s`;
+        };
+        
+        adjustSpeed();
+        window.addEventListener('resize', utils.debounce(adjustSpeed, 250));
+        
+        // Pausar no hover
+        DOM.partnersSlider.addEventListener('mouseenter', () => {
+            sliderTrack.style.animationPlayState = 'paused';
         });
-    });
+        
+        DOM.partnersSlider.addEventListener('mouseleave', () => {
+            sliderTrack.style.animationPlayState = 'running';
+        });
+        
+        log.success('Slider de parceiros inicializado');
+    }
     
     // ===== CARD "ADICIONAR PROJETO" =====
-    const addProjectCard = document.querySelector('.add-project');
-    if (addProjectCard) {
-        addProjectCard.addEventListener('click', function(e) {
-            if (!e.target.closest('.btn')) {
-                // Redirecionar para contato
-                window.location.hash = '#contact';
-                window.scrollTo({
-                    top: document.getElementById('contact').offsetTop - 80,
-                    behavior: 'smooth'
-                });
+    function initAddProjectCard() {
+        if (!DOM.addProjectCard) return;
+        
+        DOM.addProjectCard.addEventListener('click', function(e) {
+            if (!e.target.closest('a') && !e.target.closest('button')) {
+                // Redirecionar suavemente para contato
+                const contactSection = document.getElementById('contact');
+                if (contactSection) {
+                    if (DOM.navMenu && DOM.navMenu.classList.contains('active')) {
+                        DOM.menuToggle.classList.remove('active');
+                        DOM.navMenu.classList.remove('active');
+                        if (utils.isMobile()) {
+                            document.body.style.overflow = '';
+                        }
+                    }
+                    
+                    setTimeout(() => {
+                        contactSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 100);
+                }
             }
         });
     }
     
-    // ===== PARCEIROS - PAUSAR ANIMAÇÃO NO HOVER =====
-    const partnersSlider = document.querySelector('.partners-slider');
-    if (partnersSlider) {
-        const sliderTrack = partnersSlider.querySelector('.slider-track');
-        
-        partnersSlider.addEventListener('mouseenter', () => {
-            if (sliderTrack) {
-                sliderTrack.style.animationPlayState = 'paused';
-            }
+    // ===== PREVENIR COMPORTAMENTOS INDESEJADOS =====
+    function initPreventDefaults() {
+        // Prevenir menu de contexto em placeholders
+        document.querySelectorAll('[class*="placeholder"]').forEach(el => {
+            el.addEventListener('contextmenu', (e) => e.preventDefault());
         });
         
-        partnersSlider.addEventListener('mouseleave', () => {
-            if (sliderTrack) {
-                sliderTrack.style.animationPlayState = 'running';
-            }
+        // Prevenir submit de forms não tratados
+        document.querySelectorAll('form:not(#whatsapp-form)').forEach(form => {
+            form.addEventListener('submit', (e) => e.preventDefault());
         });
     }
     
-    // ===== SMOOTH SCROLL PARA ÂNCORAS =====
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            
-            // Ignorar links vazios ou externos
-            if (href === '#' || href.includes('javascript')) return;
-            
-            const targetElement = document.querySelector(href);
-            
-            if (targetElement) {
-                e.preventDefault();
-                
-                const offsetTop = targetElement.offsetTop - 80;
-                
-                window.scrollTo({
-                    top: offsetTop,
-                    behavior: 'smooth'
-                });
-            }
+    // ===== GERENCIAR IMAGENS QUE NÃO CARREGAM =====
+    function initImageFallbacks() {
+        document.querySelectorAll('img').forEach(img => {
+            img.addEventListener('error', function() {
+                // Tentar fallback para SVG ou placeholder
+                if (this.src.includes('img/')) {
+                    this.style.display = 'none';
+                    const parent = this.closest('.logo-container, .tech-icon, .skill-icon');
+                    if (parent) {
+                        const textElement = parent.querySelector('span, p, h5');
+                        if (textElement) {
+                            parent.style.backgroundColor = '#f0f4ff';
+                            parent.style.display = 'flex';
+                            parent.style.alignItems = 'center';
+                            parent.style.justifyContent = 'center';
+                            parent.style.padding = '10px';
+                        }
+                    }
+                }
+            });
         });
-    });
+    }
     
-    // ===== PREVENIR CONTEXTO MENU EM IMAGENS PLACEHOLDER =====
-    document.querySelectorAll('.image-placeholder, .project-placeholder').forEach(el => {
-        el.addEventListener('contextmenu', (e) => e.preventDefault());
-    });
-    
-    // ===== ANIMAÇÃO INICIAL =====
-    // Animar elementos do hero
-    const heroElements = document.querySelectorAll('.hero-badge, .hero-title, .hero-description, .hero-stats, .hero-actions');
-    heroElements.forEach((el, index) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
+    // ===== INICIALIZAÇÃO PRINCIPAL =====
+    function init() {
+        log.info('Inicializando Creative Codex...');
         
+        // Ordem de inicialização importante
+        initCurrentYear();
+        initMobileMenu();
+        initScrollEffects();
+        initSmoothScroll();
+        initScrollAnimations();
+        initPortfolioFilter();
+        initWhatsAppForm();
+        initWhatsAppFloat();
+        initPartnersSlider();
+        initAddProjectCard();
+        initPreventDefaults();
+        initImageFallbacks();
+        
+        // Ajustes específicos para mobile
+        if (utils.isMobile()) {
+            document.body.classList.add('is-mobile');
+            log.info('Modo mobile detectado');
+        }
+        
+        // Log final
         setTimeout(() => {
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            el.style.opacity = '1';
-            el.style.transform = 'translateY(0)';
-        }, 100 + (index * 100));
-    });
+            log.success('Creative Codex totalmente inicializado!');
+            console.log('📱 Dispositivo:', utils.isMobile() ? 'Mobile' : 'Desktop');
+            console.log('🖥️  Largura:', window.innerWidth, 'px');
+        }, 500);
+    }
     
-    // ===== PREVENIR COMPORTAMENTO PADRÃO DE FORMULÁRIOS =====
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            // Só prevenir se não for o formulário do WhatsApp
-            if (this.id !== 'whatsapp-form') {
-                e.preventDefault();
-            }
-        });
-    });
-});
-
-// ===== DEBUG: Log para verificar se o script carregou =====
-console.log('✅ Creative Codex - JavaScript carregado com sucesso!');
+    // ===== INICIAR TUDO =====
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    
+    // ===== HANDLERS PARA WINDOW =====
+    window.addEventListener('resize', utils.debounce(() => {
+        if (utils.isMobile()) {
+            document.body.classList.add('is-mobile');
+        } else {
+            document.body.classList.remove('is-mobile');
+        }
+    }, 250));
+    
+    // Expor utils para debugging se necessário
+    window.CreativeCodex = { utils, config };
+    
+})();
