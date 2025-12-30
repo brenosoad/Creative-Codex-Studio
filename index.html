@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creative Codex | Design & Desenvolvimento Web</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="img/logo.png?v=2" type="image/png">
+</head>
+<body>
+    <!-- MENU FIXO MELHORADO -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <!-- LOGO MAIS CENTRALIZADA -->
+            <a href="#home" class="logo">
+                <div class="logo-brand">
+                    <div class="logo-circle">
+                        <img src="img/logo.png" alt="Logo Creative Codex" class="logo-img">
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-main">Creative</span>
+                        <span class="logo-sub">Codex</span>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- MENU COM MELHOR ESPAÇAMENTO -->
+            <div class="nav-menu">
+                <div class="nav-links">
+                    <a href="#home" class="nav-link active">
+                        <i class="fas fa-home"></i>
+                        <span>Início</span>
+                        <div class="link-indicator"></div>
+                    </a>
+                    <a href="#about" class="nav-link">
+                        <i class="fas fa-user"></i>
+                        <span>Sobre</span>
+                        <div class="link-indicator"></div>
+                    </a>
+                    <a href="#services" class="nav-link">
+                        <i class="fas fa-cogs"></i>
+                        <span>Serviços</span>
+                        <div class="link-indicator"></div>
+                    </a>
+                    <a href="#partners" class="nav-link">
+                        <i class="fas fa-handshake"></i>
+                        <span>Parceiros</span>
+                        <div class="link-indicator"></div>
+                    </a>
+                    <a href="#portfolio" class="nav-link">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Portfólio</span>
+                        <div class="link-indicator"></div>
+                    </a>
+                    <a href="#contact" class="nav-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>Contato</span>
+                        <div class="link-indicator"></div>
+                    </a>
+                </div>
+                
+                <!-- AÇÃO DE CONTATO NO MENU -->
+                <div class="nav-action">
+                    <a href="https://wa.me/5516997837454" class="btn-nav-action" target="_blank">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>Fale Comigo</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- BOTÃO MENU MOBILE -->
+            <button class="menu-toggle">
+                <span class="menu-bar"></span>
+                <span class="menu-bar"></span>
+                <span class="menu-bar"></span>
+            </button>
+        </div>
+        
+        <!-- LINHA DE AÇÃO VISUAL -->
+        <div class="nav-progress"></div>
+    </nav>
+
+    <!-- SEÇÃO HERO -->
+    <section id="home" class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-star"></i>
+                    <span>Design + Code</span>
+                </div>
+                
+                <h1 class="hero-title">
+                    <span class="hero-subtitle">Transformo ideias em</span>
+                    Experiências Visuais
+                    <span class="hero-highlight">Que Convertem</span>
+                </h1>
+                
+                <p class="hero-description">
+                    Crio identidades visuais impactantes e desenvolvo landing pages funcionais. 
+                    Do conceito à implementação, seu projeto em boas mãos.
+                </p>
+                
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">Projetos</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Satisfação</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">24h</span>
+                        <span class="stat-label">Resposta</span>
+                    </div>
+                </div>
+                
+                <div class="hero-actions">
+                    <a href="#portfolio" class="btn btn-primary btn-lg">
+                        <i class="fas fa-eye"></i>
+                        Ver Portfólio
+                    </a>
+                    <a href="#contact" class="btn btn-outline btn-lg">
+                        <i class="fas fa-comments"></i>
+                        Conversar Agora
+                    </a>
+                </div>
+            </div>
+            
+            <div class="hero-scroll">
+                <div class="scroll-text">Role para explorar</div>
+                <div class="scroll-line"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEÇÃO SOBRE -->
+<section id="about" class="about">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Quem Sou Eu</span>
+            <h2 class="section-title">O Designer Por Trás do Código</h2>
+            <p class="section-subtitle">Unindo criatividade e técnica para resultados excepcionais</p>
+        </div>
+        
+        <div class="about-grid">
+            <div class="about-image">
+                <!-- SUA FOTO AQUI -->
+                <div class="profile-image">
+                    <div class="image-frame">
+                        <img src="img/perfil.png" alt="Creative Codex - Designer" class="profile-photo">
+                        <div class="image-badge">
+                            <i class="fas fa-medal"></i>
+                            5+ anos de experiência
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="about-content">
+                <div class="about-intro">
+                    <h3>Olá, eu sou o Breno Soad</h3>
+                    <p>
+                        Especialista em criar soluções visuais que não só impressionam, 
+                        mas também entregam resultados mensuráveis. Minha abordagem 
+                        combina design estratégico com desenvolvimento prático.
+                    </p>
+                </div>
+                
+                <div class="skills-section">
+                    <h4>Minhas Especialidades</h4>
+                    <div class="skills-grid">
+                        <div class="skill-card">
+                            <div class="skill-icon">
+                                <i class="fas fa-paint-brush"></i>
+                            </div>
+                            <div class="skill-info">
+                                <h5>Design Gráfico</h5>
+                                <p>Identidade visual, logos, material impresso</p>
+                            </div>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <div class="skill-icon">
+                                <i class="fas fa-laptop-code"></i>
+                            </div>
+                            <div class="skill-info">
+                                <h5>Landing Pages</h5>
+                                <p>Design conversor e desenvolvimento</p>
+                            </div>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <div class="skill-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="skill-info">
+                                <h5>Sites Institucionais</h5>
+                                <p>Websites responsivos e modernos</p>
+                            </div>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <div class="skill-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="skill-info">
+                                <h5>Design Responsivo</h5>
+                                <p>Perfeito em todos os dispositivos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tech-stack">
+                    <h4>Ferramentas que Domino</h4>
+                    <div class="tech-icons">
+                        <div class="tech-icon" title="Adobe Photoshop">
+                            <img src="img/ferramentas/photoshop.png" alt="Adobe Photoshop" class="tech-logo">
+                            <span>Photoshop</span>
+                        </div>
+                        <div class="tech-icon" title="HTML5">
+                            <img src="img/ferramentas/html.png" alt="HTML5" class="tech-logo">
+                            <span>HTML5</span>
+                        </div>
+                        <div class="tech-icon" title="CSS3">
+                            <img src="img/ferramentas/css3.png" alt="CSS3" class="tech-logo">
+                            <span>CSS3</span>
+                        </div>
+                        <div class="tech-icon" title="JavaScript">
+                            <img src="img/ferramentas/JS.png" alt="JavaScript" class="tech-logo">
+                            <span>JavaScript</span>
+                        </div>
+                        <div class="tech-icon" title="Visual Studio Code">
+                            <img src="img/ferramentas/vscode.png" alt="VS Code" class="tech-logo">
+                            <span>VS Code</span>
+                        </div>
+                        <div class="tech-icon" title="Canva">
+                            <img src="img/ferramentas/canva.png" alt="Canva" class="tech-logo">
+                            <span>Canva</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+    <!-- SEÇÃO SERVIÇOS -->
+    <section id="services" class="services">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">O Que Ofereço</span>
+                <h2 class="section-title">Serviços Especializados</h2>
+                <p class="section-subtitle">Soluções completas para sua presença digital</p>
+            </div>
+            
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <span class="service-badge">Mais Popular</span>
+                    </div>
+                    <h3>Design Gráfico Completo</h3>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check"></i> Identidade Visual</li>
+                        <li><i class="fas fa-check"></i> Logotipos Profissionais</li>
+                        <li><i class="fas fa-check"></i> Material Impresso</li>
+                        <li><i class="fas fa-check"></i> Design para Redes Sociais</li>
+                        <li><i class="fas fa-check"></i> Apresentações</li>
+                    </ul>
+                    <div class="service-action">
+                        <a href="#contact" class="btn-service">
+                            Solicitar Orçamento
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="service-card featured">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <span class="service-badge">Destaque</span>
+                    </div>
+                    <h3>Landing Pages</h3>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check"></i> Design Conversor</li>
+                        <li><i class="fas fa-check"></i> Responsivo Mobile-First</li>
+                        <li><i class="fas fa-check"></i> Integrações (WhatsApp, Forms)</li>
+                        <li><i class="fas fa-check"></i> Otimização para Conversão</li>
+                        <li><i class="fas fa-check"></i> Hospedagem Inclusa (Opcional - Valor adicional)</li>
+                    </ul>
+                    <div class="service-action">
+                        <a href="#contact" class="btn-service">
+                            Quero Minha Landing Page
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <span class="service-badge">Essencial</span>
+                    </div>
+                    <h3>Sites Institucionais</h3>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check"></i> Design Moderno</li>
+                        <li><i class="fas fa-check"></i> Totalmente Responsivo</li>
+                        <li><i class="fas fa-check"></i> CMS Fácil de Usar</li>
+                        <li><i class="fas fa-check"></i> Otimização SEO</li>
+                        <li><i class="fas fa-check"></i> Suporte por 30 dias</li>
+                    </ul>
+                    <div class="service-action">
+                        <a href="#contact" class="btn-service">
+                            Criar Meu Site
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEÇÃO PARCEIROS -->
+    <section id="partners" class="partners">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Parcerias</span>
+                <h2 class="section-title">Já Trabalhei Com:</h2>
+                <p class="section-subtitle">Empresas que confiaram no meu trabalho</p>
+            </div>
+            
+            <div class="partners-slider">
+                <div class="slider-track">
+                    <!-- LOGO 1: ZEEK CURSOS -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/zeek.png" alt="Zeek Cursos" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Zeek Cursos - Escola de Cursos</span>
+                                <span class="logo-service">Design + Landing Page</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- LOGO 2: Black -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/blackbelt.png" alt="Black Belt" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Black Belt - Academia de Taekwondo</span>
+                                <span class="logo-service">Design Gráfico e Impressos</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- LOGO 3: Lanche -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/kilanchao.png" alt="Ki Lanchão" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Ki Lanchão - Lanchonete</span>
+                                <span class="logo-service">Design Gráfico</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- LOGO 4: Sanca por Aí -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/sanca.png" alt="Sanca por Aí" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Sanca por Aí - Influencers</span>
+                                <span class="logo-service">Criação de Mídia Kit e Artes</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LOGO 5: Laís -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/lais.png" alt="Laís" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Laís G. Cavicchioli - Influenciadora</span>
+                                <span class="logo-service">OnePage e serviços gráficos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LOGO 6: Resenha da vila -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/resenha.png" alt="Resenha da Vila" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Resenha da Vila - Futebol</span>
+                                <span class="logo-service">Designer Gráfico</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LOGO 7: Rafa Custódio -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/rafa.png" alt="Rafa Custódio" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Rafa Custódio - Músico</span>
+                                <span class="logo-service">Designer Gráfico</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- LOGO 8: Auto Escola -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/opcao.png" alt="Opção" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Opção - Auto Escola</span>
+                                <span class="logo-service">Designer Gráfico</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LOGO 9: Diogo -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/diogo.png" alt="Diogo" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Diogo Bolzan - Youtuber</span>
+                                <span class="logo-service">Identidade Visual</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LOGO 10: Boleiragem -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/boleiragem.png" alt="Boleiragem" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Boleiragem - Time esportivo</span>
+                                <span class="logo-service">Design Esportivo</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- REPETIÇÃO PARA EFEITO CONTÍNUO -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/zeek.png" alt="Zeek Cursos" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Zeek Cursos - Escola de Cursos</span>
+                                <span class="logo-service">Design + Landing Page</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/blackbelt.png" alt="Black Belt" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Black Belt - Academia de Taekwondo</span>
+                                <span class="logo-service">Design Gráfico e Impressos</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/kilanchao.png" alt="Ki Lanchão" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Ki Lanchão - Lanchonete</span>
+                                <span class="logo-service">Design Gráfico</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/sanca.png" alt="Sanca por Aí" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Sanca por Aí - Influencers</span>
+                                <span class="logo-service">Criação de Mídia Kit e Artes</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img src="img/lais.png" alt="Laís" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Laís G. Cavicchioli - Influenciadora</span>
+                                <span class="logo-service">OnePage e serviços gráficos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="partners-cta">
+                <p><i class="fas fa-handshake"></i> Seja o próximo a aparecer aqui! Vamos trabalhar juntos.</p>
+                <a href="#contact" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> Iniciar Parceria
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEÇÃO PORTFÓLIO -->
+    <section id="portfolio" class="portfolio">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Meu Trabalho</span>
+                <h2 class="section-title">Projetos em Destaque</h2>
+                <p class="section-subtitle">Cases que mostram minha capacidade criativa e técnica</p>
+            </div>
+            
+            <div class="portfolio-filters">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-th-large"></i> Todos
+                </button>
+                <button class="filter-btn" data-filter="design">
+                    <i class="fas fa-paint-brush"></i> Design
+                </button>
+                <button class="filter-btn" data-filter="web">
+                    <i class="fas fa-code"></i> Web
+                </button>
+                <button class="filter-btn" data-filter="landing">
+                    <i class="fas fa-rocket"></i> Landing Pages
+                </button>
+            </div>
+            
+            <div class="portfolio-grid">
+                <!-- PROJETO 1: LAIS (LANDING PAGE) -->
+                <div class="project-card" data-category="web landing">
+                    <div class="project-image" style="background-image: url('img/lais01.png');">
+                        <div class="project-badge">Landing Page</div>
+                        <div class="project-overlay">
+                            <a href="https://brenosoad.github.io/Midia-Kit-Lais-/" 
+                               class="project-view" 
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <i class="fas fa-external-link-alt"></i>
+                                Ver Site ao Vivo
+                            </a>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-meta">
+                            <span class="project-category">Landing Page</span>
+                            <span class="project-date">2025</span>
+                        </div>
+                        <h3>Lais - Media Kit</h3>
+                        <p>Landing page profissional para apresentação de mídia kit e portfólio.</p>
+                        <div class="project-tags">
+                            <span>HTML5</span>
+                            <span>CSS3</span>
+                            <span>JavaScript</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://brenosoad.github.io/Midia-Kit-Lais-/" 
+                               class="project-link" 
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <i class="fas fa-external-link-alt"></i>
+                                Acessar Site
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PROJETO 2: ZEEK (LANDING PAGE) -->
+                <div class="project-card" data-category="web landing">
+                    <div class="project-image" style="background-image: url('img/zeek01.png');">
+                        <div class="project-badge">Landing Page</div>
+                        <div class="project-overlay">
+                            <a href="https://zeekcursos.com.br/Workshop/Informatica-Executiva" 
+                               class="project-view" 
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <i class="fas fa-external-link-alt"></i>
+                                Ver Site ao Vivo
+                            </a>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-meta">
+                            <span class="project-category">Landing Page</span>
+                            <span class="project-date">2025</span>
+                        </div>
+                        <h3>Landing Page - Zeek Cursos</h3>
+                        <p>Landing page para atração de clientes e cadastro para um Workshop.</p>
+                        <div class="project-tags">
+                            <span>HTML5</span>
+                            <span>CSS3</span>
+                            <span>JavaScript</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://zeekcursos.com.br/Workshop/Informatica-Executiva" 
+                               class="project-link" 
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <i class="fas fa-external-link-alt"></i>
+                                Acessar Site
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PROJETO 3: BLACK BELT -->
+                <div class="project-card" data-category="design">
+                    <div class="project-image" style="background-image: url('img/Capa.png');">
+                        <div class="project-badge">Design Gráfico</div>
+                        <div class="project-overlay">
+                            <a href="https://www.behance.net/brenosoad" 
+                               class="project-view behance-btn" 
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               title="Ver projeto no Behance">
+                                <i class="fab fa-behance"></i>
+                                Ver no Behance
+                            </a>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-meta">
+                            <span class="project-category">Impressos, Logo & Uniformes</span>
+                            <span class="project-date">2025</span>
+                        </div>
+                        <h3>Black Belt - Design Completo</h3>
+                        <p>Criação de identidade visual completa para evento: logo, impressos e camisetas.</p>
+                        <div class="project-tags">
+                            <span>Photoshop</span>
+                            <span>Branding</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://www.behance.net/brenosoad" 
+                               class="btn-behance" 
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <i class="fab fa-behance"></i>
+                                Ver Case Completo no Behance
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PROJETO 4: AUTO ESCOLA -->
+                <div class="project-card" data-category="design">
+                    <div class="project-image" style="background-image: url('img/opcao01.png');">
+                        <div class="project-badge">Design Gráfico</div>
+                        <div class="project-overlay">
+                            <a href="https://www.behance.net/brenosoad" 
+                               class="project-view behance-btn" 
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               title="Ver projeto no Behance">
+                                <i class="fab fa-behance"></i>
+                                Ver no Behance
+                            </a>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-meta">
+                            <span class="project-category">Avisos e Feed</span>
+                            <span class="project-date">2025</span>
+                        </div>
+                        <h3>Auto Escola Opção - Designer gráfico</h3>
+                        <p>Criação de posts freelancer para Auto Escola Opção.</p>
+                        <div class="project-tags">
+                            <span>Photoshop</span>
+                            <span>Branding</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://www.behance.net/brenosoad" 
+                               class="btn-behance" 
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <i class="fab fa-behance"></i>
+                                Ver Case Completo no Behance
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PROJETO 5: DESIGN ESPORTIVO -->
+                <div class="project-card" data-category="design">
+                    <div class="project-image" style="background-image: url('img/esporte1.png');">
+                        <div class="project-badge">Design Gráfico</div>
+                        <div class="project-overlay">
+                            <a href="https://www.behance.net/brenosoad" 
+                               class="project-view behance-btn" 
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               title="Ver projeto no Behance">
+                                <i class="fab fa-behance"></i>
+                                Ver no Behance
+                            </a>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-meta">
+                            <span class="project-category">Design Esportivo</span>
+                            <span class="project-date">2021 - 2025</span>
+                        </div>
+                        <h3>Esportes - Designer gráfico</h3>
+                        <p>Criação de posts para vários nichos no esporte.</p>
+                        <div class="project-tags">
+                            <span>Photoshop</span>
+                            <span>Branding</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://www.behance.net/brenosoad" 
+                               class="btn-behance" 
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <i class="fab fa-behance"></i>
+                                Ver Case Completo no Behance
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PROJETO 6: PRÓXIMO PROJETO (MANTÉM SEM BACKGROUND) -->
+                <div class="project-card add-project" data-category="all">
+                    <div class="project-add">
+                        <div class="add-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <h3>Seu Próximo Projeto Aqui</h3>
+                        <p>Esta vaga está reservada para você. Vamos criar algo incrível juntos!</p>
+                        <a href="#contact" class="btn btn-outline">
+                            <i class="fas fa-paper-plane"></i>
+                            Propor Projeto
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="portfolio-cta">
+                <p>Quer saber mais sobre esses projetos ou cases detalhados?</p>
+                <a href="#contact" class="btn btn-primary">
+                    <i class="fas fa-envelope"></i>
+                    Entre em contato e descubra!
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEÇÃO CONTATO -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Vamos Conversar</span>
+                <h2 class="section-title">Pronto para Iniciar seu Projeto?</h2>
+                <p class="section-subtitle">Entre em contato e vamos criar algo extraordinário juntos</p>
+            </div>
+            
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <h3>Informações de Contato</h3>
+                    
+                    <div class="contact-methods">
+                        <a href="https://wa.me/5516997837454" class="contact-method whatsapp" target="_blank">
+                            <div class="method-icon">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <div class="method-content">
+                                <h4>WhatsApp</h4>
+                                <p>(16) 99783-7454</p>
+                                <span class="method-status">
+                                    <i class="fas fa-circle online"></i>
+                                    Online agora
+                                </span>
+                            </div>
+                            <div class="method-action">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </a>
+                        
+                        <a href="https://instagram.com/criativecodex.studio" class="contact-method instagram" target="_blank">
+                            <div class="method-icon">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                            <div class="method-content">
+                                <h4>Instagram</h4>
+                                <p>@criativecodex.studio</p>
+                                <span class="method-sub">Siga e envie mensagem</span>
+                            </div>
+                            <div class="method-action">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </a>
+                        
+                        <div class="contact-method">
+                            <div class="method-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="method-content">
+                                <h4>Horário Comercial</h4>
+                                <p>Segunda a Sexta</p>
+                                <span class="method-sub">9h às 18h</span>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method">
+                            <div class="method-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="method-content">
+                                <h4>Atendimento</h4>
+                                <p>100% Online</p>
+                                <span class="method-sub">Todo o Brasil</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-social">
+                        <h4>Conecte-se</h4>
+                        <div class="social-links">
+                            <a href="https://instagram.com/criativecodex.studio" class="social-link" target="_blank">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="https://wa.me/5516997837454" class="social-link" target="_blank">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form">
+                    <h3>Envie sua Proposta</h3>
+                    <p class="form-description">Descreva seu projeto. Respondo em minutos pelo WhatsApp!</p>
+                    
+                    <form id="whatsapp-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name">Seu Nome *</label>
+                                <input type="text" id="name" name="name" required placeholder="Como prefere ser chamado">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="service">Tipo de Projeto *</label>
+                                <select id="service" name="service" required>
+                                    <option value="" disabled selected>Selecione o serviço</option>
+                                    <option value="Design Gráfico">Design Gráfico</option>
+                                    <option value="Landing Page">Landing Page</option>
+                                    <option value="Site Institucional">Site Institucional</option>
+                                    <option value="Redesign">Redesign</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="budget">Orçamento Aproximado</label>
+                            <select id="budget" name="budget">
+                                <option value="" selected>Ainda não sei</option>
+                                <option value="Até R$ 500">Até R$ 500</option>
+                                <option value="R$ 500 - R$ 1.000">R$ 500 - R$ 1.000</option>
+                                <option value="R$ 1.000 - R$ 2.000">R$ 1.000 - R$ 2.000</option>
+                                <option value="Acima de R$ 2.000">Acima de R$ 2.000</option>
+                                <option value="Preciso de orçamento">Preciso de orçamento</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Detalhes do Projeto *</label>
+                            <textarea id="message" name="message" rows="5" required 
+                                      placeholder="Descreva seu projeto, objetivos, prazos e qualquer informação relevante..."></textarea>
+                        </div>
+                        
+                        <div class="form-submit">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fab fa-whatsapp"></i>
+                                Enviar para WhatsApp
+                            </button>
+                            <p class="form-note">
+                                <i class="fas fa-shield-alt"></i>
+                                Sem intermediários. Sua mensagem vai direto para meu WhatsApp.
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BOTÃO WHATSAPP FLUTUANTE -->
+    <a href="https://wa.me/5516997837454" class="whatsapp-float" target="_blank">
+        <div class="float-content">
+            <i class="fab fa-whatsapp"></i>
+            <span class="float-text">Fale comigo</span>
+        </div>
+    </a>
+
+    <!-- BOTÃO VOLTAR AO TOPO -->
+    <button class="back-to-top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="logo-brand">
+                        <div class="logo-circle">
+                            <img src="img/logo.png" alt="Logo Creative Codex" class="logo-img">
+                        </div>
+                        <div class="logo-text">
+                            <span class="logo-main">Creative</span>
+                            <span class="logo-sub">Codex</span>
+                        </div>
+                    </div>
+                    <p class="footer-description">
+                        Transformando ideias em experiências visuais memoráveis através de design estratégico e desenvolvimento web.
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Navegação</h4>
+                    <a href="#home">Início</a>
+                    <a href="#about">Sobre Mim</a>
+                    <a href="#services">Serviços</a>
+                    <a href="#partners">Parceiros</a>
+                    <a href="#portfolio">Portfólio</a>
+                    <a href="#contact">Contato</a>
+                </div>
+                
+                <div class="footer-services">
+                    <h4>Serviços</h4>
+                    <a href="#services">Design Gráfico</a>
+                    <a href="#services">Landing Pages</a>
+                    <a href="#services">Sites Institucionais</a>
+                    <a href="#services">Identidade Visual</a>
+                </div>
+                
+                <div class="footer-contact">
+                    <h4>Entre em Contato</h4>
+                    <a href="https://wa.me/5516997837454" class="footer-contact-link" target="_blank">
+                        <i class="fab fa-whatsapp"></i>
+                        (16) 99783-7454
+                    </a>
+                    <a href="https://instagram.com/criativecodex.studio" class="footer-contact-link" target="_blank">
+                        <i class="fab fa-instagram"></i>
+                        @criativecodex.studio
+                    </a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    <p>&copy; <span id="current-year">2025</span> Creative Codex. Todos os direitos reservados.</p>
+                </div>
+                
+                <div class="footer-legal">
+                    <a href="#" class="legal-link">Termos de Uso</a>
+                    <a href="#" class="legal-link">Política de Privacidade</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
