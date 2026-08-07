@@ -1,0 +1,21 @@
+{
+    "name": "Creative Codex",
+    "short_name": "Creative Codex",
+    "description": "Design gráfico e desenvolvimento web",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#3b82f6",
+    "icons": [
+        {
+            "src": "img/logo.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "img/logo.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
