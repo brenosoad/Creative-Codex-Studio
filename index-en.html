@@ -50,8 +50,30 @@
         ]
     }
     </script>
+    <noscript>
+        <style>
+            .navbar { background-color: rgba(255,255,255,0.95) !important; backdrop-filter: blur(10px) !important; box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important; }
+            .nav-link, .nav-link i { color: #475569 !important; }
+            .logo-main { color: #0f172a !important; }
+            .logo-sub { color: #64748b !important; }
+            .menu-bar { background-color: #0f172a !important; }
+            .nav-options-toggle { display: none !important; }
+            .nav-options-menu { display: flex !important; position: static !important; box-shadow: none !important; border: none !important; }
+        </style>
+    </noscript>
 </head>
 <body>
+    <!-- PRELOADER -->
+    <div class="preloader" id="preloader">
+        <div class="preloader-logo">
+            <div class="logo-circle">
+                <img src="img/logo.png" alt="Creative Codex" loading="eager">
+            </div>
+        </div>
+    </div>
+    <noscript><style>.preloader { display: none !important; }</style></noscript>
+    
+    <a href="#home" class="skip-link">Skip to content</a>
     <!-- MENU FIXO MELHORADO -->
     <nav class="navbar">
         <div class="container nav-container">
@@ -71,42 +93,42 @@
             <!-- MENU COM MELHOR ESPAÇAMENTO -->
             <div class="nav-menu" id="nav-menu">
                 <div class="nav-links">
-                    <a href="#home" class="nav-link active">
-                        <i class="fas fa-home" aria-hidden="true"></i>
-                        <span>Home</span>
-                        <div class="link-indicator"></div>
-                    </a>
-                    <a href="#about" class="nav-link">
+                    <a href="#about" class="nav-link" aria-label="About">
                         <i class="fas fa-user" aria-hidden="true"></i>
                         <span>About</span>
                         <div class="link-indicator"></div>
                     </a>
-                    <a href="#services" class="nav-link">
+                    <a href="#services" class="nav-link" aria-label="Services">
                         <i class="fas fa-cogs" aria-hidden="true"></i>
                         <span>Services</span>
                         <div class="link-indicator"></div>
                     </a>
-                    <a href="#partners" class="nav-link">
+                    <a href="#partners" class="nav-link" aria-label="Partners">
                         <i class="fas fa-handshake" aria-hidden="true"></i>
                         <span>Partners</span>
                         <div class="link-indicator"></div>
                     </a>
-                    <a href="#portfolio" class="nav-link">
+                    <a href="#portfolio" class="nav-link" aria-label="Portfolio">
                         <i class="fas fa-briefcase" aria-hidden="true"></i>
                         <span>Portfolio</span>
                         <div class="link-indicator"></div>
                     </a>
-                    <a href="#faq" class="nav-link">
+                    <a href="#testimonials" class="nav-link" aria-label="Testimonials">
+                        <i class="fas fa-comment-dots" aria-hidden="true"></i>
+                        <span>Testimonials</span>
+                        <div class="link-indicator"></div>
+                    </a>
+                    <a href="#faq" class="nav-link" aria-label="FAQ">
                         <i class="fas fa-question-circle" aria-hidden="true"></i>
                         <span>FAQ</span>
                         <div class="link-indicator"></div>
                     </a>
-                    <a href="#pricing" class="nav-link">
+                    <a href="#pricing" class="nav-link" aria-label="Pricing">
                         <i class="fas fa-tag" aria-hidden="true"></i>
                         <span>Pricing</span>
                         <div class="link-indicator"></div>
                     </a>
-                    <a href="#contact" class="nav-link">
+                    <a href="#contact" class="nav-link" aria-label="Contact">
                         <i class="fas fa-envelope" aria-hidden="true"></i>
                         <span>Contact</span>
                         <div class="link-indicator"></div>
@@ -115,24 +137,31 @@
                 
                 <!-- AÇÃO DE CONTATO NO MENU -->
                 <div class="nav-action">
-                    <a href="https://wa.me/5516997837454" class="btn-nav-action" target="_blank">
+                    <a href="https://wa.me/5516997837454" class="btn-nav-action" target="_blank" aria-label="Message me on WhatsApp">
                         <i class="fab fa-whatsapp" aria-hidden="true"></i>
                         <span>Message Me</span>
                     </a>
                 </div>
             </div>
             
-            <!-- SELETOR DE IDIOMA -->
-            <a href="index.html" class="lang-switch" title="Mudar para Português">
-                <span class="lang-flag">🇧🇷</span>
-                <span class="lang-code">PT</span>
-            </a>
-            
-            <!-- ALTERNAR TEMA CLARO/ESCURO -->
-            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark theme">
-                <i class="fas fa-moon" aria-hidden="true"></i>
-                <i class="fas fa-sun" aria-hidden="true"></i>
-            </button>
+            <!-- MENU DE OPÇÕES: IDIOMA + TEMA -->
+            <div class="nav-options">
+                <button type="button" class="nav-options-toggle" id="nav-options-toggle" aria-label="More options" aria-haspopup="true" aria-expanded="false" aria-controls="nav-options-menu">
+                    <i class="fas fa-ellipsis-vertical" aria-hidden="true"></i>
+                </button>
+                
+                <div class="nav-options-menu" id="nav-options-menu" role="menu" hidden>
+                    <a href="index.html" class="nav-options-item" role="menuitem">
+                        <span class="lang-flag">🇧🇷</span>
+                        <span>Português</span>
+                    </a>
+                    <button type="button" class="nav-options-item" id="theme-toggle" role="menuitem">
+                        <i class="fas fa-moon theme-icon-moon" aria-hidden="true"></i>
+                        <i class="fas fa-sun theme-icon-sun" aria-hidden="true"></i>
+                        <span class="theme-toggle-label">Dark mode</span>
+                    </button>
+                </div>
+            </div>
             
             <!-- BOTÃO MENU MOBILE -->
             <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu">
@@ -147,50 +176,85 @@
     </nav>
 
     <!-- SEÇÃO HERO -->
-    <section id="home" class="hero">
-        <div class="hero-overlay"></div>
+    <section id="home" class="hero" tabindex="-1">
+        <div class="hero-stars"></div>
+        <div class="hero-aurora">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="hero-shooting-stars" aria-hidden="true">
+            <span></span>
+            <span></span>
+        </div>
         <div class="container">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <i class="fas fa-star" aria-hidden="true"></i>
-                    <span>Design + Code</span>
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <span>Design + Code</span>
+                    </div>
+                    
+                    <h1 class="hero-title">
+                        <span class="hero-subtitle">Turning ideas into</span>
+                        Visual Experiences
+                        <span class="hero-highlight">That Convert</span>
+                    </h1>
+                    
+                    <p class="hero-description">
+                        I create impactful visual identities and build functional landing pages. 
+                        From concept to launch, your project is in good hands.
+                    </p>
+                    
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-number" data-count-to="50" data-suffix="+">50+</span>
+                            <span class="stat-label">Projects</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" data-count-to="100" data-suffix="%">100%</span>
+                            <span class="stat-label">Satisfaction</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">24h</span>
+                            <span class="stat-label">Response</span>
+                        </div>
+                    </div>
+                    
+                    <!-- MINI CÓDIGO (só mobile - o mockup grande é só desktop) -->
+                    <div class="hero-mini-code" aria-hidden="true">
+                        <span class="mini-code-dots">
+                            <span></span><span></span><span></span>
+                        </span>
+                        <code>&lt;<span class="token-tag">Design</span> <span class="token-punct">+</span> <span class="token-func">Code</span> /&gt;</code>
+                        <span class="code-cursor"></span>
+                    </div>
+                    
+                    <div class="hero-actions">
+                        <a href="#portfolio" class="btn btn-primary btn-lg" data-magnetic>
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                            View Portfolio
+                        </a>
+                        <a href="#contact" class="btn btn-outline btn-lg" data-magnetic>
+                            <i class="fas fa-comments" aria-hidden="true"></i>
+                            Let's Talk
+                        </a>
+                    </div>
                 </div>
                 
-                <h1 class="hero-title">
-                    <span class="hero-subtitle">Turning ideas into</span>
-                    Visual Experiences
-                    <span class="hero-highlight">That Convert</span>
-                </h1>
-                
-                <p class="hero-description">
-                    I create impactful visual identities and build functional landing pages. 
-                    From concept to launch, your project is in good hands.
-                </p>
-                
-                <div class="hero-stats">
-                    <div class="stat">
-                        <span class="stat-number" data-count-to="50" data-suffix="+">50+</span>
-                        <span class="stat-label">Projects</span>
+                <!-- MOCKUP DE EDITOR DE CÓDIGO (decorativo, só desktop) -->
+                <div class="hero-mockup" aria-hidden="true">
+                    <div class="code-window">
+                        <div class="code-window-bar">
+                            <span class="dot dot-red"></span>
+                            <span class="dot dot-yellow"></span>
+                            <span class="dot dot-green"></span>
+                            <span class="code-window-title">creative-codex.jsx</span>
+                        </div>
+                        <div class="code-window-body">
+                            <div class="code-lines" id="hero-code"></div>
+                        </div>
                     </div>
-                    <div class="stat">
-                        <span class="stat-number" data-count-to="100" data-suffix="%">100%</span>
-                        <span class="stat-label">Satisfaction</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">24h</span>
-                        <span class="stat-label">Response</span>
-                    </div>
-                </div>
-                
-                <div class="hero-actions">
-                    <a href="#portfolio" class="btn btn-primary btn-lg">
-                        <i class="fas fa-eye" aria-hidden="true"></i>
-                        View Portfolio
-                    </a>
-                    <a href="#contact" class="btn btn-outline btn-lg">
-                        <i class="fas fa-comments" aria-hidden="true"></i>
-                        Let's Talk
-                    </a>
                 </div>
             </div>
             
@@ -199,6 +263,10 @@
                 <div class="scroll-line"></div>
             </div>
         </div>
+        
+        <svg class="hero-wave" viewBox="0 0 1440 100" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,40 C360,100 1080,0 1440,50 L1440,100 L0,100 Z"></path>
+        </svg>
     </section>
 
     <!-- SEÇÃO SOBRE -->
@@ -238,6 +306,7 @@
                     <h4>My Specialties</h4>
                     <div class="skills-grid">
                         <div class="skill-card">
+                            <span class="skill-number">01</span>
                             <div class="skill-icon">
                                 <i class="fas fa-paint-brush" aria-hidden="true"></i>
                             </div>
@@ -248,6 +317,7 @@
                         </div>
                         
                         <div class="skill-card">
+                            <span class="skill-number">02</span>
                             <div class="skill-icon">
                                 <i class="fas fa-laptop-code" aria-hidden="true"></i>
                             </div>
@@ -258,6 +328,7 @@
                         </div>
                         
                         <div class="skill-card">
+                            <span class="skill-number">03</span>
                             <div class="skill-icon">
                                 <i class="fas fa-globe" aria-hidden="true"></i>
                             </div>
@@ -268,6 +339,7 @@
                         </div>
                         
                         <div class="skill-card">
+                            <span class="skill-number">04</span>
                             <div class="skill-icon">
                                 <i class="fas fa-mobile-alt" aria-hidden="true"></i>
                             </div>
@@ -323,19 +395,14 @@
             
             <div class="services-grid">
                 <div class="service-card">
-                    <div class="service-header">
-                        <div class="service-icon">
-                            <i class="fas fa-palette" aria-hidden="true"></i>
-                        </div>
-                        <span class="service-badge">Most Popular</span>
+                    <div class="service-icon">
+                        <i class="fas fa-palette" aria-hidden="true"></i>
                     </div>
-                    <h3>Complete Graphic Design</h3>
+                    <h3>Graphic Design</h3>
                     <ul class="service-features">
                         <li><i class="fas fa-check" aria-hidden="true"></i> Visual Identity</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Professional Logos</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Printed Materials</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Social Media Design</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Presentations</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Logos</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Social Media</li>
                     </ul>
                     <div class="service-action">
                         <a href="#contact" class="btn-service">
@@ -349,20 +416,15 @@
                     </div>
                 </div>
                 
-                <div class="service-card featured">
-                    <div class="service-header">
-                        <div class="service-icon">
-                            <i class="fas fa-rocket" aria-hidden="true"></i>
-                        </div>
-                        <span class="service-badge">Featured</span>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-rocket" aria-hidden="true"></i>
                     </div>
                     <h3>Landing Pages</h3>
                     <ul class="service-features">
                         <li><i class="fas fa-check" aria-hidden="true"></i> Conversion-Focused Design</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Mobile-First Responsive</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Integrations (WhatsApp, Forms)</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Conversion Optimization</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Hosting (optional, on request)</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Responsive</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> WhatsApp Integration</li>
                     </ul>
                     <div class="service-action">
                         <a href="#contact" class="btn-service">
@@ -377,19 +439,14 @@
                 </div>
                 
                 <div class="service-card">
-                    <div class="service-header">
-                        <div class="service-icon">
-                            <i class="fas fa-globe" aria-hidden="true"></i>
-                        </div>
-                        <span class="service-badge">Essential</span>
+                    <div class="service-icon">
+                        <i class="fas fa-globe" aria-hidden="true"></i>
                     </div>
                     <h3>Business Websites</h3>
                     <ul class="service-features">
                         <li><i class="fas fa-check" aria-hidden="true"></i> Modern Design</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Fully Responsive</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Easy-to-Use CMS</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Responsive</li>
                         <li><i class="fas fa-check" aria-hidden="true"></i> SEO Optimization</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> 30-Day Support</li>
                     </ul>
                     <div class="service-action">
                         <a href="#contact" class="btn-service">
@@ -397,6 +454,72 @@
                             <i class="fas fa-arrow-right" aria-hidden="true"></i>
                         </a>
                         <a href="#" class="service-whatsapp-link" data-service="Business Website">
+                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                            Or message me on WhatsApp
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-utensils" aria-hidden="true"></i>
+                    </div>
+                    <h3>Digital Menu</h3>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check" aria-hidden="true"></i> QR Code Access</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Easy Updates</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> No Reprinting</li>
+                    </ul>
+                    <div class="service-action">
+                        <a href="#contact" class="btn-service">
+                            I Want My Digital Menu
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="service-whatsapp-link" data-service="Digital Menu">
+                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                            Or message me on WhatsApp
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-tools" aria-hidden="true"></i>
+                    </div>
+                    <h3>Website Maintenance</h3>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Updates & Adjustments</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Bug Fixes</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Ongoing Support</li>
+                    </ul>
+                    <div class="service-action">
+                        <a href="#contact" class="btn-service">
+                            I Want Maintenance
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="service-whatsapp-link" data-service="Website Maintenance">
+                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                            Or message me on WhatsApp
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-envelope-open-text" aria-hidden="true"></i>
+                    </div>
+                    <h3>Cards & Invitations</h3>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Business Cards</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Digital/Printed Invitations</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Custom Design</li>
+                    </ul>
+                    <div class="service-action">
+                        <a href="#contact" class="btn-service">
+                            Request a Quote
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="service-whatsapp-link" data-service="Cards & Invitations">
                             <i class="fab fa-whatsapp" aria-hidden="true"></i>
                             Or message me on WhatsApp
                         </a>
@@ -414,7 +537,7 @@
                 <h2 class="section-title">Companies I've Worked With:</h2>
                 <p class="section-subtitle">Businesses that trusted my work</p>
                 <div class="partners-badge">
-                    <span class="partners-badge-number" data-count-to="21" data-suffix="+">21+</span>
+                    <span class="partners-badge-number" data-count-to="23" data-suffix="+">23+</span>
                     <span class="partners-badge-text">brands served across fitness, food service, education, and more</span>
                 </div>
             </div>
@@ -655,17 +778,43 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- 22: Pet Café Araraquara -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img loading="lazy" src="img/petcafe.png" alt="Pet Café - Araraquara - Graphic Design" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Pet Café</span>
+                                <span class="logo-service">Araraquara · Graphic Design</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 23: Tuor São Carlos -->
+                    <div class="partner-logo">
+                        <div class="logo-container">
+                            <img loading="lazy" src="img/tuor.png" alt="Tuor - São Carlos - Graphic Design" class="logo-img">
+                            <div class="logo-overlay">
+                                <span class="logo-name">Tuor</span>
+                                <span class="logo-service">São Carlos · Graphic Design</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <button type="button" class="carousel-arrow carousel-arrow-next" aria-label="Ver próximas empresas">
+                <button type="button" class="carousel-arrow carousel-arrow-next" aria-label="View next companies">
                     <i class="fas fa-chevron-right" aria-hidden="true"></i>
                 </button>
             </div>
             
+            <div class="partners-progress" aria-hidden="true">
+                <div class="partners-progress-bar"></div>
+            </div>
+            
             <div class="partners-cta">
-                <p><i class="fas fa-handshake" aria-hidden="true"></i> Seja o próximo a aparecer aqui! Vamos trabalhar juntos.</p>
+                <p><i class="fas fa-handshake" aria-hidden="true"></i> Want to be the next one featured here? Let's work together.</p>
                 <a href="#contact" class="btn btn-primary">
-                    <i class="fas fa-plus-circle" aria-hidden="true"></i> Iniciar Parceria
+                    <i class="fas fa-plus-circle" aria-hidden="true"></i> Start a Partnership
                 </a>
             </div>
         </div>
@@ -856,9 +1005,9 @@
                     </div>
                 </div>
                 
-                <!-- PROJETO 5: AUTO ESCOLA -->
+                <!-- PROJETO 5: PET CAFÉ -->
                 <div class="project-card" data-category="design">
-                    <div class="project-image" style="background-image: url('img/opcao01.png');">
+                    <div class="project-image" style="background-image: url('img/petcafe01.png');">
                         <div class="project-badge">Graphic Design</div>
                         <div class="project-overlay">
                             <a href="https://www.behance.net/brenosoad" 
@@ -876,8 +1025,8 @@
                             <span class="project-category">Announcements & Feed</span>
                             <span class="project-date">2025</span>
                         </div>
-                        <h3>Opção Driving School - Graphic Designer</h3>
-                        <p>Freelance social media posts for Opção Driving School.</p>
+                        <h3>Pet Café - Graphic Designer</h3>
+                        <p>Freelance social media posts for Pet Café.</p>
                         <div class="project-tags">
                             <span>Photoshop</span>
                             <span>Branding</span>
@@ -955,6 +1104,95 @@
                     Get in touch and find out!
                 </a>
             </div>
+            
+            <!-- ACOMPANHE MAIS -->
+            <div class="follow-more">
+                <p class="follow-more-text">Follow more of my work</p>
+                <div class="follow-more-links">
+                    <a href="https://github.com/brenosoad" class="follow-link follow-link-github" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-github" aria-hidden="true"></i>
+                        GitHub
+                    </a>
+                    <a href="https://www.behance.net/brenosoad" class="follow-link follow-link-behance" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-behance" aria-hidden="true"></i>
+                        Behance
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--
+        ⚠️ WARNING — FICTIONAL TESTIMONIALS ⚠️
+        The 3 testimonials below (Laís Cavicchioli, Iceberg Educação, Sanca por Aí) are
+        MADE-UP EXAMPLES so you can preview the layout, as agreed.
+        DO NOT PUBLISH the site with these — replace each one with the real testimonial
+        from that client (WhatsApp/Instagram screenshots or text they authorized) first.
+    -->
+    <!-- SEÇÃO DEPOIMENTOS -->
+    <section id="testimonials" class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Testimonials</span>
+                <h2 class="section-title">What My Clients Say</h2>
+                <p class="section-subtitle">Feedback from people I've worked with</p>
+            </div>
+            
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                    </div>
+                    <p class="testimonial-text">"Breno understood exactly what I needed to present my work to brands. The landing page turned out professional, and now it's the first thing I send whenever someone asks for my media kit."</p>
+                    <div class="testimonial-author">
+                        <img loading="lazy" src="img/lais.png" alt="Laís Cavicchioli" class="testimonial-avatar">
+                        <div class="testimonial-author-info">
+                            <h4>Laís Cavicchioli</h4>
+                            <span>Influencer</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                    </div>
+                    <p class="testimonial-text">"We needed a page that would actually convert sign-ups, not just look nice. The result delivered both: a design aligned with our brand and a simple enrollment process for students."</p>
+                    <div class="testimonial-author">
+                        <img loading="lazy" src="img/icebergeducacao.png" alt="Iceberg Educação" class="testimonial-avatar">
+                        <div class="testimonial-author-info">
+                            <h4>Iceberg Educação</h4>
+                            <span>Educational Institution</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                    </div>
+                    <p class="testimonial-text">"Recurring work, always on time. Breno understands the visual identity we've already built and keeps every new piece consistent, which makes day-to-day work so much easier."</p>
+                    <div class="testimonial-author">
+                        <img loading="lazy" src="img/sanca.png" alt="Sanca por Aí" class="testimonial-avatar">
+                        <div class="testimonial-author-info">
+                            <h4>Sanca por Aí</h4>
+                            <span>Influencer Marketing</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -1027,6 +1265,69 @@
                         <li><i class="fas fa-check" aria-hidden="true"></i> Hosting (optional, on request)</li>
                     </ul>
                     <a href="#" class="btn btn-outline btn-block service-whatsapp-link" data-service="Business Website">
+                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                        Request a Quote
+                    </a>
+                </div>
+                
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <i class="fas fa-utensils" aria-hidden="true"></i>
+                        <h3>Digital Menu</h3>
+                    </div>
+                    <div class="pricing-value">
+                        <span class="price-value">On Request</span>
+                        <span class="price-note">price depends on scope</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Custom design</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> QR Code access</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Quick, easy updates</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> No reprinting costs</li>
+                    </ul>
+                    <a href="#" class="btn btn-outline btn-block service-whatsapp-link" data-service="Digital Menu">
+                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                        Request a Quote
+                    </a>
+                </div>
+                
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <i class="fas fa-tools" aria-hidden="true"></i>
+                        <h3>Website Maintenance</h3>
+                    </div>
+                    <div class="pricing-value">
+                        <span class="price-value">On Request</span>
+                        <span class="price-note">price depends on scope</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Updates & adjustments</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Bug fixes</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Ongoing support</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Monthly or one-off plans</li>
+                    </ul>
+                    <a href="#" class="btn btn-outline btn-block service-whatsapp-link" data-service="Website Maintenance">
+                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                        Request a Quote
+                    </a>
+                </div>
+                
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <i class="fas fa-envelope-open-text" aria-hidden="true"></i>
+                        <h3>Cards & Invitations</h3>
+                    </div>
+                    <div class="pricing-value">
+                        <span class="price-value">On Request</span>
+                        <span class="price-note">price depends on scope</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Business cards</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Digital or printed invitations</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Custom design</li>
+                        <li><i class="fas fa-check" aria-hidden="true"></i> Revision rounds included</li>
+                    </ul>
+                    <a href="#" class="btn btn-outline btn-block service-whatsapp-link" data-service="Cards & Invitations">
                         <i class="fab fa-whatsapp" aria-hidden="true"></i>
                         Request a Quote
                     </a>
@@ -1196,12 +1497,13 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="name">Your Name *</label>
-                                <input type="text" id="name" name="name" required autocomplete="name" placeholder="What should I call you?">
+                                <input type="text" id="name" name="name" required autocomplete="name" placeholder="What should I call you?" aria-describedby="name-error">
+                                <span class="field-error" id="name-error"></span>
                             </div>
                             
                             <div class="form-group">
                                 <label for="service">Project Type *</label>
-                                <select id="service" name="service" required>
+                                <select id="service" name="service" required aria-describedby="service-error">
                                     <option value="" disabled selected>Select a service</option>
                                     <option value="Graphic Design">Graphic Design</option>
                                     <option value="Landing Page">Landing Page</option>
@@ -1209,6 +1511,7 @@
                                     <option value="Redesign">Redesign</option>
                                     <option value="Other">Other</option>
                                 </select>
+                                <span class="field-error" id="service-error"></span>
                             </div>
                         </div>
                         
@@ -1227,7 +1530,8 @@
                         <div class="form-group">
                             <label for="message">Project Details *</label>
                             <textarea id="message" name="message" rows="5" required 
-                                      placeholder="Describe your project, goals, timeline, and any relevant information..."></textarea>
+                                      placeholder="Describe your project, goals, timeline, and any relevant information..." aria-describedby="message-error"></textarea>
+                            <span class="field-error" id="message-error"></span>
                         </div>
                         
                         <div class="form-submit">
@@ -1331,6 +1635,29 @@
         </div>
     </footer>
 
+    <!-- TELA DE ESCOLHA DE IDIOMA (aparece só na primeira visita) -->
+    <div class="lang-gate" id="lang-gate" role="dialog" aria-modal="true" aria-labelledby="lang-gate-title" hidden>
+        <div class="lang-gate-backdrop" data-lang-gate-default></div>
+        <div class="lang-gate-content">
+            <div class="lang-gate-logo">
+                <div class="logo-circle">
+                    <img src="img/logo.png" alt="Creative Codex" loading="lazy">
+                </div>
+            </div>
+            <h2 id="lang-gate-title">Escolha seu idioma <span class="lang-gate-divider">/</span> Choose your language</h2>
+            <div class="lang-gate-options">
+                <button type="button" class="lang-gate-option" data-lang="pt">
+                    <span class="lang-gate-flag">🇧🇷</span>
+                    <span class="lang-gate-name">Português</span>
+                </button>
+                <button type="button" class="lang-gate-option" data-lang="en">
+                    <span class="lang-gate-flag">🇺🇸</span>
+                    <span class="lang-gate-name">English</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: CASE COMPLETO -->
     <div class="case-modal" id="case-modal" role="dialog" aria-modal="true" aria-labelledby="case-modal-title" hidden>
         <div class="case-modal-backdrop" data-close-modal></div>
@@ -1372,7 +1699,7 @@
                 title: 'Laís Cavicchioli - Media Kit',
                 challenge: 'As an influencer, she relied only on Instagram to negotiate brand partnerships, with no dedicated, professional space to showcase her numbers and portfolio.',
                 solution: 'I built a custom landing page bringing together her presentation, audience metrics, and portfolio of past work, with a visual style matching her brand and easy to share in any negotiation.',
-                result: "She now has her own professional tool for closing partnerships, instead of relying only on screenshots and Instagram DMs. [Add a real result here if you have one: number of proposals, partnerships closed, etc.]",
+                result: "She now has her own professional tool for closing partnerships, instead of relying only on screenshots and Instagram DMs.",
                 link: 'https://brenosoad.github.io/Midia-Kit-Lais-/'
             },
             zeek: {
@@ -1380,7 +1707,7 @@
                 title: 'Zeek Cursos - Executive IT Workshop',
                 challenge: 'Zeek needed a page focused on driving sign-ups for a specific workshop, targeting the right audience and making registration easy.',
                 solution: 'I developed a landing page with copy and structure built for conversion: a clear presentation of the workshop, its benefits, and a simple sign-up form, while keeping the brand\'s visual identity.',
-                result: "Zeek gained a dedicated page for each campaign, instead of sending paid traffic to generic social media profiles. [Add a real result here if you have one: number of sign-ups, conversion rate, etc.]",
+                result: "Zeek gained a dedicated page for each campaign, instead of sending paid traffic to generic social media profiles.",
                 link: 'https://zeekcursos.com.br/Workshop/Informatica-Executiva'
             }
         };
