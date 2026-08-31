@@ -382,6 +382,14 @@ img {
 
 /* No topo (hero escuro), textos e ícones do menu ficam claros - só desktop, o painel mobile já tem fundo branco próprio */
 @media (min-width: 769px) {
+    .menu-toggle {
+        display: none;
+    }
+    
+    .nav-menu {
+        display: flex;
+    }
+    
     .navbar:not(.is-scrolled) .nav-link {
         color: rgba(255, 255, 255, 0.85);
     }
@@ -642,12 +650,6 @@ img {
     z-index: 2;
     fill: var(--white);
     pointer-events: none;
-}
-
-@media (max-width: 768px) {
-    .hero-wave {
-        height: 50px;
-    }
 }
 
 /* Padrão de grade sutil - visual "tech" próprio */
@@ -2946,6 +2948,10 @@ img {
         padding: 100px 0 80px;
     }
     
+    .hero-wave {
+        height: 50px;
+    }
+    
     .hero-subtitle {
         font-size: 1.2rem;
     }
@@ -3243,15 +3249,6 @@ img {
 }
 
 /* DESKTOP: acima de 768px - menu normal */
-@media (min-width: 769px) {
-    .menu-toggle {
-        display: none;
-    }
-    
-    .nav-menu {
-        display: flex;
-    }
-}
 /* ===== ANIMAÇÃO DE ENTRADA AO SCROLL (usada pelo IntersectionObserver no JS) ===== */
 .service-card,
 .skill-card,
