@@ -2952,6 +2952,25 @@ img {
         height: 50px;
     }
     
+    .hero-content {
+        text-align: center;
+    }
+    
+    .hero-badge {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .hero-description {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .hero-mini-code {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
     .hero-subtitle {
         font-size: 1.2rem;
     }
@@ -2962,7 +2981,7 @@ img {
     
     .hero-stats {
         gap: 20px;
-        justify-content: space-between;
+        justify-content: center;
     }
     
     .stat-number {
@@ -2971,6 +2990,7 @@ img {
     
     .hero-actions {
         flex-direction: column;
+        align-items: center;
     }
     
     .hero-actions .btn {
@@ -2982,11 +3002,16 @@ img {
     .about-grid {
         grid-template-columns: 1fr;
         gap: 40px;
+        text-align: center;
     }
     
     .about-image {
         max-width: 280px;
         margin: 0 auto;
+    }
+    
+    .skills-section h4 {
+        text-align: center;
     }
     
     .skills-grid {
@@ -3074,6 +3099,15 @@ img {
         gap: 40px;
     }
     
+    .contact-info > h3,
+    .contact-social h4 {
+        text-align: center;
+    }
+    
+    .contact-social .social-links {
+        justify-content: center;
+    }
+    
     .form-row {
         grid-template-columns: 1fr;
     }
@@ -3082,6 +3116,17 @@ img {
     .footer-grid {
         grid-template-columns: 1fr;
         gap: 40px;
+        text-align: center;
+    }
+    
+    .footer-brand .logo-brand {
+        justify-content: center;
+    }
+    
+    .footer-links,
+    .footer-services,
+    .footer-contact {
+        align-items: center;
     }
     
     .footer-bottom {
