@@ -1,9 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/lais", "destination": "https://brenosoad.github.io/Midia-Kit-Lais-/" },
-    { "source": "/lais/:path*", "destination": "https://brenosoad.github.io/Midia-Kit-Lais-/:path*" },
-
-    { "source": "/palestra", "destination": "https://brenosoad.github.io/Palestra/" },
-    { "source": "/palestra/:path*", "destination": "https://brenosoad.github.io/Palestra/:path*" }
-  ]
-}
