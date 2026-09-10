@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://creativecodexstudio.netlify.app/sitemap.xml
+Sitemap: https://creativecodex.com.br/sitemap.xml
