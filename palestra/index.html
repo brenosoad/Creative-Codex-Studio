@@ -6,7 +6,7 @@
 <title>Palestra Móveis Planejados | Cozinhas, dormitórios e closets sob medida</title>
 <meta name="description" content="Móveis planejados sob medida em Ibaté-SP: cozinhas, dormitórios, closets, home office e projetos comerciais. Trabalhamos com MDF, acabamento de verdade e 5 anos de garantia.">
 <link rel="canonical" href="https://www.palestramoveis.com.br/">
-<link rel="icon" type="image/png" href="assets/logo2.png?v=4">
+<link rel="icon" href="assets/logo2.png" type="image/png">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -481,24 +481,6 @@
           <a href="#contato" class="port-link">Ver projeto <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a>
         </div>
       </article>
-    </div>
-    <div class="port-cta-bar">
-      <span class="port-tag">Próximo</span>
-      <div class="port-cta-text">
-        <h3>Seu projeto aqui</h3>
-        <p>Fale com a gente e vamos desenhar a próxima transformação juntos.</p>
-      </div>
-      <a href="#contato" class="port-link">Começar agora <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a>
-    </div>
-  </section>
-
-  <section class="featured-project">
-    <div class="section-head">
-      <span class="eyebrow">Projeto em destaque</span>
-      <h2>Uma casa inteira, ambiente por ambiente</h2>
-      <p class="section-lede">Cozinha, sala, entrada e closet do mesmo projeto — dá pra ver o mesmo cuidado repetido em cada detalhe.</p>
-    </div>
-    <div class="port-grid port-grid--photo">
       <article class="port-item video" data-video="assets/destaque/cozinha-integrada.mp4">
         <img src="assets/destaque/cozinha-integrada-poster.jpg" alt="Cozinha integrada com ilha em madeira e preto" loading="lazy">
         <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
@@ -511,7 +493,7 @@
         <img src="assets/destaque/painel-tv-branco-poster.jpg" alt="Painel de TV branco com ripado de madeira iluminado" loading="lazy">
         <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
         <div class="port-body">
-          <h3>Painel de TV</h3>
+          <h3>Painel Ripado</h3>
           <a href="#contato" class="port-link">Ver projeto <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a>
         </div>
       </article>
@@ -546,9 +528,17 @@
         </div>
       </article>
     </div>
+    <div class="port-cta-bar">
+      <span class="port-tag">Próximo</span>
+      <div class="port-cta-text">
+        <h3>Seu projeto aqui</h3>
+        <p>Fale com a gente e vamos desenhar a próxima transformação juntos.</p>
+      </div>
+      <a href="#contato" class="port-link">Começar agora <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a>
+    </div>
   </section>
 
-  <section class="faq" id="faq">
+    <section class="faq" id="faq">
     <div class="section-head">
       <h2>Perguntas frequentes</h2>
       <p class="section-lede">O que mais perguntam antes de fechar o projeto. Se não achar a sua, é só chamar no WhatsApp.</p>
@@ -730,8 +720,16 @@
 
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" id="lightbox-close">&times;</button>
-  <img id="lightbox-img" src="" alt="">
-  <video id="lightbox-video" controls playsinline></video>
+  <button class="lightbox-nav prev" id="lightbox-prev" aria-label="Anterior">‹</button>
+  <div class="lightbox-stage" id="lightbox-stage">
+    <img id="lightbox-img" src="" alt="">
+    <video id="lightbox-video" controls playsinline></video>
+  </div>
+  <button class="lightbox-nav next" id="lightbox-next" aria-label="Próximo">›</button>
+  <div class="lightbox-footer">
+    <div class="lightbox-thumbs" id="lightbox-thumbs"></div>
+    <div class="lightbox-counter" id="lightbox-counter"></div>
+  </div>
 </div>
 
 <a href="https://wa.me/5516992609843?text=Ol%C3%A1%2C%20vim%20pelo%20site%20e%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20sobre%20os%20seus%20servi%C3%A7os." target="_blank" rel="noopener" class="whatsapp-float" aria-label="Falar no WhatsApp">
