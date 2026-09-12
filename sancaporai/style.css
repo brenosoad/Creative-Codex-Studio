@@ -291,7 +291,9 @@ nav{display:flex; align-items:center; justify-content:space-between;}
 .fol-card .sub{margin-top:8px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:#8891A0;}
 
 /* ============ TESTIMONIALS ============ */
-.testi{background:var(--paper);}
+.testi{background:var(--ink); color:#fff;}
+.testi .section-title{color:#fff;}
+.testi .section-sub{color:#B7BEC7;}
 .testi-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:24px;}
 .testi-card{
   background:#fff; border-radius:20px 20px 20px 4px; padding:28px 30px; box-shadow:0 4px 16px -10px rgba(16,18,20,.15);
