@@ -177,7 +177,7 @@ function animateCounter(el) {
 }
 
 const counterTargets = document.querySelectorAll(
-  '.hero-stats strong, .stat-hero .num, .split-stats .box .num'
+  '.hero-stats strong, .stat-hero .num'
 );
 const counterObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
