@@ -496,6 +496,8 @@ img {
     max-width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
 }
 
 .nav-links::-webkit-scrollbar {
@@ -2945,7 +2947,11 @@ img {
     /* HERO MOBILE */
     .hero {
         min-height: auto;
-        padding: 100px 0 80px;
+        padding: 100px 0 60px;
+    }
+    
+    .hero-scroll {
+        display: none;
     }
     
     .hero-wave {
@@ -3046,6 +3052,10 @@ img {
         width: 36px;
         height: 36px;
         font-size: 14px;
+    }
+    
+    .partners-carousel {
+        gap: 20px;
     }
     
     /* PORTFOLIO MOBILE */
@@ -3190,13 +3200,13 @@ img {
 }
 
 /* MENU COMPACTO: evita quebra/estouro em telas "desktop" estreitas */
-@media (min-width: 769px) and (max-width: 1200px) {
+@media (min-width: 769px) and (max-width: 1400px) {
     .nav-menu {
-        gap: 16px;
+        gap: 12px;
     }
     
     .nav-link {
-        padding: 10px 14px;
+        padding: 10px 12px;
     }
     
     .nav-link span {
