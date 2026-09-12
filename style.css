@@ -2005,8 +2005,6 @@ img {
 @media (hover: none) {
     .project-overlay {
         opacity: 1;
-        top: auto;
-        height: auto;
         align-items: flex-end;
         justify-content: center;
         padding-bottom: 16px;
