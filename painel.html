@@ -6,7 +6,6 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Painel | Creative Codex</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{
     --bg:#0b1220;
@@ -81,7 +80,7 @@ body{
 .btn-danger-text{background:none;border:none;color:var(--red);font-size:13px;cursor:pointer;font-weight:600;}
 
 /* STAT CARDS */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:28px;}
 .stat-card{
     border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;
     border:1px solid var(--border);
@@ -90,6 +89,7 @@ body{
 .stat-card.accent.blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8);}
 .stat-card.accent.green{background:linear-gradient(135deg,#22c55e,#15803d);}
 .stat-card.accent.red{background:linear-gradient(135deg,#ef4444,#b91c1c);}
+.stat-card.accent.amber{background:linear-gradient(135deg,#f59e0b,#b45309);}
 .stat-card:not(.accent){background:var(--panel);}
 .stat-label{font-size:13px;font-weight:600;opacity:.85;margin-bottom:10px;}
 .stat-value{font-family:'Poppins',sans-serif;font-size:28px;font-weight:800;line-height:1;}
@@ -189,6 +189,46 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
 .section-heading{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;margin-bottom:14px;}
 
+/* META DO MÊS */
+.goal-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px 22px;margin-bottom:28px;
+}
+.goal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.goal-top h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.goal-edit{background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;text-decoration:underline;}
+.goal-edit:hover{color:var(--blue);}
+.goal-numbers{display:flex;justify-content:space-between;font-size:13px;color:var(--text-dim);margin-bottom:8px;}
+.goal-numbers strong{color:var(--text);font-family:'Poppins',sans-serif;}
+.goal-bar-track{height:10px;border-radius:999px;background:var(--bg);overflow:hidden;}
+.goal-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#3b82f6,#22c55e);transition:width .4s ease;}
+
+/* BUSCA */
+.search-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
+.search-box{
+    flex:1;min-width:220px;position:relative;
+}
+.search-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;}
+.search-box input{
+    width:100%;padding:11px 14px 11px 38px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel);color:var(--text);font-family:inherit;font-size:14px;
+}
+.search-box input:focus{outline:none;border-color:var(--blue);}
+
+/* CABEÇALHO ORDENÁVEL */
+th.sortable{cursor:pointer;user-select:none;}
+th.sortable:hover{color:var(--text);}
+th.sortable i{margin-left:5px;font-size:10px;opacity:.5;}
+th.sortable.sort-active i{opacity:1;color:var(--blue);}
+
+/* CONTATO ATRASADO */
+.contact-tag{font-size:12px;color:var(--text-dim);}
+.contact-tag.overdue{color:var(--red);font-weight:700;}
+.contact-tag.today{color:var(--amber);font-weight:700;}
+
+.icon{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;flex-shrink:0;}
+.icon svg{width:100%;height:100%;display:block;}
+
 /* MODAL */
 
 .modal-overlay{
@@ -220,7 +260,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
     .stats{grid-template-columns:1fr 1fr;}
     .field-row{grid-template-columns:1fr;}
     .table-wrap{overflow-x:auto;}
-    table{min-width:640px;}
+    table{min-width:760px;}
 }
 </style>
 </head>
@@ -232,8 +272,8 @@ tr:hover td{background:rgba(255,255,255,.02);}
         <div class="brand-text">Painel<span>Creative Codex</span></div>
     </div>
     <nav class="nav">
-        <button class="nav-item active" id="navOverview"><i class="fas fa-chart-pie"></i><span>Visão Geral</span></button>
-        <button class="nav-item" id="navProspects"><i class="fas fa-users"></i><span>Prospecção</span></button>
+        <button class="nav-item active" id="navOverview"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></span><span>Visão Geral</span></button>
+        <button class="nav-item" id="navProspects"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 20v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Prospecção</span></button>
     </nav>
     <div class="sidebar-foot">Dados salvos só neste navegador.</div>
 </aside>
@@ -244,17 +284,31 @@ tr:hover td{background:rgba(255,255,255,.02);}
             <h1 id="pageTitle">Visão Geral</h1>
             <p id="pageSubtitle"></p>
         </div>
-        <button class="btn btn-primary" onclick="openModal()"><i class="fas fa-plus"></i> Novo Prospecto</button>
+        <button class="btn btn-primary" onclick="openModal()"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span> Novo Prospecto</button>
     </div>
 
     <div id="viewOverview">
         <div class="hero-card">
             <div>
-                <div class="hero-card-label"><i class="fas fa-sack-dollar"></i> Total em Caixa</div>
+                <div class="hero-card-label"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Total em Caixa</div>
                 <div class="hero-card-value" id="heroTotal">R$ 0,00</div>
                 <div class="hero-card-sub" id="heroTotalSub">de negócios fechados</div>
             </div>
-            <div class="hero-card-icon"><i class="fas fa-piggy-bank"></i></div>
+            <div class="hero-card-icon"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span></div>
+        </div>
+
+        <div class="goal-card">
+            <div class="goal-top">
+                <h3><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span> Meta do Mês</h3>
+                <button class="goal-edit" onclick="editGoal()">Editar meta</button>
+            </div>
+            <div class="goal-numbers">
+                <span id="goalCurrent"><strong>R$ 0,00</strong> faturados este mês</span>
+                <span id="goalTarget">Meta: R$ 0,00</span>
+            </div>
+            <div class="goal-bar-track">
+                <div class="goal-bar-fill" id="goalBarFill" style="width:0%"></div>
+            </div>
         </div>
 
         <div class="stats">
@@ -278,6 +332,11 @@ tr:hover td{background:rgba(255,255,255,.02);}
                 <div class="stat-value" id="statLost">0</div>
                 <div class="stat-sub" id="statLostSub">R$ 0,00 não convertidos</div>
             </div>
+            <div class="stat-card accent amber">
+                <div class="stat-label">Taxa de Conversão</div>
+                <div class="stat-value" id="statConversion">0%</div>
+                <div class="stat-sub" id="statConversionSub">Sem negócios decididos ainda</div>
+            </div>
         </div>
 
         <h2 class="section-heading">Adicionados Recentemente</h2>
@@ -286,13 +345,20 @@ tr:hover td{background:rgba(255,255,255,.02);}
                 <tbody id="recentBody"></tbody>
             </table>
             <div class="empty-state" id="recentEmpty" hidden>
-                <i class="fas fa-clock"></i>
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>
                 <p>Nada por aqui ainda. Cadastre seu primeiro prospecto.</p>
             </div>
         </div>
     </div>
 
     <div id="viewProspects" hidden>
+        <div class="search-row">
+            <div class="search-box">
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                <input type="text" id="searchInput" placeholder="Buscar por nome do cliente...">
+            </div>
+        </div>
+
         <div class="filters" id="filters">
             <button class="filter-chip active" data-filter="todos">Todos</button>
             <button class="filter-chip" data-filter="prospectando">Prospectando</button>
@@ -307,16 +373,17 @@ tr:hover td{background:rgba(255,255,255,.02);}
                     <tr>
                         <th>Cliente</th>
                         <th>Serviço</th>
-                        <th>Valor</th>
+                        <th class="sortable" data-sort="value">Valor <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg></span></th>
                         <th>Status</th>
-                        <th>Data</th>
+                        <th class="sortable sort-active" data-sort="date">Data <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></th>
+                        <th>Próximo Contato</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
             <div class="empty-state" id="emptyState" hidden>
-                <i class="fas fa-user-plus"></i>
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg></span>
                 <p>Nenhum prospecto ainda. Clica em "Novo Prospecto" pra começar.</p>
             </div>
         </div>
@@ -346,14 +413,20 @@ tr:hover td{background:rgba(255,255,255,.02);}
                     <input type="number" id="fValue" min="0" step="0.01" placeholder="0,00">
                 </div>
             </div>
-            <div class="field">
-                <label for="fStatus">Status</label>
-                <select id="fStatus">
-                    <option value="prospectando">Prospectando</option>
-                    <option value="negociando">Negociando</option>
-                    <option value="fechado">Fechado</option>
-                    <option value="perdido">Perdido</option>
-                </select>
+            <div class="field-row">
+                <div class="field">
+                    <label for="fStatus">Status</label>
+                    <select id="fStatus">
+                        <option value="prospectando">Prospectando</option>
+                        <option value="negociando">Negociando</option>
+                        <option value="fechado">Fechado</option>
+                        <option value="perdido">Perdido</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="fNextContact">Próximo Contato</label>
+                    <input type="date" id="fNextContact">
+                </div>
             </div>
             <div class="field">
                 <label for="fNotes">Notas (opcional)</label>
@@ -361,7 +434,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Salvar</button>
+                <button type="submit" class="btn btn-primary"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> Salvar</button>
             </div>
         </form>
     </div>
@@ -371,6 +444,12 @@ tr:hover td{background:rgba(255,255,255,.02);}
 const STORAGE_KEY = 'cc_painel_prospectos';
 let prospects = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 let currentFilter = 'todos';
+let searchTerm = '';
+let sortField = 'date';
+let sortDir = 'desc';
+
+const GOAL_KEY = 'cc_painel_meta';
+let monthlyGoal = parseFloat(localStorage.getItem(GOAL_KEY) || '0');
 
 const statusLabels = {
     prospectando: 'Prospectando',
@@ -390,6 +469,38 @@ function formatMoney(v) {
 function formatDate(iso) {
     const d = new Date(iso);
     return d.toLocaleDateString('pt-BR');
+}
+
+function renderGoal(currentValue) {
+    const pct = monthlyGoal > 0 ? Math.min(100, Math.round((currentValue / monthlyGoal) * 100)) : 0;
+    document.getElementById('goalCurrent').innerHTML = `<strong>${formatMoney(currentValue)}</strong> faturados este mês`;
+    document.getElementById('goalTarget').textContent = monthlyGoal > 0 ? `Meta: ${formatMoney(monthlyGoal)} (${pct}%)` : 'Nenhuma meta definida';
+    document.getElementById('goalBarFill').style.width = pct + '%';
+}
+
+function editGoal() {
+    const input = prompt('Qual a meta de faturamento deste mês? (R$)', monthlyGoal || '');
+    if (input === null) return;
+    const value = parseFloat(input.replace(',', '.'));
+    if (isNaN(value) || value < 0) {
+        alert('Digite um número válido.');
+        return;
+    }
+    monthlyGoal = value;
+    localStorage.setItem(GOAL_KEY, monthlyGoal);
+    render();
+}
+
+function nextContactInfo(dateStr) {
+    if (!dateStr) return { label: '—', cls: '' };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(dateStr + 'T00:00:00');
+    const diffDays = Math.round((target - today) / 86400000);
+
+    if (diffDays < 0) return { label: `Atrasado (${formatDate(dateStr)})`, cls: 'overdue' };
+    if (diffDays === 0) return { label: 'Hoje', cls: 'today' };
+    return { label: formatDate(dateStr), cls: '' };
 }
 
 function render() {
@@ -417,8 +528,38 @@ function render() {
     document.getElementById('statLost').textContent = lost.length;
     document.getElementById('statLostSub').textContent = formatMoney(lost.reduce((s, p) => s + Number(p.value || 0), 0)) + ' não convertidos';
 
+    const decided = won.length + lost.length;
+    const conversionRate = decided === 0 ? 0 : Math.round((won.length / decided) * 100);
+    document.getElementById('statConversion').textContent = conversionRate + '%';
+    document.getElementById('statConversionSub').textContent = decided === 0
+        ? 'Sem negócios decididos ainda'
+        : `${won.length} de ${decided} decididos`;
+
+    const now = new Date();
+    const wonThisMonth = won.filter(p => {
+        const d = new Date(p.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const monthValue = wonThisMonth.reduce((s, p) => s + Number(p.value || 0), 0);
+    renderGoal(monthValue);
+
     // Table
-    const filtered = currentFilter === 'todos' ? prospects : prospects.filter(p => p.status === currentFilter);
+    let filtered = currentFilter === 'todos' ? prospects : prospects.filter(p => p.status === currentFilter);
+
+    if (searchTerm.trim()) {
+        const term = searchTerm.trim().toLowerCase();
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(term));
+    }
+
+    filtered = filtered.slice().sort((a, b) => {
+        let av = a[sortField], bv = b[sortField];
+        if (sortField === 'date') { av = new Date(av); bv = new Date(bv); }
+        if (sortField === 'value') { av = Number(av || 0); bv = Number(bv || 0); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+    });
+
     const tbody = document.getElementById('tableBody');
     const empty = document.getElementById('emptyState');
 
@@ -428,9 +569,9 @@ function render() {
     } else {
         empty.hidden = true;
         tbody.innerHTML = filtered
-            .slice()
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .map(p => `
+            .map(p => {
+                const nc = nextContactInfo(p.nextContact);
+                return `
                 <tr>
                     <td>
                         <div class="client-name">${escapeHtml(p.name)}</div>
@@ -444,14 +585,16 @@ function render() {
                         </select>
                     </td>
                     <td>${formatDate(p.date)}</td>
+                    <td><span class="contact-tag ${nc.cls}">${nc.label}</span></td>
                     <td>
                         <div class="row-actions">
-                            <button onclick="editProspect('${p.id}')" title="Editar"><i class="fas fa-pen"></i></button>
-                            <button class="del" onclick="deleteProspect('${p.id}')" title="Excluir"><i class="fas fa-trash"></i></button>
+                            <button onclick="editProspect('${p.id}')" title="Editar"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></button>
+                            <button class="del" onclick="deleteProspect('${p.id}')" title="Excluir"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></span></button>
                         </div>
                     </td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
     }
 
     // Recentes (Visão Geral)
@@ -502,6 +645,7 @@ function openModal(prospect) {
     document.getElementById('fService').value = prospect ? prospect.service : '';
     document.getElementById('fValue').value = prospect ? prospect.value : '';
     document.getElementById('fStatus').value = prospect ? prospect.status : 'prospectando';
+    document.getElementById('fNextContact').value = prospect ? (prospect.nextContact || '') : '';
     document.getElementById('fNotes').value = prospect ? prospect.notes : '';
     document.getElementById('modalOverlay').hidden = false;
     document.getElementById('fName').focus();
@@ -533,6 +677,7 @@ document.getElementById('prospectForm').addEventListener('submit', (e) => {
         service: document.getElementById('fService').value.trim(),
         value: parseFloat(document.getElementById('fValue').value) || 0,
         status: document.getElementById('fStatus').value,
+        nextContact: document.getElementById('fNextContact').value || null,
         notes: document.getElementById('fNotes').value.trim()
     };
 
@@ -557,6 +702,36 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
         document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         currentFilter = chip.dataset.filter;
+        render();
+    });
+});
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchTerm = e.target.value;
+    render();
+});
+
+const SVG_SORT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg>';
+const SVG_SORT_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
+const SVG_SORT_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
+document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+        const field = th.dataset.sort;
+        if (sortField === field) {
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortField = field;
+            sortDir = 'desc';
+        }
+
+        document.querySelectorAll('th.sortable').forEach(t => {
+            t.classList.remove('sort-active');
+            t.querySelector('.icon').innerHTML = SVG_SORT;
+        });
+        th.classList.add('sort-active');
+        th.querySelector('.icon').innerHTML = sortDir === 'asc' ? SVG_SORT_UP : SVG_SORT_DOWN;
+
         render();
     });
 });
