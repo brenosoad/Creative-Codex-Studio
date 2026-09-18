@@ -187,6 +187,8 @@ tr:hover td{background:rgba(255,255,255,.02);}
     .hero-card-value{font-size:38px;}
 }
 
+.section-heading{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;margin-bottom:14px;}
+
 /* MODAL */
 
 .modal-overlay{
@@ -239,69 +241,84 @@ tr:hover td{background:rgba(255,255,255,.02);}
 <main class="main">
     <div class="topbar">
         <div>
-            <h1>Visão Geral</h1>
-            <p id="todayLabel"></p>
+            <h1 id="pageTitle">Visão Geral</h1>
+            <p id="pageSubtitle"></p>
         </div>
         <button class="btn btn-primary" onclick="openModal()"><i class="fas fa-plus"></i> Novo Prospecto</button>
     </div>
 
-    <div class="hero-card">
-        <div>
-            <div class="hero-card-label"><i class="fas fa-sack-dollar"></i> Total em Caixa</div>
-            <div class="hero-card-value" id="heroTotal">R$ 0,00</div>
-            <div class="hero-card-sub" id="heroTotalSub">de negócios fechados</div>
+    <div id="viewOverview">
+        <div class="hero-card">
+            <div>
+                <div class="hero-card-label"><i class="fas fa-sack-dollar"></i> Total em Caixa</div>
+                <div class="hero-card-value" id="heroTotal">R$ 0,00</div>
+                <div class="hero-card-sub" id="heroTotalSub">de negócios fechados</div>
+            </div>
+            <div class="hero-card-icon"><i class="fas fa-piggy-bank"></i></div>
         </div>
-        <div class="hero-card-icon"><i class="fas fa-piggy-bank"></i></div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total de Prospectos</div>
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-sub" id="statTotalSub">Nenhum cadastrado ainda</div>
+            </div>
+            <div class="stat-card accent green">
+                <div class="stat-label">Fechados</div>
+                <div class="stat-value" id="statWon">0</div>
+                <div class="stat-sub" id="statWonSub">R$ 0,00 faturados</div>
+            </div>
+            <div class="stat-card accent blue">
+                <div class="stat-label">Em Negociação</div>
+                <div class="stat-value" id="statPipeline">0</div>
+                <div class="stat-sub" id="statPipelineSub">R$ 0,00 em aberto</div>
+            </div>
+            <div class="stat-card accent red">
+                <div class="stat-label">Perdidos</div>
+                <div class="stat-value" id="statLost">0</div>
+                <div class="stat-sub" id="statLostSub">R$ 0,00 não convertidos</div>
+            </div>
+        </div>
+
+        <h2 class="section-heading">Adicionados Recentemente</h2>
+        <div class="table-wrap">
+            <table>
+                <tbody id="recentBody"></tbody>
+            </table>
+            <div class="empty-state" id="recentEmpty" hidden>
+                <i class="fas fa-clock"></i>
+                <p>Nada por aqui ainda. Cadastre seu primeiro prospecto.</p>
+            </div>
+        </div>
     </div>
 
-    <div class="stats">
-        <div class="stat-card">
-            <div class="stat-label">Total de Prospectos</div>
-            <div class="stat-value" id="statTotal">0</div>
-            <div class="stat-sub" id="statTotalSub">Nenhum cadastrado ainda</div>
+    <div id="viewProspects" hidden>
+        <div class="filters" id="filters">
+            <button class="filter-chip active" data-filter="todos">Todos</button>
+            <button class="filter-chip" data-filter="prospectando">Prospectando</button>
+            <button class="filter-chip" data-filter="negociando">Negociando</button>
+            <button class="filter-chip" data-filter="fechado">Fechados</button>
+            <button class="filter-chip" data-filter="perdido">Perdidos</button>
         </div>
-        <div class="stat-card accent green">
-            <div class="stat-label">Fechados</div>
-            <div class="stat-value" id="statWon">0</div>
-            <div class="stat-sub" id="statWonSub">R$ 0,00 faturados</div>
-        </div>
-        <div class="stat-card accent blue">
-            <div class="stat-label">Em Negociação</div>
-            <div class="stat-value" id="statPipeline">0</div>
-            <div class="stat-sub" id="statPipelineSub">R$ 0,00 em aberto</div>
-        </div>
-        <div class="stat-card accent red">
-            <div class="stat-label">Perdidos</div>
-            <div class="stat-value" id="statLost">0</div>
-            <div class="stat-sub" id="statLostSub">R$ 0,00 não convertidos</div>
-        </div>
-    </div>
 
-    <div class="filters" id="filters">
-        <button class="filter-chip active" data-filter="todos">Todos</button>
-        <button class="filter-chip" data-filter="prospectando">Prospectando</button>
-        <button class="filter-chip" data-filter="negociando">Negociando</button>
-        <button class="filter-chip" data-filter="fechado">Fechados</button>
-        <button class="filter-chip" data-filter="perdido">Perdidos</button>
-    </div>
-
-    <div class="table-wrap" id="tableSection">
-        <table>
-            <thead>
-                <tr>
-                    <th>Cliente</th>
-                    <th>Serviço</th>
-                    <th>Valor</th>
-                    <th>Status</th>
-                    <th>Data</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
-        <div class="empty-state" id="emptyState" hidden>
-            <i class="fas fa-user-plus"></i>
-            <p>Nenhum prospecto ainda. Clica em "Novo Prospecto" pra começar.</p>
+        <div class="table-wrap" id="tableSection">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Serviço</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                        <th>Data</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+            <div class="empty-state" id="emptyState" hidden>
+                <i class="fas fa-user-plus"></i>
+                <p>Nenhum prospecto ainda. Clica em "Novo Prospecto" pra começar.</p>
+            </div>
         </div>
     </div>
 </main>
@@ -436,6 +453,30 @@ function render() {
                 </tr>
             `).join('');
     }
+
+    // Recentes (Visão Geral)
+    const recentBody = document.getElementById('recentBody');
+    const recentEmpty = document.getElementById('recentEmpty');
+    const recent = prospects.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+    if (recent.length === 0) {
+        recentBody.innerHTML = '';
+        recentEmpty.hidden = false;
+    } else {
+        recentEmpty.hidden = true;
+        recentBody.innerHTML = recent.map(p => `
+            <tr>
+                <td>
+                    <div class="client-name">${escapeHtml(p.name)}</div>
+                    ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
+                </td>
+                <td>${escapeHtml(p.service || '—')}</td>
+                <td class="value-cell">${formatMoney(p.value)}</td>
+                <td><span class="status-badge ${p.status}" style="pointer-events:none;">${statusLabels[p.status]}</span></td>
+                <td>${formatDate(p.date)}</td>
+            </tr>
+        `).join('');
+    }
 }
 
 function escapeHtml(str) {
@@ -520,19 +561,25 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
     });
 });
 
-document.getElementById('navOverview').addEventListener('click', () => {
-    document.getElementById('navOverview').classList.add('active');
-    document.getElementById('navProspects').classList.remove('active');
+const todayText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+function showView(view) {
+    const isOverview = view === 'overview';
+    document.getElementById('viewOverview').hidden = !isOverview;
+    document.getElementById('viewProspects').hidden = isOverview;
+    document.getElementById('navOverview').classList.toggle('active', isOverview);
+    document.getElementById('navProspects').classList.toggle('active', !isOverview);
+    document.getElementById('pageTitle').textContent = isOverview ? 'Visão Geral' : 'Prospecção';
+    document.getElementById('pageSubtitle').textContent = isOverview
+        ? todayText.charAt(0).toUpperCase() + todayText.slice(1)
+        : 'Todos os seus clientes e negociações, num lugar só.';
     window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+}
 
-document.getElementById('navProspects').addEventListener('click', () => {
-    document.getElementById('navProspects').classList.add('active');
-    document.getElementById('navOverview').classList.remove('active');
-    document.getElementById('tableSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-});
+document.getElementById('navOverview').addEventListener('click', () => showView('overview'));
+document.getElementById('navProspects').addEventListener('click', () => showView('prospects'));
 
-document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+document.getElementById('pageSubtitle').textContent = todayText.charAt(0).toUpperCase() + todayText.slice(1);
 
 render();
 </script>
