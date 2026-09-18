@@ -137,7 +137,58 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .empty-state{padding:60px 20px;text-align:center;color:var(--text-dim);}
 .empty-state i{font-size:32px;margin-bottom:12px;opacity:.5;}
 
+/* HERO CARD - TOTAL EM CAIXA */
+.hero-card{
+    background:linear-gradient(135deg,#0f2557 0%,#1d4ed8 55%,#3b82f6 100%);
+    border-radius:20px;
+    padding:32px 36px;
+    margin-bottom:28px;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    flex-wrap:wrap;
+    box-shadow:0 20px 50px rgba(29,78,216,.35);
+}
+.hero-card::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.12), transparent 45%),
+        radial-gradient(circle at 90% 80%, rgba(6,182,212,.25), transparent 50%);
+    pointer-events:none;
+}
+.hero-card-label{
+    display:flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:700;color:rgba(255,255,255,.75);
+    text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;
+    position:relative;z-index:1;
+}
+.hero-card-value{
+    font-family:'Poppins',sans-serif;
+    font-size:52px;font-weight:800;color:#fff;line-height:1;
+    position:relative;z-index:1;
+}
+.hero-card-sub{
+    font-size:14px;color:rgba(255,255,255,.8);margin-top:10px;position:relative;z-index:1;
+}
+.hero-card-icon{
+    width:70px;height:70px;border-radius:18px;
+    background:rgba(255,255,255,.12);
+    display:flex;align-items:center;justify-content:center;
+    font-size:28px;color:#fff;flex-shrink:0;position:relative;z-index:1;
+    backdrop-filter:blur(6px);
+}
+@media (max-width:640px){
+    .hero-card{padding:26px;}
+    .hero-card-value{font-size:38px;}
+}
+
 /* MODAL */
+
 .modal-overlay{
     position:fixed;inset:0;background:rgba(5,8,16,.7);z-index:100;
     display:flex;align-items:center;justify-content:center;padding:20px;
@@ -192,6 +243,15 @@ tr:hover td{background:rgba(255,255,255,.02);}
             <p id="todayLabel"></p>
         </div>
         <button class="btn btn-primary" onclick="openModal()"><i class="fas fa-plus"></i> Novo Prospecto</button>
+    </div>
+
+    <div class="hero-card">
+        <div>
+            <div class="hero-card-label"><i class="fas fa-sack-dollar"></i> Total em Caixa</div>
+            <div class="hero-card-value" id="heroTotal">R$ 0,00</div>
+            <div class="hero-card-sub" id="heroTotalSub">de negócios fechados</div>
+        </div>
+        <div class="hero-card-icon"><i class="fas fa-piggy-bank"></i></div>
     </div>
 
     <div class="stats">
@@ -324,6 +384,12 @@ function render() {
 
     document.getElementById('statTotal').textContent = total;
     document.getElementById('statTotalSub').textContent = total === 0 ? 'Nenhum cadastrado ainda' : `${pipeline.length} em andamento`;
+
+    const totalWonValue = won.reduce((s, p) => s + Number(p.value || 0), 0);
+    document.getElementById('heroTotal').textContent = formatMoney(totalWonValue);
+    document.getElementById('heroTotalSub').textContent = won.length === 0
+        ? 'Nenhum negócio fechado ainda'
+        : `de ${won.length} negócio${won.length > 1 ? 's' : ''} fechado${won.length > 1 ? 's' : ''}`;
 
     document.getElementById('statWon').textContent = won.length;
     document.getElementById('statWonSub').textContent = formatMoney(won.reduce((s, p) => s + Number(p.value || 0), 0)) + ' faturados';
