@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel | Creative Codex</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+    --bg:#0b1220;
+    --panel:#111a2e;
+    --panel-2:#0f1830;
+    --border:#1f2c47;
+    --text:#e8ecf6;
+    --text-dim:#8896b3;
+    --blue:#3b82f6;
+    --blue-dark:#1d4ed8;
+    --green:#22c55e;
+    --red:#ef4444;
+    --amber:#f59e0b;
+    --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+}
+
+/* SIDEBAR */
+.sidebar{
+    width:220px;
+    flex-shrink:0;
+    background:var(--panel-2);
+    border-right:1px solid var(--border);
+    padding:24px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:28px;
+    position:fixed;
+    height:100vh;
+    z-index:10;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px;}
+.brand-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:15px;flex-shrink:0;}
+.brand-text{font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;line-height:1.2;}
+.brand-text span{display:block;font-size:11px;color:var(--text-dim);font-weight:500;}
+
+.nav{display:flex;flex-direction:column;gap:4px;}
+.nav-item{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 12px;border-radius:10px;
+    color:var(--text-dim);font-size:14px;font-weight:500;
+    cursor:pointer;transition:.15s;border:none;background:none;width:100%;text-align:left;
+}
+.nav-item i{width:16px;text-align:center;font-size:14px;}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+.nav-item.active{background:var(--blue);color:#fff;}
+
+.sidebar-foot{margin-top:auto;padding:0 8px;font-size:12px;color:var(--text-dim);}
+
+/* LAYOUT */
+.main{margin-left:220px;flex:1;padding:32px 36px;max-width:1280px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
+.topbar h1{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;}
+.topbar p{color:var(--text-dim);font-size:14px;margin-top:2px;}
+.btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:11px 18px;border-radius:10px;border:none;
+    font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;
+    transition:.15s;
+}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:#fff;box-shadow:0 8px 20px rgba(59,130,246,.25);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(59,130,246,.35);}
+.btn-ghost{background:var(--panel);border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{border-color:var(--blue);}
+.btn-danger-text{background:none;border:none;color:var(--red);font-size:13px;cursor:pointer;font-weight:600;}
+
+/* STAT CARDS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.stat-card{
+    border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;
+    border:1px solid var(--border);
+}
+.stat-card.accent{border:none;color:#fff;}
+.stat-card.accent.blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8);}
+.stat-card.accent.green{background:linear-gradient(135deg,#22c55e,#15803d);}
+.stat-card.accent.red{background:linear-gradient(135deg,#ef4444,#b91c1c);}
+.stat-card:not(.accent){background:var(--panel);}
+.stat-label{font-size:13px;font-weight:600;opacity:.85;margin-bottom:10px;}
+.stat-value{font-family:'Poppins',sans-serif;font-size:28px;font-weight:800;line-height:1;}
+.stat-sub{font-size:12px;margin-top:8px;opacity:.75;}
+.stat-card:not(.accent) .stat-label{color:var(--text-dim);}
+.stat-card:not(.accent) .stat-sub{color:var(--text-dim);}
+
+/* FILTERS */
+.filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.filter-chip{
+    padding:8px 16px;border-radius:999px;border:1px solid var(--border);
+    background:var(--panel);color:var(--text-dim);font-size:13px;font-weight:600;
+    cursor:pointer;transition:.15s;
+}
+.filter-chip.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+
+/* TABLE */
+.table-wrap{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+th{
+    text-align:left;padding:14px 18px;font-size:12px;font-weight:700;
+    color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;
+    border-bottom:1px solid var(--border);white-space:nowrap;
+}
+td{padding:14px 18px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.client-name{font-weight:600;}
+.client-contact{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
+.value-cell{font-weight:700;font-family:'Poppins',sans-serif;}
+.status-badge{
+    display:inline-flex;align-items:center;gap:6px;padding:5px 12px;
+    border-radius:999px;font-size:12px;font-weight:700;border:none;cursor:pointer;
+    font-family:inherit;
+}
+.status-badge.prospectando{background:rgba(148,163,184,.15);color:#cbd5e1;}
+.status-badge.negociando{background:rgba(245,158,11,.15);color:var(--amber);}
+.status-badge.fechado{background:rgba(34,197,94,.15);color:var(--green);}
+.status-badge.perdido{background:rgba(239,68,68,.15);color:var(--red);}
+.row-actions{display:flex;gap:14px;}
+.row-actions button{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;transition:.15s;}
+.row-actions button:hover{color:var(--text);}
+.row-actions button.del:hover{color:var(--red);}
+
+.empty-state{padding:60px 20px;text-align:center;color:var(--text-dim);}
+.empty-state i{font-size:32px;margin-bottom:12px;opacity:.5;}
+
+/* MODAL */
+.modal-overlay{
+    position:fixed;inset:0;background:rgba(5,8,16,.7);z-index:100;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay[hidden]{display:none;}
+.modal{
+    background:var(--panel-2);border:1px solid var(--border);border-radius:16px;
+    padding:28px;width:100%;max-width:440px;
+}
+.modal h2{font-family:'Poppins',sans-serif;font-size:19px;font-weight:700;margin-bottom:20px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:6px;}
+.field input,.field select,.field textarea{
+    width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);
+    background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue);}
+.field textarea{resize:vertical;min-height:70px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+
+@media (max-width: 900px){
+    .sidebar{width:76px;padding:20px 10px;}
+    .brand-text,.nav-item span{display:none;}
+    .nav-item{justify-content:center;}
+    .main{margin-left:76px;padding:24px 18px;}
+    .stats{grid-template-columns:1fr 1fr;}
+    .field-row{grid-template-columns:1fr;}
+    .table-wrap{overflow-x:auto;}
+    table{min-width:640px;}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="brand">
+        <div class="brand-icon">CC</div>
+        <div class="brand-text">Painel<span>Creative Codex</span></div>
+    </div>
+    <nav class="nav">
+        <button class="nav-item active" id="navOverview"><i class="fas fa-chart-pie"></i><span>Visão Geral</span></button>
+        <button class="nav-item" id="navProspects"><i class="fas fa-users"></i><span>Prospecção</span></button>
+    </nav>
+    <div class="sidebar-foot">Dados salvos só neste navegador.</div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div>
+            <h1>Visão Geral</h1>
+            <p id="todayLabel"></p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()"><i class="fas fa-plus"></i> Novo Prospecto</button>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-label">Total de Prospectos</div>
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-sub" id="statTotalSub">Nenhum cadastrado ainda</div>
+        </div>
+        <div class="stat-card accent green">
+            <div class="stat-label">Fechados</div>
+            <div class="stat-value" id="statWon">0</div>
+            <div class="stat-sub" id="statWonSub">R$ 0,00 faturados</div>
+        </div>
+        <div class="stat-card accent blue">
+            <div class="stat-label">Em Negociação</div>
+            <div class="stat-value" id="statPipeline">0</div>
+            <div class="stat-sub" id="statPipelineSub">R$ 0,00 em aberto</div>
+        </div>
+        <div class="stat-card accent red">
+            <div class="stat-label">Perdidos</div>
+            <div class="stat-value" id="statLost">0</div>
+            <div class="stat-sub" id="statLostSub">R$ 0,00 não convertidos</div>
+        </div>
+    </div>
+
+    <div class="filters" id="filters">
+        <button class="filter-chip active" data-filter="todos">Todos</button>
+        <button class="filter-chip" data-filter="prospectando">Prospectando</button>
+        <button class="filter-chip" data-filter="negociando">Negociando</button>
+        <button class="filter-chip" data-filter="fechado">Fechados</button>
+        <button class="filter-chip" data-filter="perdido">Perdidos</button>
+    </div>
+
+    <div class="table-wrap" id="tableSection">
+        <table>
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Serviço</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                    <th>Data</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+        <div class="empty-state" id="emptyState" hidden>
+            <i class="fas fa-user-plus"></i>
+            <p>Nenhum prospecto ainda. Clica em "Novo Prospecto" pra começar.</p>
+        </div>
+    </div>
+</main>
+
+<div class="modal-overlay" id="modalOverlay" hidden>
+    <div class="modal">
+        <h2 id="modalTitle">Novo Prospecto</h2>
+        <form id="prospectForm">
+            <input type="hidden" id="editId">
+            <div class="field">
+                <label for="fName">Nome / Empresa</label>
+                <input type="text" id="fName" required placeholder="Ex: Pet Café">
+            </div>
+            <div class="field">
+                <label for="fContact">Contato (WhatsApp, email...)</label>
+                <input type="text" id="fContact" placeholder="Ex: (16) 99999-9999">
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label for="fService">Serviço</label>
+                    <input type="text" id="fService" placeholder="Ex: Landing Page">
+                </div>
+                <div class="field">
+                    <label for="fValue">Valor (R$)</label>
+                    <input type="number" id="fValue" min="0" step="0.01" placeholder="0,00">
+                </div>
+            </div>
+            <div class="field">
+                <label for="fStatus">Status</label>
+                <select id="fStatus">
+                    <option value="prospectando">Prospectando</option>
+                    <option value="negociando">Negociando</option>
+                    <option value="fechado">Fechado</option>
+                    <option value="perdido">Perdido</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="fNotes">Notas (opcional)</label>
+                <textarea id="fNotes" placeholder="Detalhes da conversa, próximos passos..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'cc_painel_prospectos';
+let prospects = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+let currentFilter = 'todos';
+
+const statusLabels = {
+    prospectando: 'Prospectando',
+    negociando: 'Negociando',
+    fechado: 'Fechado',
+    perdido: 'Perdido'
+};
+
+function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prospects));
+}
+
+function formatMoney(v) {
+    return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR');
+}
+
+function render() {
+    // Stats
+    const total = prospects.length;
+    const won = prospects.filter(p => p.status === 'fechado');
+    const lost = prospects.filter(p => p.status === 'perdido');
+    const pipeline = prospects.filter(p => p.status === 'prospectando' || p.status === 'negociando');
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statTotalSub').textContent = total === 0 ? 'Nenhum cadastrado ainda' : `${pipeline.length} em andamento`;
+
+    document.getElementById('statWon').textContent = won.length;
+    document.getElementById('statWonSub').textContent = formatMoney(won.reduce((s, p) => s + Number(p.value || 0), 0)) + ' faturados';
+
+    document.getElementById('statPipeline').textContent = pipeline.length;
+    document.getElementById('statPipelineSub').textContent = formatMoney(pipeline.reduce((s, p) => s + Number(p.value || 0), 0)) + ' em aberto';
+
+    document.getElementById('statLost').textContent = lost.length;
+    document.getElementById('statLostSub').textContent = formatMoney(lost.reduce((s, p) => s + Number(p.value || 0), 0)) + ' não convertidos';
+
+    // Table
+    const filtered = currentFilter === 'todos' ? prospects : prospects.filter(p => p.status === currentFilter);
+    const tbody = document.getElementById('tableBody');
+    const empty = document.getElementById('emptyState');
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        empty.hidden = false;
+    } else {
+        empty.hidden = true;
+        tbody.innerHTML = filtered
+            .slice()
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .map(p => `
+                <tr>
+                    <td>
+                        <div class="client-name">${escapeHtml(p.name)}</div>
+                        ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
+                    </td>
+                    <td>${escapeHtml(p.service || '—')}</td>
+                    <td class="value-cell">${formatMoney(p.value)}</td>
+                    <td>
+                        <select class="status-badge ${p.status}" onchange="quickStatus('${p.id}', this.value)">
+                            ${Object.entries(statusLabels).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>${formatDate(p.date)}</td>
+                    <td>
+                        <div class="row-actions">
+                            <button onclick="editProspect('${p.id}')" title="Editar"><i class="fas fa-pen"></i></button>
+                            <button class="del" onclick="deleteProspect('${p.id}')" title="Excluir"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+    }
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+}
+
+function quickStatus(id, newStatus) {
+    const p = prospects.find(x => x.id === id);
+    if (p) {
+        p.status = newStatus;
+        save();
+        render();
+    }
+}
+
+function openModal(prospect) {
+    document.getElementById('modalTitle').textContent = prospect ? 'Editar Prospecto' : 'Novo Prospecto';
+    document.getElementById('editId').value = prospect ? prospect.id : '';
+    document.getElementById('fName').value = prospect ? prospect.name : '';
+    document.getElementById('fContact').value = prospect ? prospect.contact : '';
+    document.getElementById('fService').value = prospect ? prospect.service : '';
+    document.getElementById('fValue').value = prospect ? prospect.value : '';
+    document.getElementById('fStatus').value = prospect ? prospect.status : 'prospectando';
+    document.getElementById('fNotes').value = prospect ? prospect.notes : '';
+    document.getElementById('modalOverlay').hidden = false;
+    document.getElementById('fName').focus();
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').hidden = true;
+    document.getElementById('prospectForm').reset();
+}
+
+function editProspect(id) {
+    const p = prospects.find(x => x.id === id);
+    if (p) openModal(p);
+}
+
+function deleteProspect(id) {
+    if (!confirm('Excluir esse prospecto? Essa ação não pode ser desfeita.')) return;
+    prospects = prospects.filter(x => x.id !== id);
+    save();
+    render();
+}
+
+document.getElementById('prospectForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('editId').value;
+    const data = {
+        name: document.getElementById('fName').value.trim(),
+        contact: document.getElementById('fContact').value.trim(),
+        service: document.getElementById('fService').value.trim(),
+        value: parseFloat(document.getElementById('fValue').value) || 0,
+        status: document.getElementById('fStatus').value,
+        notes: document.getElementById('fNotes').value.trim()
+    };
+
+    if (id) {
+        const p = prospects.find(x => x.id === id);
+        Object.assign(p, data);
+    } else {
+        prospects.push({ id: crypto.randomUUID(), date: new Date().toISOString(), ...data });
+    }
+
+    save();
+    render();
+    closeModal();
+});
+
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modalOverlay') closeModal();
+});
+
+document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        currentFilter = chip.dataset.filter;
+        render();
+    });
+});
+
+document.getElementById('navOverview').addEventListener('click', () => {
+    document.getElementById('navOverview').classList.add('active');
+    document.getElementById('navProspects').classList.remove('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+document.getElementById('navProspects').addEventListener('click', () => {
+    document.getElementById('navProspects').classList.add('active');
+    document.getElementById('navOverview').classList.remove('active');
+    document.getElementById('tableSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+render();
+</script>
+</body>
+</html>
