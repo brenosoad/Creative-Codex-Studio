@@ -1,1548 +1,847 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
-        (function() {
-            try {
-                var savedLang = localStorage.getItem('creative-codex-lang');
-                var currentLang = document.documentElement.lang.indexOf('en') === 0 ? 'en' : 'pt';
-                if (savedLang && savedLang !== currentLang) {
-                    window.location.replace(savedLang === 'en' ? 'index-en.html' : 'index.html');
-                }
-            } catch (e) {}
-        })();
-    </script>
-    <script>
-        (function() {
-            try {
-                var saved = localStorage.getItem('creative-codex-theme');
-                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (saved === 'dark' || (!saved && prefersDark)) {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                }
-            } catch (e) {}
-        })();
-    </script>
-    <title>Creative Codex | Design & Desenvolvimento Web</title>
-    <meta name="description" content="Design gráfico e desenvolvimento de landing pages e sites institucionais. Identidade visual, redes sociais e páginas que convertem. Orçamento pelo WhatsApp.">
-    <meta property="og:title" content="Creative Codex | Design & Desenvolvimento Web">
-    <meta property="og:description" content="Transformo ideias em experiências visuais que convertem. Design gráfico, landing pages e sites institucionais.">
-    <meta property="og:image" content="img/logo.png">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://creativecodex.com.br/">
-    <link rel="alternate" hreflang="pt-BR" href="https://creativecodex.com.br/">
-    <link rel="alternate" hreflang="en" href="https://creativecodex.com.br/index-en.html">
-    <link rel="alternate" hreflang="x-default" href="https://creativecodex.com.br/">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preload" href="img/logo.png" as="image">
-    <link rel="canonical" href="https://creativecodex.com.br/">
-    <link rel="apple-touch-icon" href="img/logo.png">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="icon" href="img/logo.png?v=2" type="image/png">
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "ProfessionalService",
-        "name": "Creative Codex",
-        "description": "Design gráfico e desenvolvimento de landing pages e sites institucionais.",
-        "image": "img/logo.png",
-        "telephone": "+5516997837454",
-        "areaServed": "BR",
-        "sameAs": [
-            "https://instagram.com/creativecodex.studio",
-            "https://www.behance.net/brenosoad"
-        ]
-    }
-    </script>
-    <noscript>
-        <style>
-            .navbar { background-color: rgba(255,255,255,0.95) !important; backdrop-filter: blur(10px) !important; box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important; }
-            .nav-link, .nav-link i { color: #475569 !important; }
-            .logo-main { color: #0f172a !important; }
-            .logo-sub { color: #64748b !important; }
-            .menu-bar { background-color: #0f172a !important; }
-            .nav-options-toggle { display: none !important; }
-            .nav-options-menu { display: flex !important; position: static !important; box-shadow: none !important; border: none !important; }
-        </style>
-    </noscript>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel | Creative Codex</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+    --bg:#0b1220;
+    --panel:#111a2e;
+    --panel-2:#0f1830;
+    --border:#1f2c47;
+    --text:#e8ecf6;
+    --text-dim:#8896b3;
+    --blue:#3b82f6;
+    --blue-dark:#1d4ed8;
+    --green:#22c55e;
+    --red:#ef4444;
+    --amber:#f59e0b;
+    --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+}
+
+/* SIDEBAR */
+.sidebar{
+    width:220px;
+    flex-shrink:0;
+    background:var(--panel-2);
+    border-right:1px solid var(--border);
+    padding:24px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:28px;
+    position:fixed;
+    height:100vh;
+    z-index:10;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px;}
+.brand-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:15px;flex-shrink:0;}
+.brand-text{font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;line-height:1.2;}
+.brand-text span{display:block;font-size:11px;color:var(--text-dim);font-weight:500;}
+
+.nav{display:flex;flex-direction:column;gap:4px;}
+.nav-item{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 12px;border-radius:10px;
+    color:var(--text-dim);font-size:14px;font-weight:500;
+    cursor:pointer;transition:.15s;border:none;background:none;width:100%;text-align:left;
+}
+.nav-item i{width:16px;text-align:center;font-size:14px;}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+.nav-item.active{background:var(--blue);color:#fff;}
+
+.sidebar-foot{margin-top:auto;padding:0 8px;font-size:12px;color:var(--text-dim);}
+
+/* LAYOUT */
+.main{margin-left:220px;flex:1;padding:32px 36px;max-width:1280px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
+.topbar h1{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;}
+.topbar p{color:var(--text-dim);font-size:14px;margin-top:2px;}
+.btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:11px 18px;border-radius:10px;border:none;
+    font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;
+    transition:.15s;
+}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:#fff;box-shadow:0 8px 20px rgba(59,130,246,.25);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(59,130,246,.35);}
+.btn-ghost{background:var(--panel);border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{border-color:var(--blue);}
+.btn-danger-text{background:none;border:none;color:var(--red);font-size:13px;cursor:pointer;font-weight:600;}
+
+/* STAT CARDS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:28px;}
+.stat-card{
+    border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;
+    border:1px solid var(--border);
+}
+.stat-card.accent{border:none;color:#fff;}
+.stat-card.accent.blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8);}
+.stat-card.accent.green{background:linear-gradient(135deg,#22c55e,#15803d);}
+.stat-card.accent.red{background:linear-gradient(135deg,#ef4444,#b91c1c);}
+.stat-card.accent.amber{background:linear-gradient(135deg,#f59e0b,#b45309);}
+.stat-card:not(.accent){background:var(--panel);}
+.stat-label{font-size:13px;font-weight:600;opacity:.85;margin-bottom:10px;}
+.stat-value{font-family:'Poppins',sans-serif;font-size:28px;font-weight:800;line-height:1;}
+.stat-sub{font-size:12px;margin-top:8px;opacity:.75;}
+.stat-card:not(.accent) .stat-label{color:var(--text-dim);}
+.stat-card:not(.accent) .stat-sub{color:var(--text-dim);}
+
+/* FILTERS */
+.filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.filter-chip{
+    padding:8px 16px;border-radius:999px;border:1px solid var(--border);
+    background:var(--panel);color:var(--text-dim);font-size:13px;font-weight:600;
+    cursor:pointer;transition:.15s;
+}
+.filter-chip.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+
+/* TABLE */
+.table-wrap{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+th{
+    text-align:left;padding:14px 18px;font-size:12px;font-weight:700;
+    color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;
+    border-bottom:1px solid var(--border);white-space:nowrap;
+}
+td{padding:14px 18px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.client-name{font-weight:600;}
+.client-contact{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
+.value-cell{font-weight:700;font-family:'Poppins',sans-serif;}
+.recurring-tag{display:inline-block;margin-left:5px;font-size:10.5px;font-weight:600;color:var(--green);background:rgba(34,197,94,.12);padding:2px 6px;border-radius:6px;font-family:'Inter',sans-serif;}
+.status-badge{
+    display:inline-flex;align-items:center;gap:6px;padding:5px 12px;
+    border-radius:999px;font-size:12px;font-weight:700;border:none;cursor:pointer;
+    font-family:inherit;
+}
+.status-badge.prospectando{background:rgba(148,163,184,.15);color:#cbd5e1;}
+.status-badge.negociando{background:rgba(245,158,11,.15);color:var(--amber);}
+.status-badge.fechado{background:rgba(34,197,94,.15);color:var(--green);}
+.status-badge.perdido{background:rgba(239,68,68,.15);color:var(--red);}
+.row-actions{display:flex;gap:14px;}
+.row-actions button{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;transition:.15s;}
+.row-actions button:hover{color:var(--text);}
+.row-actions button.del:hover{color:var(--red);}
+
+.empty-state{padding:60px 20px;text-align:center;color:var(--text-dim);}
+.empty-state i{font-size:32px;margin-bottom:12px;opacity:.5;}
+
+/* HERO CARD - TOTAL EM CAIXA */
+.hero-card{
+    background:linear-gradient(135deg,#0f2557 0%,#1d4ed8 55%,#3b82f6 100%);
+    border-radius:20px;
+    padding:32px 36px;
+    margin-bottom:28px;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    flex-wrap:wrap;
+    box-shadow:0 20px 50px rgba(29,78,216,.35);
+}
+.hero-card::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.12), transparent 45%),
+        radial-gradient(circle at 90% 80%, rgba(6,182,212,.25), transparent 50%);
+    pointer-events:none;
+}
+.hero-card-label{
+    display:flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:700;color:rgba(255,255,255,.75);
+    text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;
+    position:relative;z-index:1;
+}
+.hero-card-value{
+    font-family:'Poppins',sans-serif;
+    font-size:52px;font-weight:800;color:#fff;line-height:1;
+    position:relative;z-index:1;
+}
+.hero-card-sub{
+    font-size:14px;color:rgba(255,255,255,.8);margin-top:10px;position:relative;z-index:1;
+}
+.hero-card-icon{
+    width:70px;height:70px;border-radius:18px;
+    background:rgba(255,255,255,.12);
+    display:flex;align-items:center;justify-content:center;
+    font-size:28px;color:#fff;flex-shrink:0;position:relative;z-index:1;
+    backdrop-filter:blur(6px);
+}
+@media (max-width:640px){
+    .hero-card{padding:26px;}
+    .hero-card-value{font-size:38px;}
+}
+.hero-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px;}
+.hero-row .hero-card{margin-bottom:0;}
+.hero-card.mrr{background:linear-gradient(135deg,#0f3d2e 0%,#15803d 55%,#22c55e 100%);box-shadow:0 20px 50px rgba(21,128,61,.35);}
+@media (max-width:760px){.hero-row{grid-template-columns:1fr;}}
+
+.section-heading{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;margin-bottom:14px;}
+
+/* META DO MÊS */
+.goal-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px 22px;margin-bottom:28px;
+}
+.goal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.goal-top h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.goal-edit{background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;text-decoration:underline;}
+.goal-edit:hover{color:var(--blue);}
+.goal-numbers{display:flex;justify-content:space-between;font-size:13px;color:var(--text-dim);margin-bottom:8px;}
+.goal-numbers strong{color:var(--text);font-family:'Poppins',sans-serif;}
+.goal-bar-track{height:10px;border-radius:999px;background:var(--bg);overflow:hidden;}
+.goal-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#3b82f6,#22c55e);transition:width .4s ease;}
+
+/* BUSCA */
+.search-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
+.search-box{
+    flex:1;min-width:220px;position:relative;
+}
+.search-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;}
+.search-box input{
+    width:100%;padding:11px 14px 11px 38px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel);color:var(--text);font-family:inherit;font-size:14px;
+}
+.search-box input:focus{outline:none;border-color:var(--blue);}
+
+/* CABEÇALHO ORDENÁVEL */
+th.sortable{cursor:pointer;user-select:none;}
+th.sortable:hover{color:var(--text);}
+th.sortable i{margin-left:5px;font-size:10px;opacity:.5;}
+th.sortable.sort-active i{opacity:1;color:var(--blue);}
+
+/* CONTATO ATRASADO */
+.contact-tag{font-size:12px;color:var(--text-dim);}
+.contact-tag.overdue{color:var(--red);font-weight:700;}
+.contact-tag.today{color:var(--amber);font-weight:700;}
+
+.icon{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;flex-shrink:0;}
+.icon svg{width:100%;height:100%;display:block;}
+
+.checkbox-label{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13.5px;color:var(--text-dim);font-weight:500;}
+.checkbox-label input{width:auto;margin-top:2px;accent-color:var(--blue);}
+.checkbox-label strong{color:var(--text);}
+
+.error-banner{
+    position:fixed;top:0;left:0;right:0;z-index:200;
+    background:#7f1d1d;color:#fff;text-align:center;
+    padding:10px 20px;font-size:13.5px;font-weight:600;
+}
+.error-banner[hidden]{display:none;}
+
+/* MODAL */
+
+.modal-overlay{
+    position:fixed;inset:0;background:rgba(5,8,16,.7);z-index:100;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay[hidden]{display:none;}
+.modal{
+    background:var(--panel-2);border:1px solid var(--border);border-radius:16px;
+    padding:28px;width:100%;max-width:440px;
+}
+.modal h2{font-family:'Poppins',sans-serif;font-size:19px;font-weight:700;margin-bottom:20px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:6px;}
+.field input,.field select,.field textarea{
+    width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);
+    background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue);}
+.field textarea{resize:vertical;min-height:70px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+
+@media (max-width: 900px){
+    .sidebar{width:76px;padding:20px 10px;}
+    .brand-text,.nav-item span{display:none;}
+    .nav-item{justify-content:center;}
+    .main{margin-left:76px;padding:24px 18px;}
+    .stats{grid-template-columns:1fr 1fr;}
+    .field-row{grid-template-columns:1fr;}
+    .table-wrap{overflow-x:auto;}
+    table{min-width:760px;}
+}
+</style>
 </head>
 <body>
-    <!-- PRELOADER -->
-    <div class="preloader" id="preloader">
-        <div class="preloader-logo">
-            <div class="logo-circle">
-                <img src="img/logo.png" alt="Creative Codex" loading="eager">
-            </div>
-        </div>
+
+<aside class="sidebar">
+    <div class="brand">
+        <div class="brand-icon">CC</div>
+        <div class="brand-text">Painel<span>Creative Codex</span></div>
     </div>
-    <noscript><style>.preloader { display: none !important; }</style></noscript>
-    
-    <a href="#home" class="skip-link">Pular para o conteúdo</a>
-    
-    <!-- MENU FIXO MELHORADO -->
-    <nav class="navbar">
-        <div class="container nav-container">
-            <!-- LOGO MAIS CENTRALIZADA -->
-            <a href="#home" class="logo">
-                <div class="logo-brand">
-                    <div class="logo-circle">
-                        <img src="img/logo.png" alt="Logo Creative Codex" class="logo-img">
-                    </div>
-                    <div class="logo-text">
-                        <span class="logo-main">Creative</span>
-                        <span class="logo-sub">Codex</span>
-                    </div>
-                </div>
-            </a>
-            
-            <!-- MENU COM MELHOR ESPAÇAMENTO -->
-            <div class="nav-menu" id="nav-menu">
-                <div class="nav-links">
-                    <a href="#about" class="nav-link" aria-label="Sobre" title="Sobre">
-                        <i class="fas fa-user" aria-hidden="true"></i>
-                        <span>Sobre</span>
-                        <div class="link-indicator"></div>
-                    </a>
-                    <a href="#services" class="nav-link" aria-label="Serviços" title="Serviços">
-                        <i class="fas fa-cogs" aria-hidden="true"></i>
-                        <span>Serviços</span>
-                        <div class="link-indicator"></div>
-                    </a>
-                    <a href="#partners" class="nav-link" aria-label="Parceiros" title="Parceiros">
-                        <i class="fas fa-handshake" aria-hidden="true"></i>
-                        <span>Parceiros</span>
-                        <div class="link-indicator"></div>
-                    </a>
-                    <a href="#portfolio" class="nav-link" aria-label="Portfólio" title="Portfólio">
-                        <i class="fas fa-briefcase" aria-hidden="true"></i>
-                        <span>Portfólio</span>
-                        <div class="link-indicator"></div>
-                    </a>
-                    <a href="#testimonials" class="nav-link" aria-label="Depoimentos" title="Depoimentos">
-                        <i class="fas fa-comment-dots" aria-hidden="true"></i>
-                        <span>Depoimentos</span>
-                        <div class="link-indicator"></div>
-                    </a>
-                    <a href="#faq" class="nav-link" aria-label="FAQ" title="FAQ">
-                        <i class="fas fa-question-circle" aria-hidden="true"></i>
-                        <span>FAQ</span>
-                        <div class="link-indicator"></div>
-                    </a>
-                    <a href="#contact" class="nav-link" aria-label="Contato" title="Contato">
-                        <i class="fas fa-envelope" aria-hidden="true"></i>
-                        <span>Contato</span>
-                        <div class="link-indicator"></div>
-                    </a>
-                </div>
-                
-                <!-- AÇÃO DE CONTATO NO MENU -->
-                <div class="nav-action">
-                    <a href="https://wa.me/5516997837454" class="btn-nav-action" target="_blank" aria-label="Fale Comigo no WhatsApp">
-                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                        <span>Fale Comigo</span>
-                    </a>
-                </div>
-            </div>
-            
-            <!-- MENU DE OPÇÕES: IDIOMA + TEMA -->
-            <div class="nav-options">
-                <button type="button" class="nav-options-toggle" id="nav-options-toggle" aria-label="Mais opções" aria-haspopup="true" aria-expanded="false" aria-controls="nav-options-menu">
-                    <i class="fas fa-ellipsis-vertical" aria-hidden="true"></i>
-                </button>
-                
-                <div class="nav-options-menu" id="nav-options-menu" role="menu" hidden>
-                    <a href="index-en.html" class="nav-options-item" role="menuitem">
-                        <span class="lang-flag">🇺🇸</span>
-                        <span>English</span>
-                    </a>
-                    <button type="button" class="nav-options-item" id="theme-toggle" role="menuitem">
-                        <i class="fas fa-moon theme-icon-moon" aria-hidden="true"></i>
-                        <i class="fas fa-sun theme-icon-sun" aria-hidden="true"></i>
-                        <span class="theme-toggle-label">Modo escuro</span>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- BOTÃO MENU MOBILE -->
-            <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav-menu">
-                <span class="menu-bar"></span>
-                <span class="menu-bar"></span>
-                <span class="menu-bar"></span>
-            </button>
-        </div>
-        
-        <!-- LINHA DE AÇÃO VISUAL -->
-        <div class="nav-progress"></div>
+    <nav class="nav">
+        <button class="nav-item active" id="navOverview"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></span><span>Visão Geral</span></button>
+        <button class="nav-item" id="navProspects"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 20v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Prospecção</span></button>
     </nav>
+    <div class="sidebar-foot">Dados salvos no banco da Vercel.</div>
+</aside>
 
-    <!-- SEÇÃO HERO -->
-    <section id="home" class="hero" tabindex="-1">
-        <div class="hero-stars"></div>
-        <div class="hero-aurora">
-            <span></span>
-            <span></span>
-            <span></span>
+<main class="main">
+    <div class="topbar">
+        <div>
+            <h1 id="pageTitle">Visão Geral</h1>
+            <p id="pageSubtitle"></p>
         </div>
-        <div class="hero-shooting-stars" aria-hidden="true">
-            <span></span>
-            <span></span>
-        </div>
-        <div class="container">
-            <div class="hero-grid">
-                <div class="hero-content">
-                    <div class="hero-badge">
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <span>Design + Code</span>
-                    </div>
-                    
-                    <h1 class="hero-title">
-                        <span class="hero-subtitle">Transformo ideias em</span>
-                        Experiências Visuais
-                        <span class="hero-highlight">Que Convertem</span>
-                    </h1>
-                    
-                    <p class="hero-description">
-                        Crio identidades visuais impactantes e desenvolvo landing pages funcionais. 
-                        Do conceito à implementação, seu projeto em boas mãos.
-                    </p>
-                    
-                    <div class="hero-stats">
-                        <div class="stat">
-                            <span class="stat-number" data-count-to="50" data-suffix="+">50+</span>
-                            <span class="stat-label">Projetos</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number" data-count-to="100" data-suffix="%">100%</span>
-                            <span class="stat-label">Satisfação</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">24h</span>
-                            <span class="stat-label">Resposta</span>
-                        </div>
-                    </div>
-                    
-                    <!-- MINI CÓDIGO (só mobile - o mockup grande é só desktop) -->
-                    <div class="hero-mini-code" aria-hidden="true">
-                        <span class="mini-code-dots">
-                            <span></span><span></span><span></span>
-                        </span>
-                        <code>&lt;<span class="token-tag">Design</span> <span class="token-punct">+</span> <span class="token-func">Code</span> /&gt;</code>
-                        <span class="code-cursor"></span>
-                    </div>
-                    
-                    <div class="hero-actions">
-                        <a href="#portfolio" class="btn btn-primary btn-lg" data-magnetic>
-                            <i class="fas fa-eye" aria-hidden="true"></i>
-                            Ver Portfólio
-                        </a>
-                        <a href="#contact" class="btn btn-outline btn-lg" data-magnetic>
-                            <i class="fas fa-comments" aria-hidden="true"></i>
-                            Conversar Agora
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- MOCKUP DE EDITOR DE CÓDIGO (decorativo, só desktop) -->
-                <div class="hero-mockup" aria-hidden="true">
-                    <div class="code-window">
-                        <div class="code-window-bar">
-                            <span class="dot dot-red"></span>
-                            <span class="dot dot-yellow"></span>
-                            <span class="dot dot-green"></span>
-                            <span class="code-window-title">creative-codex.jsx</span>
-                        </div>
-                        <div class="code-window-body">
-                            <div class="code-lines" id="hero-code"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="hero-scroll">
-                <div class="scroll-text">Role para explorar</div>
-                <div class="scroll-line"></div>
-            </div>
-        </div>
-        
-        <svg class="hero-wave" viewBox="0 0 1440 100" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0,40 C360,100 1080,0 1440,50 L1440,100 L0,100 Z"></path>
-        </svg>
-    </section>
-
-    <!-- SEÇÃO SOBRE -->
-<section id="about" class="about">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-label">Quem Sou Eu</span>
-            <h2 class="section-title">O Designer Por Trás do Código</h2>
-            <p class="section-subtitle">Unindo criatividade e técnica para resultados excepcionais</p>
-        </div>
-        
-        <div class="about-grid">
-            <div class="about-image">
-                <!-- SUA FOTO AQUI -->
-                <div class="profile-image">
-                    <div class="image-frame">
-                        <img loading="lazy" src="img/perfil.png" alt="Creative Codex - Designer" class="profile-photo">
-                        <div class="image-badge">
-                            <i class="fas fa-medal" aria-hidden="true"></i>
-                            <span data-count-to="5" data-suffix="+ anos de experiência">5+ anos de experiência</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="about-content">
-                <div class="about-intro">
-                    <h3>Olá, eu sou o Breno Soad</h3>
-                    <p>
-                        Especialista em criar soluções visuais que não só impressionam, 
-                        mas também entregam resultados mensuráveis. Minha abordagem 
-                        combina design estratégico com desenvolvimento prático.
-                    </p>
-                </div>
-                
-                <div class="skills-section">
-                    <h4>Minhas Especialidades</h4>
-                    <div class="skills-grid">
-                        <div class="skill-card">
-                            <span class="skill-number">01</span>
-                            <div class="skill-icon">
-                                <i class="fas fa-paint-brush" aria-hidden="true"></i>
-                            </div>
-                            <div class="skill-info">
-                                <h5>Design Gráfico</h5>
-                                <p>Identidade visual, logos, material impresso</p>
-                            </div>
-                        </div>
-                        
-                        <div class="skill-card">
-                            <span class="skill-number">02</span>
-                            <div class="skill-icon">
-                                <i class="fas fa-laptop-code" aria-hidden="true"></i>
-                            </div>
-                            <div class="skill-info">
-                                <h5>Landing Pages</h5>
-                                <p>Design conversor e desenvolvimento</p>
-                            </div>
-                        </div>
-                        
-                        <div class="skill-card">
-                            <span class="skill-number">03</span>
-                            <div class="skill-icon">
-                                <i class="fas fa-globe" aria-hidden="true"></i>
-                            </div>
-                            <div class="skill-info">
-                                <h5>Sites Institucionais</h5>
-                                <p>Websites responsivos e modernos</p>
-                            </div>
-                        </div>
-                        
-                        <div class="skill-card">
-                            <span class="skill-number">04</span>
-                            <div class="skill-icon">
-                                <i class="fas fa-mobile-alt" aria-hidden="true"></i>
-                            </div>
-                            <div class="skill-info">
-                                <h5>Design Responsivo</h5>
-                                <p>Perfeito em todos os dispositivos</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="tech-stack">
-                    <h4>Ferramentas que Domino</h4>
-                    <div class="tech-icons">
-                        <div class="tech-icon" title="Adobe Photoshop">
-                            <img loading="lazy" src="img/ferramentas/photoshop.png" alt="Adobe Photoshop" class="tech-logo">
-                            <span>Photoshop</span>
-                        </div>
-                        <div class="tech-icon" title="HTML5">
-                            <img loading="lazy" src="img/ferramentas/html.png" alt="HTML5" class="tech-logo">
-                            <span>HTML5</span>
-                        </div>
-                        <div class="tech-icon" title="CSS3">
-                            <img loading="lazy" src="img/ferramentas/css3.png" alt="CSS3" class="tech-logo">
-                            <span>CSS3</span>
-                        </div>
-                        <div class="tech-icon" title="JavaScript">
-                            <img loading="lazy" src="img/ferramentas/JS.png" alt="JavaScript" class="tech-logo">
-                            <span>JavaScript</span>
-                        </div>
-                        <div class="tech-icon" title="Visual Studio Code">
-                            <img loading="lazy" src="img/ferramentas/vscode.png" alt="VS Code" class="tech-logo">
-                            <span>VS Code</span>
-                        </div>
-                        <div class="tech-icon" title="Canva">
-                            <img loading="lazy" src="img/ferramentas/canva.png" alt="Canva" class="tech-logo">
-                            <span>Canva</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <button class="btn btn-primary" onclick="openModal()"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span> Novo Prospecto</button>
     </div>
-</section>
-    <!-- SEÇÃO SERVIÇOS -->
-    <section id="services" class="services">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">O Que Ofereço</span>
-                <h2 class="section-title">Serviços Especializados</h2>
-                <p class="section-subtitle">Soluções completas para sua presença digital</p>
+
+    <div id="viewOverview">
+        <div class="hero-row">
+            <div class="hero-card">
+                <div>
+                    <div class="hero-card-label"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Total em Caixa</div>
+                    <div class="hero-card-value" id="heroTotal">R$ 0,00</div>
+                    <div class="hero-card-sub" id="heroTotalSub">de negócios fechados (avulsos)</div>
+                </div>
+                <div class="hero-card-icon"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span></div>
             </div>
-            
-            <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-palette" aria-hidden="true"></i>
-                    </div>
-                    <h3>Design Gráfico</h3>
-                    <ul class="service-features">
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Identidade Visual</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Logotipos</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Redes Sociais</li>
-                    </ul>
-                    <div class="service-action">
-                        <a href="#contact" class="btn-service">
-                            Solicitar Orçamento
-                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                        </a>
-                        <a href="#" class="service-whatsapp-link" data-service="Design Gráfico Completo">
-                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                            Ou fale direto no WhatsApp
-                        </a>
-                    </div>
+
+            <div class="hero-card mrr">
+                <div>
+                    <div class="hero-card-label"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span> Receita Recorrente (MRR)</div>
+                    <div class="hero-card-value" id="heroMrr">R$ 0,00</div>
+                    <div class="hero-card-sub" id="heroMrrSub">por mês, em contratos ativos</div>
                 </div>
-                
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-rocket" aria-hidden="true"></i>
-                    </div>
-                    <h3>Landing Pages</h3>
-                    <ul class="service-features">
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Design Conversor</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Responsivo</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Integração WhatsApp</li>
-                    </ul>
-                    <div class="service-action">
-                        <a href="#contact" class="btn-service">
-                            Quero Minha Landing Page
-                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                        </a>
-                        <a href="#" class="service-whatsapp-link" data-service="Landing Page">
-                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                            Ou fale direto no WhatsApp
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-globe" aria-hidden="true"></i>
-                    </div>
-                    <h3>Sites Institucionais</h3>
-                    <ul class="service-features">
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Design Moderno</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Responsivo</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Otimização SEO</li>
-                    </ul>
-                    <div class="service-action">
-                        <a href="#contact" class="btn-service">
-                            Criar Meu Site
-                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                        </a>
-                        <a href="#" class="service-whatsapp-link" data-service="Site Institucional">
-                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                            Ou fale direto no WhatsApp
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-utensils" aria-hidden="true"></i>
-                    </div>
-                    <h3>Cardápio Digital</h3>
-                    <ul class="service-features">
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Acesso via QR Code</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Atualização Fácil</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Sem Reimpressão</li>
-                    </ul>
-                    <div class="service-action">
-                        <a href="#contact" class="btn-service">
-                            Quero Meu Cardápio Digital
-                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                        </a>
-                        <a href="#" class="service-whatsapp-link" data-service="Cardápio Digital">
-                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                            Ou fale direto no WhatsApp
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-tools" aria-hidden="true"></i>
-                    </div>
-                    <h3>Manutenção de Site</h3>
-                    <ul class="service-features">
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Atualizações e Ajustes</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Correção de Erros</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Suporte Contínuo</li>
-                    </ul>
-                    <div class="service-action">
-                        <a href="#contact" class="btn-service">
-                            Quero Manutenção
-                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                        </a>
-                        <a href="#" class="service-whatsapp-link" data-service="Manutenção de Site">
-                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                            Ou fale direto no WhatsApp
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-envelope-open-text" aria-hidden="true"></i>
-                    </div>
-                    <h3>Cartões e Convites</h3>
-                    <ul class="service-features">
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Cartão de Visita</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Convites Digitais/Impressos</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Design Personalizado</li>
-                    </ul>
-                    <div class="service-action">
-                        <a href="#contact" class="btn-service">
-                            Solicitar Orçamento
-                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                        </a>
-                        <a href="#" class="service-whatsapp-link" data-service="Cartões e Convites">
-                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                            Ou fale direto no WhatsApp
-                        </a>
-                    </div>
-                </div>
+                <div class="hero-card-icon"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span></div>
             </div>
         </div>
-    </section>
 
-    <!-- SEÇÃO PARCEIROS -->
-    <section id="partners" class="partners">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">Parcerias</span>
-                <h2 class="section-title">Já Trabalhei Com:</h2>
-                <p class="section-subtitle">Empresas que confiaram no meu trabalho</p>
-                <div class="partners-badge">
-                    <span class="partners-badge-number" data-count-to="23" data-suffix="+">23+</span>
-                    <span class="partners-badge-text">marcas atendidas em academias, gastronomia, educação e mais</span>
-                </div>
+        <div class="goal-card">
+            <div class="goal-top">
+                <h3><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span> Meta do Mês</h3>
+                <button class="goal-edit" onclick="editGoal()">Editar meta</button>
             </div>
-            
-            <div class="partners-carousel">
-                <button type="button" class="carousel-arrow carousel-arrow-prev" aria-label="Ver empresas anteriores">
-                    <i class="fas fa-chevron-left" aria-hidden="true"></i>
-                </button>
-                
-                <div class="partners-track" tabindex="0" aria-label="Empresas atendidas, role para o lado ou use as setas para navegar">
-                    <!-- 1: Zeek Cursos -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/zeek.png" alt="Zeek Cursos - Escola de Cursos - Design e Landing Page" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Zeek Cursos</span>
-                                <span class="logo-service">Design + Landing Page</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 2: Black Belt -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/blackbelt.png" alt="Black Belt - Academia de Taekwondo - Design Gráfico e Impressos" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Black Belt - Taekwondo</span>
-                                <span class="logo-service">Design Gráfico e Impressos</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 3: Ki Lanchão -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/kilanchao.png" alt="Ki Lanchão - Lanchonete - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Ki Lanchão</span>
-                                <span class="logo-service">Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 4: Sanca por Aí -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/sanca.png" alt="Sanca por Aí - Influencers - Mídia Kit e Artes" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Sanca por Aí</span>
-                                <span class="logo-service">Mídia Kit e Artes</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 5: Laís -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/lais.png" alt="Laís G. Cavicchioli - Influenciadora - OnePage e Design" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Laís Cavicchioli</span>
-                                <span class="logo-service">OnePage e Design</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 6: Resenha da Vila -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/resenha.png" alt="Resenha da Vila - Futebol - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Resenha da Vila</span>
-                                <span class="logo-service">Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 7: Rafa Custódio -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/rafa.png" alt="Rafa Custódio - Músico - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Rafa Custódio</span>
-                                <span class="logo-service">Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 8: Opção Auto Escola -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/opcao.png" alt="Opção - Auto Escola - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Opção Auto Escola</span>
-                                <span class="logo-service">Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 9: Diogo Bolzan -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/diogo.png" alt="Diogo Bolzan - Youtuber - Identidade Visual" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Diogo Bolzan</span>
-                                <span class="logo-service">Identidade Visual</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 10: Boleiragem -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/boleiragem.png" alt="Boleiragem - Time Esportivo - Design Esportivo" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Boleiragem</span>
-                                <span class="logo-service">Design Esportivo</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 11: Black Fit Ibaté -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/blackfit.png" alt="Black Fit Ibaté - Academia - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Black Fit Ibaté</span>
-                                <span class="logo-service">Academia · Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 12: Bike and Fly -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/bikeandfly.png" alt="Bike and Fly - Araraquara - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Bike and Fly</span>
-                                <span class="logo-service">Araraquara · Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 13: Skyfit Araraquara -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/skyfit-araraquara.png" alt="Skyfit Araraquara - Academia - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Skyfit Araraquara</span>
-                                <span class="logo-service">Academia · Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 14: Skyfit Vila Xavier -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/skyfit-vilaxavier.png" alt="Skyfit Vila Xavier - Araraquara - Academia - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Skyfit Vila Xavier</span>
-                                <span class="logo-service">Academia · Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 15: Grano Ricco -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/granoricco.png" alt="Grano Ricco - São Carlos - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Grano Ricco</span>
-                                <span class="logo-service">São Carlos · Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 16: Lattiera Gelato -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/lattiera.png" alt="Lattiera Gelato - São Carlos - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Lattiera Gelato</span>
-                                <span class="logo-service">São Carlos · Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 17: Cozinha do Lobo -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/cozinhadolobo.png" alt="Cozinha do Lobo - Restaurante - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Cozinha do Lobo</span>
-                                <span class="logo-service">Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 18: Let's Eat São Carlos -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/letseat.png" alt="Let's Eat São Carlos - Restaurante - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Let's Eat</span>
-                                <span class="logo-service">São Carlos · Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 19: Pão do Bairro -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/paodobairro.png" alt="Pão do Bairro - Padaria - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Pão do Bairro</span>
-                                <span class="logo-service">Padaria · Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 20: Sanca Mídias -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/sancamidias.png" alt="Sanca Mídias - Marketing - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Sanca Mídias</span>
-                                <span class="logo-service">Marketing · Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 21: Iceberg Educação -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/icebergeducacao.png" alt="Iceberg Educação - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Iceberg Educação</span>
-                                <span class="logo-service">Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 22: Pet Café Araraquara -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/petcafe.png" alt="Pet Café - Araraquara - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Pet Café</span>
-                                <span class="logo-service">Araraquara · Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 23: Tuor São Carlos -->
-                    <div class="partner-logo">
-                        <div class="logo-container">
-                            <img loading="lazy" src="img/tuor.png" alt="Tuor - São Carlos - Design Gráfico" class="logo-img">
-                            <div class="logo-overlay">
-                                <span class="logo-name">Tuor</span>
-                                <span class="logo-service">São Carlos · Design Gráfico</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <button type="button" class="carousel-arrow carousel-arrow-next" aria-label="Ver próximas empresas">
-                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
-                </button>
+            <div class="goal-numbers">
+                <span id="goalCurrent"><strong>R$ 0,00</strong> faturados este mês</span>
+                <span id="goalTarget">Meta: R$ 0,00</span>
             </div>
-            
-            <div class="partners-progress" aria-hidden="true">
-                <div class="partners-progress-bar"></div>
-            </div>
-            
-            <div class="partners-cta">
-                <p><i class="fas fa-handshake" aria-hidden="true"></i> Seja o próximo a aparecer aqui! Vamos trabalhar juntos.</p>
-                <a href="#contact" class="btn btn-primary">
-                    <i class="fas fa-plus-circle" aria-hidden="true"></i> Iniciar Parceria
-                </a>
+            <div class="goal-bar-track">
+                <div class="goal-bar-fill" id="goalBarFill" style="width:0%"></div>
             </div>
         </div>
-    </section>
 
-    <!-- SEÇÃO PORTFÓLIO -->
-    <section id="portfolio" class="portfolio">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">Meu Trabalho</span>
-                <h2 class="section-title">Projetos em Destaque</h2>
-                <p class="section-subtitle">Cases que mostram minha capacidade criativa e técnica</p>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total de Prospectos</div>
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-sub" id="statTotalSub">Nenhum cadastrado ainda</div>
             </div>
-            
-            <div class="portfolio-filters">
-                <button class="filter-btn active" data-filter="all">
-                    <i class="fas fa-th-large" aria-hidden="true"></i> Todos
-                </button>
-                <button class="filter-btn" data-filter="design">
-                    <i class="fas fa-paint-brush" aria-hidden="true"></i> Design
-                </button>
-                <button class="filter-btn" data-filter="web">
-                    <i class="fas fa-code" aria-hidden="true"></i> Web
-                </button>
-                <button class="filter-btn" data-filter="landing">
-                    <i class="fas fa-rocket" aria-hidden="true"></i> Landing Pages
-                </button>
+            <div class="stat-card accent green">
+                <div class="stat-label">Fechados</div>
+                <div class="stat-value" id="statWon">0</div>
+                <div class="stat-sub" id="statWonSub">R$ 0,00 faturados</div>
             </div>
-            
-            <div class="portfolio-grid">
-                <!-- PROJETO 1: LAIS (LANDING PAGE) -->
-                <div class="project-card" data-category="web landing">
-                    <div class="project-image" style="background-image: url('img/lais01.png');">
-                        <div class="project-badge">Landing Page</div>
-                        <div class="project-overlay">
-                            <a href="https://brenosoad.github.io/Midia-Kit-Lais-/" 
-                               class="project-view" 
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-                                Ver Site ao Vivo
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-info">
-                        <div class="project-meta">
-                            <span class="project-category">Landing Page</span>
-                            <span class="project-date">2025</span>
-                        </div>
-                        <h3>Lais - Media Kit</h3>
-                        <p>Landing page profissional para apresentação de mídia kit e portfólio.</p>
-                        <div class="project-tags">
-                            <span>HTML5</span>
-                            <span>CSS3</span>
-                            <span>JavaScript</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://brenosoad.github.io/Midia-Kit-Lais-/" 
-                               class="project-link" 
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-                                Acessar Site
-                            </a>
-                            <button type="button" class="project-link project-link-outline case-trigger" data-case="lais">
-                                <i class="fas fa-file-alt" aria-hidden="true"></i>
-                                Ver Case Completo
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- PROJETO 2: PALESTRA (LANDING PAGE) -->
-                <div class="project-card" data-category="web landing">
-                    <div class="project-image" style="background-image: url('img/palestra01.png');">
-                        <div class="project-badge">Landing Page</div>
-                        <div class="project-overlay">
-                            <a href="https://brenosoad.github.io/Palestra/" 
-                               class="project-view" 
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-                                Ver Site ao Vivo
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-info">
-                        <div class="project-meta">
-                            <span class="project-category">Landing Page</span>
-                            <span class="project-date">2025</span>
-                        </div>
-                        <h3>Palestra Móveis Planejados</h3>
-                        <p>Landing page para uma marcenaria especializada em móveis planejados.</p>
-                        <div class="project-tags">
-                            <span>HTML5</span>
-                            <span>CSS3</span>
-                            <span>JavaScript</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://brenosoad.github.io/Palestra/" 
-                               class="project-link" 
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-                                Acessar Site
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- PROJETO 3: ICEBERG EDUCAÇÃO (LANDING PAGE) -->
-                <div class="project-card" data-category="web landing">
-                    <div class="project-image" style="background-image: url('img/iceberg01.png');">
-                        <div class="project-badge">Landing Page</div>
-                        <div class="project-overlay">
-                            <a href="https://brenosoad.github.io/Iceberg-Educacao-arkhe/" 
-                               class="project-view" 
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-                                Ver Site ao Vivo
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-info">
-                        <div class="project-meta">
-                            <span class="project-category">Landing Page</span>
-                            <span class="project-date">2025</span>
-                        </div>
-                        <h3>Iceberg Educação</h3>
-                        <p>Landing page institucional para apresentação de curso e captação de alunos.</p>
-                        <div class="project-tags">
-                            <span>HTML5</span>
-                            <span>CSS3</span>
-                            <span>JavaScript</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://brenosoad.github.io/Iceberg-Educacao-arkhe/" 
-                               class="project-link" 
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-                                Acessar Site
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- PROJETO 4: BLACK BELT -->
-                <div class="project-card" data-category="design">
-                    <div class="project-image" style="background-image: url('img/Capa.png');">
-                        <div class="project-badge">Design Gráfico</div>
-                        <div class="project-overlay">
-                            <a href="https://www.behance.net/brenosoad" 
-                               class="project-view behance-btn" 
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               title="Ver projeto no Behance">
-                                <i class="fab fa-behance" aria-hidden="true"></i>
-                                Ver no Behance
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-info">
-                        <div class="project-meta">
-                            <span class="project-category">Impressos, Logo & Uniformes</span>
-                            <span class="project-date">2025</span>
-                        </div>
-                        <h3>Black Belt - Design Completo</h3>
-                        <p>Criação de identidade visual completa para evento: logo, impressos e camisetas.</p>
-                        <div class="project-tags">
-                            <span>Photoshop</span>
-                            <span>Branding</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://www.behance.net/brenosoad" 
-                               class="btn-behance" 
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <i class="fab fa-behance" aria-hidden="true"></i>
-                                Ver Case Completo no Behance
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- PROJETO 5: PET CAFÉ -->
-                <div class="project-card" data-category="design">
-                    <div class="project-image" style="background-image: url('img/petcafe01.png');">
-                        <div class="project-badge">Design Gráfico</div>
-                        <div class="project-overlay">
-                            <a href="https://www.behance.net/brenosoad" 
-                               class="project-view behance-btn" 
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               title="Ver projeto no Behance">
-                                <i class="fab fa-behance" aria-hidden="true"></i>
-                                Ver no Behance
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-info">
-                        <div class="project-meta">
-                            <span class="project-category">Avisos e Feed</span>
-                            <span class="project-date">2025</span>
-                        </div>
-                        <h3>Pet Café - Designer gráfico</h3>
-                        <p>Criação de posts freelancer para Pet Café.</p>
-                        <div class="project-tags">
-                            <span>Photoshop</span>
-                            <span>Branding</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://www.behance.net/brenosoad" 
-                               class="btn-behance" 
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <i class="fab fa-behance" aria-hidden="true"></i>
-                                Ver Case Completo no Behance
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- PROJETO 6: DESIGN ESPORTIVO -->
-                <div class="project-card" data-category="design">
-                    <div class="project-image" style="background-image: url('img/esporte1.png');">
-                        <div class="project-badge">Design Gráfico</div>
-                        <div class="project-overlay">
-                            <a href="https://www.behance.net/brenosoad" 
-                               class="project-view behance-btn" 
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               title="Ver projeto no Behance">
-                                <i class="fab fa-behance" aria-hidden="true"></i>
-                                Ver no Behance
-                            </a>
-                        </div>
-                    </div>
-                    <div class="project-info">
-                        <div class="project-meta">
-                            <span class="project-category">Design Esportivo</span>
-                            <span class="project-date">2021 - 2025</span>
-                        </div>
-                        <h3>Esportes - Designer gráfico</h3>
-                        <p>Criação de posts para vários nichos no esporte.</p>
-                        <div class="project-tags">
-                            <span>Photoshop</span>
-                            <span>Branding</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://www.behance.net/brenosoad" 
-                               class="btn-behance" 
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <i class="fab fa-behance" aria-hidden="true"></i>
-                                Ver Case Completo no Behance
-                            </a>
-                        </div>
-                    </div>
-                </div>
+            <div class="stat-card accent blue">
+                <div class="stat-label">Em Negociação</div>
+                <div class="stat-value" id="statPipeline">0</div>
+                <div class="stat-sub" id="statPipelineSub">R$ 0,00 em aberto</div>
             </div>
-            
-            <!-- FAIXA HORIZONTAL: PRÓXIMO PROJETO -->
-            <div class="portfolio-add-banner">
-                <div class="add-icon">
-                    <i class="fas fa-plus" aria-hidden="true"></i>
-                </div>
-                <div class="portfolio-add-text">
-                    <h3>Seu Próximo Projeto Aqui</h3>
-                    <p>Esta vaga está reservada para você. Vamos criar algo incrível juntos!</p>
-                </div>
-                <a href="#contact" class="btn btn-outline">
-                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                    Propor Projeto
-                </a>
+            <div class="stat-card accent red">
+                <div class="stat-label">Perdidos</div>
+                <div class="stat-value" id="statLost">0</div>
+                <div class="stat-sub" id="statLostSub">R$ 0,00 não convertidos</div>
             </div>
-            
-            <div class="portfolio-cta">
-                <p>Quer saber mais sobre esses projetos ou cases detalhados?</p>
-                <a href="#contact" class="btn btn-primary">
-                    <i class="fas fa-envelope" aria-hidden="true"></i>
-                    Entre em contato e descubra!
-                </a>
-            </div>
-            
-            <!-- ACOMPANHE MAIS -->
-            <div class="follow-more">
-                <p class="follow-more-text">Acompanhe mais sobre o meu trabalho</p>
-                <div class="follow-more-links">
-                    <a href="https://github.com/brenosoad" class="follow-link follow-link-github" target="_blank" rel="noopener noreferrer">
-                        <i class="fab fa-github" aria-hidden="true"></i>
-                        GitHub
-                    </a>
-                    <a href="https://www.behance.net/brenosoad" class="follow-link follow-link-behance" target="_blank" rel="noopener noreferrer">
-                        <i class="fab fa-behance" aria-hidden="true"></i>
-                        Behance
-                    </a>
-                </div>
+            <div class="stat-card accent amber">
+                <div class="stat-label">Taxa de Conversão</div>
+                <div class="stat-value" id="statConversion">0%</div>
+                <div class="stat-sub" id="statConversionSub">Sem negócios decididos ainda</div>
             </div>
         </div>
-    </section>
 
-    <!-- SEÇÃO DEPOIMENTOS -->
-    <section id="testimonials" class="testimonials">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">Depoimentos</span>
-                <h2 class="section-title">O Que Meus Clientes Dizem</h2>
-                <p class="section-subtitle">Feedback de quem já trabalhou comigo</p>
-            </div>
-            
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                    </div>
-                    <p class="testimonial-text">"O site ficou moderno, profissional, visualmente muito bem construído e extremamente alinhado à identidade que buscávamos. Recebemos diversos elogios dos nossos alunos e clientes em relação à aparência, organização e qualidade do site — o trabalho foi excepcional do início ao fim."</p>
-                    <div class="testimonial-author">
-                        <img loading="lazy" src="img/icebergeducacao.png" alt="Iceberg Educação" class="testimonial-avatar">
-                        <div class="testimonial-author-info">
-                            <h4>Iceberg Educação</h4>
-                            <span>Instituição de Ensino</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                    </div>
-                    <p class="testimonial-text">"Fiquei muito satisfeita com o resultado do meu mídia kit! Ele ficou muito a minha cara e conseguiu transmitir de forma clara o meu trabalho. Depois que comecei a utilizar, ficou muito mais fácil apresentar meu trabalho pra possíveis parceiros — ele me trouxe muitos parceiros e novas oportunidades."</p>
-                    <div class="testimonial-author">
-                        <img loading="lazy" src="img/lais.png" alt="Laís Cavicchioli" class="testimonial-avatar">
-                        <div class="testimonial-author-info">
-                            <h4>Laís Cavicchioli</h4>
-                            <span>Influenciadora</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                    </div>
-                    <p class="testimonial-text">"Todas as vezes que precisei do Breno, ele atendeu minhas expectativas, realizando o trabalho de forma profissional. Consigo contar com ele pra diversas áreas — desenvolvimento de imagens e de sistemas — mesmo sendo negócios completamente diferentes."</p>
-                    <div class="testimonial-author">
-                        <img loading="lazy" src="img/thalyta.png" alt="Thalyta" class="testimonial-avatar">
-                        <div class="testimonial-author-info">
-                            <h4>Thalyta</h4>
-                            <span>Sanca por Aí, Black Belt, Tour SC & Pet Café</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SEÇÃO FAQ -->
-    <section id="faq" class="faq">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">Dúvidas Frequentes</span>
-                <h2 class="section-title">Perguntas Frequentes</h2>
-                <p class="section-subtitle">Tudo o que você precisa saber antes de fechar seu projeto</p>
-            </div>
-            
-            <div class="faq-list">
-                <div class="faq-item">
-                    <button class="faq-question" aria-expanded="false">
-                        <span>Qual o prazo médio de entrega?</span>
-                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                    </button>
-                    <div class="faq-answer">
-                        <p>Depende do escopo: artes avulsas para redes sociais costumam sair em 1 a 3 dias úteis, identidades visuais completas em 5 a 10 dias, e landing pages ou sites em 7 a 15 dias, conforme a complexidade e a agilidade no envio de conteúdo pelo cliente.</p>
-                    </div>
-                </div>
-                
-                <div class="faq-item">
-                    <button class="faq-question" aria-expanded="false">
-                        <span>Como funciona o processo de trabalho?</span>
-                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                    </button>
-                    <div class="faq-answer">
-                        <p>Conversamos sobre o projeto pelo WhatsApp, alinhamos escopo e orçamento, você envia o briefing e materiais necessários, eu apresento uma proposta inicial e seguimos com rodadas de ajuste até a aprovação final.</p>
-                    </div>
-                </div>
-                
-                <div class="faq-item">
-                    <button class="faq-question" aria-expanded="false">
-                        <span>Quantas revisões estão inclusas?</span>
-                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                    </button>
-                    <div class="faq-answer">
-                        <p>Cada projeto inclui rodadas de ajuste dentro do escopo combinado inicialmente. Alterações fora do briefing original podem ser orçadas à parte. Os detalhes são sempre alinhados antes de começar.</p>
-                    </div>
-                </div>
-                
-                <div class="faq-item">
-                    <button class="faq-question" aria-expanded="false">
-                        <span>Quais as formas de pagamento?</span>
-                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                    </button>
-                    <div class="faq-answer">
-                        <p>PIX, transferência ou combinações de entrada + saldo na entrega, dependendo do porte do projeto. Os detalhes de pagamento são definidos junto com o orçamento.</p>
-                    </div>
-                </div>
-                
-                <div class="faq-item">
-                    <button class="faq-question" aria-expanded="false">
-                        <span>Vocês atendem fora de São Paulo?</span>
-                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                    </button>
-                    <div class="faq-answer">
-                        <p>Sim, o atendimento é 100% online e cobre todo o Brasil. Toda a comunicação e entrega de arquivos acontece à distância, pelo WhatsApp e ferramentas digitais.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SEÇÃO CONTATO -->
-    <section id="contact" class="contact">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">Vamos Conversar</span>
-                <h2 class="section-title">Pronto para Iniciar seu Projeto?</h2>
-                <p class="section-subtitle">Entre em contato e vamos criar algo extraordinário juntos</p>
-            </div>
-            
-            <div class="contact-grid">
-                <div class="contact-info">
-                    <h3>Informações de Contato</h3>
-                    
-                    <div class="contact-methods">
-                        <a href="https://wa.me/5516997837454" class="contact-method whatsapp" target="_blank">
-                            <div class="method-icon">
-                                <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                            </div>
-                            <div class="method-content">
-                                <h4>WhatsApp</h4>
-                                <p>(16) 99783-7454</p>
-                                <span class="method-status">
-                                    <i class="fas fa-circle online" aria-hidden="true"></i>
-                                    Online agora
-                                </span>
-                            </div>
-                            <div class="method-action">
-                                <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                            </div>
-                        </a>
-                        
-                        <a href="https://instagram.com/creativecodex.studio" class="contact-method instagram" target="_blank">
-                            <div class="method-icon">
-                                <i class="fab fa-instagram" aria-hidden="true"></i>
-                            </div>
-                            <div class="method-content">
-                                <h4>Instagram</h4>
-                                <p>@creativecodex.studio</p>
-                                <span class="method-sub">Siga e envie mensagem</span>
-                            </div>
-                            <div class="method-action">
-                                <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                            </div>
-                        </a>
-                        
-                        <div class="contact-method">
-                            <div class="method-icon">
-                                <i class="fas fa-clock" aria-hidden="true"></i>
-                            </div>
-                            <div class="method-content">
-                                <h4>Horário Comercial</h4>
-                                <p>Segunda a Sexta</p>
-                                <span class="method-sub">9h às 18h</span>
-                            </div>
-                        </div>
-                        
-                        <div class="contact-method">
-                            <div class="method-icon">
-                                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-                            </div>
-                            <div class="method-content">
-                                <h4>Atendimento</h4>
-                                <p>100% Online</p>
-                                <span class="method-sub">Todo o Brasil</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-social">
-                        <h4>Conecte-se</h4>
-                        <div class="social-links">
-                            <a href="https://instagram.com/creativecodex.studio" class="social-link" target="_blank">
-                                <i class="fab fa-instagram" aria-hidden="true"></i>
-                            </a>
-                            <a href="https://wa.me/5516997837454" class="social-link" target="_blank">
-                                <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="contact-form">
-                    <h3>Envie sua Proposta</h3>
-                    <p class="form-description">Descreva seu projeto. Respondo em minutos pelo WhatsApp!</p>
-                    
-                    <form id="whatsapp-form">
-                        <div class="form-group" style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
-                            <label for="website">Não preencha este campo</label>
-                            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="name">Seu Nome *</label>
-                                <input type="text" id="name" name="name" required autocomplete="name" placeholder="Como prefere ser chamado" aria-describedby="name-error">
-                                <span class="field-error" id="name-error"></span>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="service">Tipo de Projeto *</label>
-                                <select id="service" name="service" required aria-describedby="service-error">
-                                    <option value="" disabled selected>Selecione o serviço</option>
-                                    <option value="Design Gráfico">Design Gráfico</option>
-                                    <option value="Landing Page">Landing Page</option>
-                                    <option value="Site Institucional">Site Institucional</option>
-                                    <option value="Redesign">Redesign</option>
-                                    <option value="Outro">Outro</option>
-                                </select>
-                                <span class="field-error" id="service-error"></span>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="budget">Orçamento Aproximado (opcional)</label>
-                            <select id="budget" name="budget">
-                                <option value="" selected>Ainda não sei</option>
-                                <option value="Até R$ 500">Até R$ 500</option>
-                                <option value="R$ 500 - R$ 1.000">R$ 500 - R$ 1.000</option>
-                                <option value="R$ 1.000 - R$ 2.000">R$ 1.000 - R$ 2.000</option>
-                                <option value="Acima de R$ 2.000">Acima de R$ 2.000</option>
-                                <option value="Preciso de orçamento">Preciso de orçamento</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="message">Detalhes do Projeto *</label>
-                            <textarea id="message" name="message" rows="5" required 
-                                      placeholder="Descreva seu projeto, objetivos, prazos e qualquer informação relevante..." aria-describedby="message-error"></textarea>
-                            <span class="field-error" id="message-error"></span>
-                        </div>
-                        
-                        <div class="form-submit">
-                            <button type="submit" class="btn btn-primary btn-block">
-                                <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                                Enviar para WhatsApp
-                            </button>
-                            <p class="form-note">
-                                <i class="fas fa-shield-alt" aria-hidden="true"></i>
-                                Sem intermediários. Sua mensagem vai direto para meu WhatsApp.
-                            </p>
-                            <p class="form-note">
-                                <i class="fas fa-lock" aria-hidden="true"></i>
-                                Seus dados são usados apenas para te responder e nunca são compartilhados. 
-                                <a href="privacidade.html" class="form-note-link">Saiba mais</a>.
-                            </p>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- BOTÃO WHATSAPP FLUTUANTE -->
-    <a href="https://wa.me/5516997837454" class="whatsapp-float" target="_blank">
-        <div class="float-content">
-            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-            <span class="float-text">Fale comigo</span>
-        </div>
-    </a>
-
-    <!-- BOTÃO VOLTAR AO TOPO -->
-    <button class="back-to-top">
-        <i class="fas fa-chevron-up" aria-hidden="true"></i>
-    </button>
-
-    <!-- FOOTER -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <div class="logo-brand">
-                        <div class="logo-circle">
-                            <img loading="lazy" src="img/logo.png" alt="Logo Creative Codex" class="logo-img">
-                        </div>
-                        <div class="logo-text">
-                            <span class="logo-main">Creative</span>
-                            <span class="logo-sub">Codex</span>
-                        </div>
-                    </div>
-                    <p class="footer-description">
-                        Transformando ideias em experiências visuais memoráveis através de design estratégico e desenvolvimento web.
-                    </p>
-                    <button type="button" class="btn-share" id="share-button">
-                        <i class="fas fa-share-alt" aria-hidden="true"></i>
-                        Gostou? Compartilhe
-                    </button>
-                </div>
-                
-                <div class="footer-links">
-                    <h4>Navegação</h4>
-                    <a href="#home">Início</a>
-                    <a href="#about">Sobre Mim</a>
-                    <a href="#services">Serviços</a>
-                    <a href="#partners">Parceiros</a>
-                    <a href="#portfolio">Portfólio</a>
-                    <a href="#contact">Contato</a>
-                </div>
-                
-                <div class="footer-services">
-                    <h4>Serviços</h4>
-                    <a href="#services">Design Gráfico</a>
-                    <a href="#services">Landing Pages</a>
-                    <a href="#services">Sites Institucionais</a>
-                    <a href="#services">Identidade Visual</a>
-                </div>
-                
-                <div class="footer-contact">
-                    <h4>Entre em Contato</h4>
-                    <a href="https://wa.me/5516997837454" class="footer-contact-link" target="_blank">
-                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                        (16) 99783-7454
-                    </a>
-                    <a href="https://instagram.com/creativecodex.studio" class="footer-contact-link" target="_blank">
-                        <i class="fab fa-instagram" aria-hidden="true"></i>
-                        @creativecodex.studio
-                    </a>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <div class="footer-copyright">
-                    <p>&copy; <span id="current-year">2025</span> Creative Codex. Todos os direitos reservados.</p>
-                </div>
-                
-                <div class="footer-legal">
-                    <a href="termos.html" class="legal-link">Termos de Uso</a>
-                    <a href="privacidade.html" class="legal-link">Política de Privacidade</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- TELA DE ESCOLHA DE IDIOMA (aparece só na primeira visita) -->
-    <div class="lang-gate" id="lang-gate" role="dialog" aria-modal="true" aria-labelledby="lang-gate-title" hidden>
-        <div class="lang-gate-backdrop" data-lang-gate-default></div>
-        <div class="lang-gate-content">
-            <div class="lang-gate-logo">
-                <div class="logo-circle">
-                    <img src="img/logo.png" alt="Creative Codex" loading="lazy">
-                </div>
-            </div>
-            <h2 id="lang-gate-title">Escolha seu idioma <span class="lang-gate-divider">/</span> Choose your language</h2>
-            <div class="lang-gate-options">
-                <button type="button" class="lang-gate-option" data-lang="pt">
-                    <span class="lang-gate-flag">🇧🇷</span>
-                    <span class="lang-gate-name">Português</span>
-                </button>
-                <button type="button" class="lang-gate-option" data-lang="en">
-                    <span class="lang-gate-flag">🇺🇸</span>
-                    <span class="lang-gate-name">English</span>
-                </button>
+        <h2 class="section-heading">Adicionados Recentemente</h2>
+        <div class="table-wrap">
+            <table>
+                <tbody id="recentBody"></tbody>
+            </table>
+            <div class="empty-state" id="recentEmpty" hidden>
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>
+                <p>Nada por aqui ainda. Cadastre seu primeiro prospecto.</p>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: CASE COMPLETO -->
-    <div class="case-modal" id="case-modal" role="dialog" aria-modal="true" aria-labelledby="case-modal-title" hidden>
-        <div class="case-modal-backdrop" data-close-modal></div>
-        <div class="case-modal-content">
-            <button type="button" class="case-modal-close" data-close-modal aria-label="Fechar case">
-                <i class="fas fa-times" aria-hidden="true"></i>
-            </button>
-            <div class="case-modal-body">
-                <span class="case-modal-tag" id="case-modal-tag"></span>
-                <h3 id="case-modal-title"></h3>
-                
-                <div class="case-modal-block">
-                    <h4><i class="fas fa-flag" aria-hidden="true"></i> O Desafio</h4>
-                    <p id="case-modal-challenge"></p>
-                </div>
-                
-                <div class="case-modal-block">
-                    <h4><i class="fas fa-lightbulb" aria-hidden="true"></i> A Solução</h4>
-                    <p id="case-modal-solution"></p>
-                </div>
-                
-                <div class="case-modal-block">
-                    <h4><i class="fas fa-chart-line" aria-hidden="true"></i> O Resultado</h4>
-                    <p id="case-modal-result"></p>
-                </div>
-                
-                <a href="#" id="case-modal-link" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
-                    <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-                    Ver Site ao Vivo
-                </a>
+    <div id="viewProspects" hidden>
+        <div class="search-row">
+            <div class="search-box">
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                <input type="text" id="searchInput" placeholder="Buscar por nome do cliente...">
+            </div>
+        </div>
+
+        <div class="filters" id="filters">
+            <button class="filter-chip active" data-filter="todos">Todos</button>
+            <button class="filter-chip" data-filter="prospectando">Prospectando</button>
+            <button class="filter-chip" data-filter="negociando">Negociando</button>
+            <button class="filter-chip" data-filter="fechado">Fechados</button>
+            <button class="filter-chip" data-filter="perdido">Perdidos</button>
+        </div>
+
+        <div class="table-wrap" id="tableSection">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Serviço</th>
+                        <th class="sortable" data-sort="value">Valor <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg></span></th>
+                        <th>Status</th>
+                        <th class="sortable sort-active" data-sort="date">Data <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></th>
+                        <th>Próximo Contato</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+            <div class="empty-state" id="emptyState" hidden>
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg></span>
+                <p>Nenhum prospecto ainda. Clica em "Novo Prospecto" pra começar.</p>
             </div>
         </div>
     </div>
+</main>
 
-    <script src="script.js"></script>
+<div class="modal-overlay" id="modalOverlay" hidden>
+    <div class="modal">
+        <h2 id="modalTitle">Novo Prospecto</h2>
+        <form id="prospectForm">
+            <input type="hidden" id="editId">
+            <div class="field">
+                <label for="fName">Nome / Empresa</label>
+                <input type="text" id="fName" required placeholder="Ex: Pet Café">
+            </div>
+            <div class="field">
+                <label for="fContact">Contato (WhatsApp, email...)</label>
+                <input type="text" id="fContact" placeholder="Ex: (16) 99999-9999">
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label for="fService">Serviço</label>
+                    <input type="text" id="fService" placeholder="Ex: Landing Page">
+                </div>
+                <div class="field">
+                    <label for="fValue">Valor (R$)</label>
+                    <input type="number" id="fValue" min="0" step="0.01" placeholder="0,00">
+                </div>
+            </div>
+            <div class="field">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="fRecurring">
+                    <span>Esse é um valor <strong>mensal recorrente</strong> (não avulso)</span>
+                </label>
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label for="fStatus">Status</label>
+                    <select id="fStatus">
+                        <option value="prospectando">Prospectando</option>
+                        <option value="negociando">Negociando</option>
+                        <option value="fechado">Fechado</option>
+                        <option value="perdido">Perdido</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="fNextContact">Próximo Contato</label>
+                    <input type="date" id="fNextContact">
+                </div>
+            </div>
+            <div class="field">
+                <label for="fNotes">Notas (opcional)</label>
+                <textarea id="fNotes" placeholder="Detalhes da conversa, próximos passos..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let prospects = [];
+let monthlyGoal = 0;
+let currentFilter = 'todos';
+let searchTerm = '';
+let sortField = 'date';
+let sortDir = 'desc';
+let saveTimer = null;
+
+const statusLabels = {
+    prospectando: 'Prospectando',
+    negociando: 'Negociando',
+    fechado: 'Fechado',
+    perdido: 'Perdido'
+};
+
+async function loadData() {
+    try {
+        const res = await fetch('/api/data');
+        if (!res.ok) throw new Error('Resposta ' + res.status);
+        const data = await res.json();
+        prospects = data.prospects || [];
+        monthlyGoal = data.goal || 0;
+        hideBanner();
+    } catch (err) {
+        console.error('Falha ao carregar dados:', err);
+        showBanner('Não consegui carregar seus dados do servidor. Verifique sua conexão e recarregue a página.');
+    }
+    render();
+}
+
+async function save() {
+    try {
+        const res = await fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prospects, goal: monthlyGoal })
+        });
+        if (!res.ok) throw new Error('Resposta ' + res.status);
+        hideBanner();
+    } catch (err) {
+        console.error('Falha ao salvar dados:', err);
+        showBanner('Não consegui salvar. Sua última alteração pode não ter sido gravada — verifique sua conexão.');
+    }
+}
+
+function showBanner(msg) {
+    let b = document.getElementById('errorBanner');
+    if (!b) {
+        b = document.createElement('div');
+        b.id = 'errorBanner';
+        b.className = 'error-banner';
+        document.body.prepend(b);
+    }
+    b.textContent = msg;
+    b.hidden = false;
+}
+
+function hideBanner() {
+    const b = document.getElementById('errorBanner');
+    if (b) b.hidden = true;
+}
+
+function formatMoney(v) {
+    return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR');
+}
+
+function renderGoal(currentValue) {
+    const pct = monthlyGoal > 0 ? Math.min(100, Math.round((currentValue / monthlyGoal) * 100)) : 0;
+    document.getElementById('goalCurrent').innerHTML = `<strong>${formatMoney(currentValue)}</strong> faturados este mês`;
+    document.getElementById('goalTarget').textContent = monthlyGoal > 0 ? `Meta: ${formatMoney(monthlyGoal)} (${pct}%)` : 'Nenhuma meta definida';
+    document.getElementById('goalBarFill').style.width = pct + '%';
+}
+
+function editGoal() {
+    const input = prompt('Qual a meta de faturamento deste mês? (R$)', monthlyGoal || '');
+    if (input === null) return;
+    const value = parseFloat(input.replace(',', '.'));
+    if (isNaN(value) || value < 0) {
+        alert('Digite um número válido.');
+        return;
+    }
+    monthlyGoal = value;
+    save();
+    render();
+}
+
+function nextContactInfo(dateStr) {
+    if (!dateStr) return { label: '—', cls: '' };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(dateStr + 'T00:00:00');
+    const diffDays = Math.round((target - today) / 86400000);
+
+    if (diffDays < 0) return { label: `Atrasado (${formatDate(dateStr)})`, cls: 'overdue' };
+    if (diffDays === 0) return { label: 'Hoje', cls: 'today' };
+    return { label: formatDate(dateStr), cls: '' };
+}
+
+function render() {
+    // Stats
+    const total = prospects.length;
+    const won = prospects.filter(p => p.status === 'fechado');
+    const lost = prospects.filter(p => p.status === 'perdido');
+    const pipeline = prospects.filter(p => p.status === 'prospectando' || p.status === 'negociando');
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statTotalSub').textContent = total === 0 ? 'Nenhum cadastrado ainda' : `${pipeline.length} em andamento`;
+
+    const wonOneTime = won.filter(p => !p.recurring);
+    const wonRecurring = won.filter(p => p.recurring);
+
+    const totalWonValue = wonOneTime.reduce((s, p) => s + Number(p.value || 0), 0);
+    document.getElementById('heroTotal').textContent = formatMoney(totalWonValue);
+    document.getElementById('heroTotalSub').textContent = wonOneTime.length === 0
+        ? 'Nenhum negócio avulso fechado ainda'
+        : `de ${wonOneTime.length} negócio${wonOneTime.length > 1 ? 's' : ''} fechado${wonOneTime.length > 1 ? 's' : ''} (avulsos)`;
+
+    const mrrValue = wonRecurring.reduce((s, p) => s + Number(p.value || 0), 0);
+    document.getElementById('heroMrr').textContent = formatMoney(mrrValue);
+    document.getElementById('heroMrrSub').textContent = wonRecurring.length === 0
+        ? 'Nenhum contrato recorrente ainda'
+        : `${wonRecurring.length} cliente${wonRecurring.length > 1 ? 's' : ''} pagando por mês`;
+
+    document.getElementById('statWon').textContent = won.length;
+    document.getElementById('statWonSub').textContent = formatMoney(won.reduce((s, p) => s + Number(p.value || 0), 0)) + ' faturados';
+
+    document.getElementById('statPipeline').textContent = pipeline.length;
+    document.getElementById('statPipelineSub').textContent = formatMoney(pipeline.reduce((s, p) => s + Number(p.value || 0), 0)) + ' em aberto';
+
+    document.getElementById('statLost').textContent = lost.length;
+    document.getElementById('statLostSub').textContent = formatMoney(lost.reduce((s, p) => s + Number(p.value || 0), 0)) + ' não convertidos';
+
+    const decided = won.length + lost.length;
+    const conversionRate = decided === 0 ? 0 : Math.round((won.length / decided) * 100);
+    document.getElementById('statConversion').textContent = conversionRate + '%';
+    document.getElementById('statConversionSub').textContent = decided === 0
+        ? 'Sem negócios decididos ainda'
+        : `${won.length} de ${decided} decididos`;
+
+    const now = new Date();
+    const wonThisMonth = won.filter(p => {
+        const d = new Date(p.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const monthValue = wonThisMonth.reduce((s, p) => s + Number(p.value || 0), 0);
+    renderGoal(monthValue);
+
+    // Table
+    let filtered = currentFilter === 'todos' ? prospects : prospects.filter(p => p.status === currentFilter);
+
+    if (searchTerm.trim()) {
+        const term = searchTerm.trim().toLowerCase();
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(term));
+    }
+
+    filtered = filtered.slice().sort((a, b) => {
+        let av = a[sortField], bv = b[sortField];
+        if (sortField === 'date') { av = new Date(av); bv = new Date(bv); }
+        if (sortField === 'value') { av = Number(av || 0); bv = Number(bv || 0); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const tbody = document.getElementById('tableBody');
+    const empty = document.getElementById('emptyState');
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        empty.hidden = false;
+    } else {
+        empty.hidden = true;
+        tbody.innerHTML = filtered
+            .map(p => {
+                const nc = nextContactInfo(p.nextContact);
+                return `
+                <tr>
+                    <td>
+                        <div class="client-name">${escapeHtml(p.name)}</div>
+                        ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
+                    </td>
+                    <td>${escapeHtml(p.service || '—')}</td>
+                    <td class="value-cell">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
+                    <td>
+                        <select class="status-badge ${p.status}" onchange="quickStatus('${p.id}', this.value)">
+                            ${Object.entries(statusLabels).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>${formatDate(p.date)}</td>
+                    <td><span class="contact-tag ${nc.cls}">${nc.label}</span></td>
+                    <td>
+                        <div class="row-actions">
+                            <button onclick="editProspect('${p.id}')" title="Editar"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></button>
+                            <button class="del" onclick="deleteProspect('${p.id}')" title="Excluir"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></span></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            }).join('');
+    }
+
+    // Recentes (Visão Geral)
+    const recentBody = document.getElementById('recentBody');
+    const recentEmpty = document.getElementById('recentEmpty');
+    const recent = prospects.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+    if (recent.length === 0) {
+        recentBody.innerHTML = '';
+        recentEmpty.hidden = false;
+    } else {
+        recentEmpty.hidden = true;
+        recentBody.innerHTML = recent.map(p => `
+            <tr>
+                <td>
+                    <div class="client-name">${escapeHtml(p.name)}</div>
+                    ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
+                </td>
+                <td>${escapeHtml(p.service || '—')}</td>
+                <td class="value-cell">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
+                <td><span class="status-badge ${p.status}" style="pointer-events:none;">${statusLabels[p.status]}</span></td>
+                <td>${formatDate(p.date)}</td>
+            </tr>
+        `).join('');
+    }
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+}
+
+function quickStatus(id, newStatus) {
+    const p = prospects.find(x => x.id === id);
+    if (p) {
+        p.status = newStatus;
+        save();
+        render();
+    }
+}
+
+function openModal(prospect) {
+    document.getElementById('modalTitle').textContent = prospect ? 'Editar Prospecto' : 'Novo Prospecto';
+    document.getElementById('editId').value = prospect ? prospect.id : '';
+    document.getElementById('fName').value = prospect ? prospect.name : '';
+    document.getElementById('fContact').value = prospect ? prospect.contact : '';
+    document.getElementById('fService').value = prospect ? prospect.service : '';
+    document.getElementById('fValue').value = prospect ? prospect.value : '';
+    document.getElementById('fStatus').value = prospect ? prospect.status : 'prospectando';
+    document.getElementById('fNextContact').value = prospect ? (prospect.nextContact || '') : '';
+    document.getElementById('fRecurring').checked = prospect ? !!prospect.recurring : false;
+    document.getElementById('fNotes').value = prospect ? prospect.notes : '';
+    document.getElementById('modalOverlay').hidden = false;
+    document.getElementById('fName').focus();
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').hidden = true;
+    document.getElementById('prospectForm').reset();
+}
+
+function editProspect(id) {
+    const p = prospects.find(x => x.id === id);
+    if (p) openModal(p);
+}
+
+function deleteProspect(id) {
+    if (!confirm('Excluir esse prospecto? Essa ação não pode ser desfeita.')) return;
+    prospects = prospects.filter(x => x.id !== id);
+    save();
+    render();
+}
+
+document.getElementById('prospectForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('editId').value;
+    const data = {
+        name: document.getElementById('fName').value.trim(),
+        contact: document.getElementById('fContact').value.trim(),
+        service: document.getElementById('fService').value.trim(),
+        value: parseFloat(document.getElementById('fValue').value) || 0,
+        status: document.getElementById('fStatus').value,
+        nextContact: document.getElementById('fNextContact').value || null,
+        recurring: document.getElementById('fRecurring').checked,
+        notes: document.getElementById('fNotes').value.trim()
+    };
+
+    if (id) {
+        const p = prospects.find(x => x.id === id);
+        Object.assign(p, data);
+    } else {
+        prospects.push({ id: crypto.randomUUID(), date: new Date().toISOString(), ...data });
+    }
+
+    save();
+    render();
+    closeModal();
+});
+
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modalOverlay') closeModal();
+});
+
+document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        currentFilter = chip.dataset.filter;
+        render();
+    });
+});
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchTerm = e.target.value;
+    render();
+});
+
+const SVG_SORT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg>';
+const SVG_SORT_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
+const SVG_SORT_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
+document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+        const field = th.dataset.sort;
+        if (sortField === field) {
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortField = field;
+            sortDir = 'desc';
+        }
+
+        document.querySelectorAll('th.sortable').forEach(t => {
+            t.classList.remove('sort-active');
+            t.querySelector('.icon').innerHTML = SVG_SORT;
+        });
+        th.classList.add('sort-active');
+        th.querySelector('.icon').innerHTML = sortDir === 'asc' ? SVG_SORT_UP : SVG_SORT_DOWN;
+
+        render();
+    });
+});
+
+const todayText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+function showView(view) {
+    const isOverview = view === 'overview';
+    document.getElementById('viewOverview').hidden = !isOverview;
+    document.getElementById('viewProspects').hidden = isOverview;
+    document.getElementById('navOverview').classList.toggle('active', isOverview);
+    document.getElementById('navProspects').classList.toggle('active', !isOverview);
+    document.getElementById('pageTitle').textContent = isOverview ? 'Visão Geral' : 'Prospecção';
+    document.getElementById('pageSubtitle').textContent = isOverview
+        ? todayText.charAt(0).toUpperCase() + todayText.slice(1)
+        : 'Todos os seus clientes e negociações, num lugar só.';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('navOverview').addEventListener('click', () => showView('overview'));
+document.getElementById('navProspects').addEventListener('click', () => showView('prospects'));
+
+document.getElementById('pageSubtitle').textContent = todayText.charAt(0).toUpperCase() + todayText.slice(1);
+
+loadData();
+</script>
 </body>
 </html>
