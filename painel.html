@@ -120,6 +120,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .client-name{font-weight:600;}
 .client-contact{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
 .value-cell{font-weight:700;font-family:'Poppins',sans-serif;}
+.recurring-tag{display:inline-block;margin-left:5px;font-size:10.5px;font-weight:600;color:var(--green);background:rgba(34,197,94,.12);padding:2px 6px;border-radius:6px;font-family:'Inter',sans-serif;}
 .status-badge{
     display:inline-flex;align-items:center;gap:6px;padding:5px 12px;
     border-radius:999px;font-size:12px;font-weight:700;border:none;cursor:pointer;
@@ -186,6 +187,10 @@ tr:hover td{background:rgba(255,255,255,.02);}
     .hero-card{padding:26px;}
     .hero-card-value{font-size:38px;}
 }
+.hero-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px;}
+.hero-row .hero-card{margin-bottom:0;}
+.hero-card.mrr{background:linear-gradient(135deg,#0f3d2e 0%,#15803d 55%,#22c55e 100%);box-shadow:0 20px 50px rgba(21,128,61,.35);}
+@media (max-width:760px){.hero-row{grid-template-columns:1fr;}}
 
 .section-heading{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;margin-bottom:14px;}
 
@@ -228,6 +233,17 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
 
 .icon{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;flex-shrink:0;}
 .icon svg{width:100%;height:100%;display:block;}
+
+.checkbox-label{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13.5px;color:var(--text-dim);font-weight:500;}
+.checkbox-label input{width:auto;margin-top:2px;accent-color:var(--blue);}
+.checkbox-label strong{color:var(--text);}
+
+.error-banner{
+    position:fixed;top:0;left:0;right:0;z-index:200;
+    background:#7f1d1d;color:#fff;text-align:center;
+    padding:10px 20px;font-size:13.5px;font-weight:600;
+}
+.error-banner[hidden]{display:none;}
 
 /* MODAL */
 
@@ -275,7 +291,7 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
         <button class="nav-item active" id="navOverview"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></span><span>Visão Geral</span></button>
         <button class="nav-item" id="navProspects"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 20v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Prospecção</span></button>
     </nav>
-    <div class="sidebar-foot">Dados salvos só neste navegador.</div>
+    <div class="sidebar-foot">Dados salvos no banco da Vercel.</div>
 </aside>
 
 <main class="main">
@@ -288,13 +304,24 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
     </div>
 
     <div id="viewOverview">
-        <div class="hero-card">
-            <div>
-                <div class="hero-card-label"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Total em Caixa</div>
-                <div class="hero-card-value" id="heroTotal">R$ 0,00</div>
-                <div class="hero-card-sub" id="heroTotalSub">de negócios fechados</div>
+        <div class="hero-row">
+            <div class="hero-card">
+                <div>
+                    <div class="hero-card-label"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Total em Caixa</div>
+                    <div class="hero-card-value" id="heroTotal">R$ 0,00</div>
+                    <div class="hero-card-sub" id="heroTotalSub">de negócios fechados (avulsos)</div>
+                </div>
+                <div class="hero-card-icon"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span></div>
             </div>
-            <div class="hero-card-icon"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span></div>
+
+            <div class="hero-card mrr">
+                <div>
+                    <div class="hero-card-label"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span> Receita Recorrente (MRR)</div>
+                    <div class="hero-card-value" id="heroMrr">R$ 0,00</div>
+                    <div class="hero-card-sub" id="heroMrrSub">por mês, em contratos ativos</div>
+                </div>
+                <div class="hero-card-icon"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span></div>
+            </div>
         </div>
 
         <div class="goal-card">
@@ -413,6 +440,12 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
                     <input type="number" id="fValue" min="0" step="0.01" placeholder="0,00">
                 </div>
             </div>
+            <div class="field">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="fRecurring">
+                    <span>Esse é um valor <strong>mensal recorrente</strong> (não avulso)</span>
+                </label>
+            </div>
             <div class="field-row">
                 <div class="field">
                     <label for="fStatus">Status</label>
@@ -441,15 +474,13 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
 </div>
 
 <script>
-const STORAGE_KEY = 'cc_painel_prospectos';
-let prospects = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+let prospects = [];
+let monthlyGoal = 0;
 let currentFilter = 'todos';
 let searchTerm = '';
 let sortField = 'date';
 let sortDir = 'desc';
-
-const GOAL_KEY = 'cc_painel_meta';
-let monthlyGoal = parseFloat(localStorage.getItem(GOAL_KEY) || '0');
+let saveTimer = null;
 
 const statusLabels = {
     prospectando: 'Prospectando',
@@ -458,8 +489,51 @@ const statusLabels = {
     perdido: 'Perdido'
 };
 
-function save() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(prospects));
+async function loadData() {
+    try {
+        const res = await fetch('/api/data');
+        if (!res.ok) throw new Error('Resposta ' + res.status);
+        const data = await res.json();
+        prospects = data.prospects || [];
+        monthlyGoal = data.goal || 0;
+        hideBanner();
+    } catch (err) {
+        console.error('Falha ao carregar dados:', err);
+        showBanner('Não consegui carregar seus dados do servidor. Verifique sua conexão e recarregue a página.');
+    }
+    render();
+}
+
+async function save() {
+    try {
+        const res = await fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prospects, goal: monthlyGoal })
+        });
+        if (!res.ok) throw new Error('Resposta ' + res.status);
+        hideBanner();
+    } catch (err) {
+        console.error('Falha ao salvar dados:', err);
+        showBanner('Não consegui salvar. Sua última alteração pode não ter sido gravada — verifique sua conexão.');
+    }
+}
+
+function showBanner(msg) {
+    let b = document.getElementById('errorBanner');
+    if (!b) {
+        b = document.createElement('div');
+        b.id = 'errorBanner';
+        b.className = 'error-banner';
+        document.body.prepend(b);
+    }
+    b.textContent = msg;
+    b.hidden = false;
+}
+
+function hideBanner() {
+    const b = document.getElementById('errorBanner');
+    if (b) b.hidden = true;
 }
 
 function formatMoney(v) {
@@ -487,7 +561,7 @@ function editGoal() {
         return;
     }
     monthlyGoal = value;
-    localStorage.setItem(GOAL_KEY, monthlyGoal);
+    save();
     render();
 }
 
@@ -513,11 +587,20 @@ function render() {
     document.getElementById('statTotal').textContent = total;
     document.getElementById('statTotalSub').textContent = total === 0 ? 'Nenhum cadastrado ainda' : `${pipeline.length} em andamento`;
 
-    const totalWonValue = won.reduce((s, p) => s + Number(p.value || 0), 0);
+    const wonOneTime = won.filter(p => !p.recurring);
+    const wonRecurring = won.filter(p => p.recurring);
+
+    const totalWonValue = wonOneTime.reduce((s, p) => s + Number(p.value || 0), 0);
     document.getElementById('heroTotal').textContent = formatMoney(totalWonValue);
-    document.getElementById('heroTotalSub').textContent = won.length === 0
-        ? 'Nenhum negócio fechado ainda'
-        : `de ${won.length} negócio${won.length > 1 ? 's' : ''} fechado${won.length > 1 ? 's' : ''}`;
+    document.getElementById('heroTotalSub').textContent = wonOneTime.length === 0
+        ? 'Nenhum negócio avulso fechado ainda'
+        : `de ${wonOneTime.length} negócio${wonOneTime.length > 1 ? 's' : ''} fechado${wonOneTime.length > 1 ? 's' : ''} (avulsos)`;
+
+    const mrrValue = wonRecurring.reduce((s, p) => s + Number(p.value || 0), 0);
+    document.getElementById('heroMrr').textContent = formatMoney(mrrValue);
+    document.getElementById('heroMrrSub').textContent = wonRecurring.length === 0
+        ? 'Nenhum contrato recorrente ainda'
+        : `${wonRecurring.length} cliente${wonRecurring.length > 1 ? 's' : ''} pagando por mês`;
 
     document.getElementById('statWon').textContent = won.length;
     document.getElementById('statWonSub').textContent = formatMoney(won.reduce((s, p) => s + Number(p.value || 0), 0)) + ' faturados';
@@ -578,7 +661,7 @@ function render() {
                         ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
                     </td>
                     <td>${escapeHtml(p.service || '—')}</td>
-                    <td class="value-cell">${formatMoney(p.value)}</td>
+                    <td class="value-cell">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
                     <td>
                         <select class="status-badge ${p.status}" onchange="quickStatus('${p.id}', this.value)">
                             ${Object.entries(statusLabels).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}
@@ -614,7 +697,7 @@ function render() {
                     ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
                 </td>
                 <td>${escapeHtml(p.service || '—')}</td>
-                <td class="value-cell">${formatMoney(p.value)}</td>
+                <td class="value-cell">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
                 <td><span class="status-badge ${p.status}" style="pointer-events:none;">${statusLabels[p.status]}</span></td>
                 <td>${formatDate(p.date)}</td>
             </tr>
@@ -646,6 +729,7 @@ function openModal(prospect) {
     document.getElementById('fValue').value = prospect ? prospect.value : '';
     document.getElementById('fStatus').value = prospect ? prospect.status : 'prospectando';
     document.getElementById('fNextContact').value = prospect ? (prospect.nextContact || '') : '';
+    document.getElementById('fRecurring').checked = prospect ? !!prospect.recurring : false;
     document.getElementById('fNotes').value = prospect ? prospect.notes : '';
     document.getElementById('modalOverlay').hidden = false;
     document.getElementById('fName').focus();
@@ -678,6 +762,7 @@ document.getElementById('prospectForm').addEventListener('submit', (e) => {
         value: parseFloat(document.getElementById('fValue').value) || 0,
         status: document.getElementById('fStatus').value,
         nextContact: document.getElementById('fNextContact').value || null,
+        recurring: document.getElementById('fRecurring').checked,
         notes: document.getElementById('fNotes').value.trim()
     };
 
@@ -756,7 +841,7 @@ document.getElementById('navProspects').addEventListener('click', () => showView
 
 document.getElementById('pageSubtitle').textContent = todayText.charAt(0).toUpperCase() + todayText.slice(1);
 
-render();
+loadData();
 </script>
 </body>
 </html>
