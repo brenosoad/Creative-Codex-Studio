@@ -234,6 +234,8 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
 .icon{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;flex-shrink:0;}
 .icon svg{width:100%;height:100%;display:block;}
 
+.commission-hint{font-size:12px;color:var(--green);font-weight:600;margin-top:6px;}
+
 .checkbox-label{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13.5px;color:var(--text-dim);font-weight:500;}
 .checkbox-label input{width:auto;margin-top:2px;accent-color:var(--blue);}
 .checkbox-label strong{color:var(--text);}
@@ -499,6 +501,7 @@ body.intern .money-only{display:none !important;}
                 <div class="field">
                     <label for="fValue">Valor (R$)</label>
                     <input type="number" id="fValue" min="0" step="0.01" placeholder="0,00">
+                    <div class="commission-hint" id="commissionHint"></div>
                 </div>
             </div>
             <div class="field">
@@ -857,7 +860,44 @@ function openModal(prospect) {
     document.getElementById('fNotes').value = prospect ? prospect.notes : '';
     document.getElementById('modalOverlay').hidden = false;
     document.getElementById('fName').focus();
+    updateCommissionHint();
 }
+
+function calcCommission(value) {
+    if (!value || value < 300) return null;
+    if (value < 600) return 50;
+    if (value < 1000) return value * 0.10;
+    if (value < 1500) return value * 0.15;
+    return null; // a combinar
+}
+
+function updateCommissionHint() {
+    const hint = document.getElementById('commissionHint');
+    const value = parseFloat(document.getElementById('fValue').value) || 0;
+    if (!value) { hint.textContent = ''; return; }
+    if (value < 300) { hint.textContent = 'Abaixo do valor mínimo de comissão.'; return; }
+    if (value >= 1500) { hint.textContent = 'Comissão: a combinar.'; return; }
+    hint.textContent = `Comissão estimada: ${formatMoney(calcCommission(value))}`;
+}
+
+document.getElementById('fValue').addEventListener('input', updateCommissionHint);
+
+document.getElementById('fContact').addEventListener('input', (e) => {
+    const el = e.target;
+    if (/[a-zA-Z@]/.test(el.value)) return; // deixa email/texto livre, sem máscara
+    let digits = el.value.replace(/\D/g, '').slice(0, 11);
+    let formatted = digits;
+    if (digits.length > 10) {
+        formatted = digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    } else if (digits.length > 6) {
+        formatted = digits.replace(/(\d{2})(\d{4})(\d*)/, (m, a, b, c) => `(${a}) ${b}${c ? '-' + c : ''}`);
+    } else if (digits.length > 2) {
+        formatted = digits.replace(/(\d{2})(\d*)/, '($1) $2');
+    } else if (digits.length > 0) {
+        formatted = '(' + digits;
+    }
+    el.value = formatted;
+});
 
 function closeModal() {
     document.getElementById('modalOverlay').hidden = true;
