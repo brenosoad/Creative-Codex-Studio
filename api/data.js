@@ -5,15 +5,24 @@ const KEY = 'painel_dados';
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
-      const data = await kv.get(KEY);
-      return res.status(200).json(data || { prospects: [], goal: 0 });
+      const role = req.query.role;
+      const data = (await kv.get(KEY)) || { prospects: [], goal: 0 };
+      if (role === 'estagiario') {
+        return res.status(200).json({ prospects: data.prospects || [], goal: null });
+      }
+      return res.status(200).json(data);
     }
 
     if (req.method === 'POST') {
-      const { prospects, goal } = req.body || {};
+      const { prospects, goal, role } = req.body || {};
+      const current = (await kv.get(KEY)) || { prospects: [], goal: 0 };
+      const nextGoal = role === 'estagiario'
+        ? current.goal || 0
+        : (typeof goal === 'number' ? goal : current.goal || 0);
+
       await kv.set(KEY, {
         prospects: Array.isArray(prospects) ? prospects : [],
-        goal: typeof goal === 'number' ? goal : 0
+        goal: nextGoal
       });
       return res.status(200).json({ ok: true });
     }
