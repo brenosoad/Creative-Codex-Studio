@@ -245,6 +245,31 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
 }
 .error-banner[hidden]{display:none;}
 
+/* LOGIN */
+.login-screen{
+    position:fixed;inset:0;z-index:300;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.login-screen[hidden]{display:none;}
+.login-box{
+    width:100%;max-width:340px;text-align:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:16px;
+    padding:36px 30px;
+}
+.login-box h2{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px;}
+.login-box p{font-size:13.5px;color:var(--text-dim);margin-bottom:20px;}
+.login-box input{
+    width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);
+    background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;text-align:center;
+}
+.login-box input:focus{outline:none;border-color:var(--blue);}
+.login-error{color:var(--red);font-size:13px;margin-top:10px;}
+.logout-link{background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;margin-top:4px;}
+.logout-link:hover{color:var(--blue);}
+
+/* CONTROLE DE ACESSO */
+body.intern .money-only{display:none !important;}
+
 /* MODAL */
 
 .modal-overlay{
@@ -282,7 +307,18 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
 </head>
 <body>
 
-<aside class="sidebar">
+<div class="login-screen" id="loginScreen">
+    <div class="login-box">
+        <div class="brand-icon" style="margin:0 auto 16px;">CC</div>
+        <h2>Painel Creative Codex</h2>
+        <p>Digite sua senha de acesso</p>
+        <input type="password" id="loginPassword" placeholder="Senha" autocomplete="off">
+        <button class="btn btn-primary" id="loginBtn" style="width:100%;justify-content:center;margin-top:12px;">Entrar</button>
+        <p class="login-error" id="loginError" hidden>Senha incorreta.</p>
+    </div>
+</div>
+
+<aside class="sidebar" id="sidebarEl" hidden>
     <div class="brand">
         <div class="brand-icon">CC</div>
         <div class="brand-text">Painel<span>Creative Codex</span></div>
@@ -291,10 +327,10 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
         <button class="nav-item active" id="navOverview"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></span><span>Visão Geral</span></button>
         <button class="nav-item" id="navProspects"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 20v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Prospecção</span></button>
     </nav>
-    <div class="sidebar-foot">Dados salvos no banco da Vercel.</div>
+    <div class="sidebar-foot" id="sidebarFoot">Dados salvos no banco da Vercel.</div>
 </aside>
 
-<main class="main">
+<main class="main" id="mainEl" hidden>
     <div class="topbar">
         <div>
             <h1 id="pageTitle">Visão Geral</h1>
@@ -304,7 +340,7 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
     </div>
 
     <div id="viewOverview">
-        <div class="hero-row">
+        <div class="hero-row money-only">
             <div class="hero-card">
                 <div>
                     <div class="hero-card-label"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Total em Caixa</div>
@@ -324,7 +360,7 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
             </div>
         </div>
 
-        <div class="goal-card">
+        <div class="goal-card money-only">
             <div class="goal-top">
                 <h3><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span> Meta do Mês</h3>
                 <button class="goal-edit" onclick="editGoal()">Editar meta</button>
@@ -400,7 +436,7 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
                     <tr>
                         <th>Cliente</th>
                         <th>Serviço</th>
-                        <th class="sortable" data-sort="value">Valor <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg></span></th>
+                        <th class="sortable money-only" data-sort="value">Valor <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg></span></th>
                         <th>Status</th>
                         <th class="sortable sort-active" data-sort="date">Data <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></th>
                         <th>Próximo Contato</th>
@@ -435,12 +471,12 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
                     <label for="fService">Serviço</label>
                     <input type="text" id="fService" placeholder="Ex: Landing Page">
                 </div>
-                <div class="field">
+                <div class="field money-only">
                     <label for="fValue">Valor (R$)</label>
                     <input type="number" id="fValue" min="0" step="0.01" placeholder="0,00">
                 </div>
             </div>
-            <div class="field">
+            <div class="field money-only">
                 <label class="checkbox-label">
                     <input type="checkbox" id="fRecurring">
                     <span>Esse é um valor <strong>mensal recorrente</strong> (não avulso)</span>
@@ -481,6 +517,61 @@ let searchTerm = '';
 let sortField = 'date';
 let sortDir = 'desc';
 let saveTimer = null;
+
+// ACESSO
+const PASSWORDS = {
+    dono: 'BS100218*',
+    estagiario: 'Fabio2026*'
+};
+let role = sessionStorage.getItem('painel_role') || null;
+
+function checkLogin() {
+    if (role === 'dono' || role === 'estagiario') {
+        document.getElementById('loginScreen').hidden = true;
+        document.getElementById('sidebarEl').hidden = false;
+        document.getElementById('mainEl').hidden = false;
+        applyRoleUI();
+        loadData();
+    } else {
+        document.getElementById('loginScreen').hidden = false;
+        document.getElementById('sidebarEl').hidden = true;
+        document.getElementById('mainEl').hidden = true;
+        document.getElementById('loginPassword').focus();
+    }
+}
+
+function attemptLogin() {
+    const val = document.getElementById('loginPassword').value;
+    if (val === PASSWORDS.dono) {
+        role = 'dono';
+    } else if (val === PASSWORDS.estagiario) {
+        role = 'estagiario';
+    } else {
+        document.getElementById('loginError').hidden = false;
+        return;
+    }
+    document.getElementById('loginError').hidden = true;
+    sessionStorage.setItem('painel_role', role);
+    checkLogin();
+}
+
+function applyRoleUI() {
+    document.body.classList.toggle('intern', role === 'estagiario');
+    document.getElementById('sidebarFoot').innerHTML = role === 'dono'
+        ? 'Dados salvos no banco da Vercel.<br><button class="logout-link" onclick="logout()">Sair</button>'
+        : 'Modo estagiário.<br><button class="logout-link" onclick="logout()">Sair</button>';
+}
+
+function logout() {
+    sessionStorage.removeItem('painel_role');
+    role = null;
+    location.reload();
+}
+
+document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+document.getElementById('loginPassword').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') attemptLogin();
+});
 
 const statusLabels = {
     prospectando: 'Prospectando',
@@ -602,14 +693,22 @@ function render() {
         ? 'Nenhum contrato recorrente ainda'
         : `${wonRecurring.length} cliente${wonRecurring.length > 1 ? 's' : ''} pagando por mês`;
 
+    const isIntern = role === 'estagiario';
+
     document.getElementById('statWon').textContent = won.length;
-    document.getElementById('statWonSub').textContent = formatMoney(won.reduce((s, p) => s + Number(p.value || 0), 0)) + ' faturados';
+    document.getElementById('statWonSub').textContent = isIntern
+        ? `${won.length} negócio${won.length === 1 ? '' : 's'} fechado${won.length === 1 ? '' : 's'}`
+        : formatMoney(won.reduce((s, p) => s + Number(p.value || 0), 0)) + ' faturados';
 
     document.getElementById('statPipeline').textContent = pipeline.length;
-    document.getElementById('statPipelineSub').textContent = formatMoney(pipeline.reduce((s, p) => s + Number(p.value || 0), 0)) + ' em aberto';
+    document.getElementById('statPipelineSub').textContent = isIntern
+        ? `${pipeline.length} em andamento`
+        : formatMoney(pipeline.reduce((s, p) => s + Number(p.value || 0), 0)) + ' em aberto';
 
     document.getElementById('statLost').textContent = lost.length;
-    document.getElementById('statLostSub').textContent = formatMoney(lost.reduce((s, p) => s + Number(p.value || 0), 0)) + ' não convertidos';
+    document.getElementById('statLostSub').textContent = isIntern
+        ? `${lost.length} não convertido${lost.length === 1 ? '' : 's'}`
+        : formatMoney(lost.reduce((s, p) => s + Number(p.value || 0), 0)) + ' não convertidos';
 
     const decided = won.length + lost.length;
     const conversionRate = decided === 0 ? 0 : Math.round((won.length / decided) * 100);
@@ -661,7 +760,7 @@ function render() {
                         ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
                     </td>
                     <td>${escapeHtml(p.service || '—')}</td>
-                    <td class="value-cell">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
+                    <td class="value-cell money-only">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
                     <td>
                         <select class="status-badge ${p.status}" onchange="quickStatus('${p.id}', this.value)">
                             ${Object.entries(statusLabels).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}
@@ -697,7 +796,7 @@ function render() {
                     ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
                 </td>
                 <td>${escapeHtml(p.service || '—')}</td>
-                <td class="value-cell">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
+                <td class="value-cell money-only">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
                 <td><span class="status-badge ${p.status}" style="pointer-events:none;">${statusLabels[p.status]}</span></td>
                 <td>${formatDate(p.date)}</td>
             </tr>
@@ -841,7 +940,7 @@ document.getElementById('navProspects').addEventListener('click', () => showView
 
 document.getElementById('pageSubtitle').textContent = todayText.charAt(0).toUpperCase() + todayText.slice(1);
 
-loadData();
+checkLogin();
 </script>
 </body>
 </html>
