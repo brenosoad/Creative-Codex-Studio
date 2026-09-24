@@ -343,6 +343,7 @@ body.intern .money-only{display:none !important;}
     </div>
 
     <div id="viewOverview">
+        <div class="error-banner" id="overdueBanner" style="position:static;border-radius:var(--radius);margin-bottom:20px;" hidden></div>
         <div class="hero-row money-only">
             <div class="hero-card">
                 <div>
@@ -423,6 +424,7 @@ body.intern .money-only{display:none !important;}
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
                 <input type="text" id="searchInput" placeholder="Buscar por nome do cliente...">
             </div>
+            <button class="btn btn-ghost" onclick="exportCsv()"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span> Exportar CSV</button>
         </div>
 
         <div class="filters" id="filters">
@@ -456,6 +458,18 @@ body.intern .money-only{display:none !important;}
     </div>
 
     <div id="viewCommissions" hidden>
+        <div class="stats" style="margin-bottom:20px;">
+            <div class="stat-card accent green">
+                <div class="stat-label">Comissão do mês</div>
+                <div class="stat-value" id="commMonth">R$ 0,00</div>
+                <div class="stat-sub" id="commMonthSub">0 negócios fechados</div>
+            </div>
+            <div class="stat-card accent blue">
+                <div class="stat-label">Comissão acumulada</div>
+                <div class="stat-value" id="commTotal">R$ 0,00</div>
+                <div class="stat-sub" id="commTotalSub">desde o início</div>
+            </div>
+        </div>
         <div class="goal-card" style="margin-bottom:20px;">
             <div class="goal-top" style="margin-bottom:0;">
                 <h3>Tabela de comissão por site fechado</h3>
@@ -551,9 +565,20 @@ const PASSWORDS = {
     dono: 'BS100218*',
     estagiario: 'Fabio2026*'
 };
+const SESSION_HOURS = 12;
 let role = sessionStorage.getItem('painel_role') || null;
 
+function sessionExpired() {
+    const ts = Number(sessionStorage.getItem('painel_login_at') || 0);
+    return !ts || (Date.now() - ts) > SESSION_HOURS * 3600 * 1000;
+}
+
 function checkLogin() {
+    if (role && sessionExpired()) {
+        sessionStorage.removeItem('painel_role');
+        sessionStorage.removeItem('painel_login_at');
+        role = null;
+    }
     if (role === 'dono' || role === 'estagiario') {
         document.getElementById('loginScreen').hidden = true;
         document.getElementById('sidebarEl').hidden = false;
@@ -580,6 +605,7 @@ function attemptLogin() {
     }
     document.getElementById('loginError').hidden = true;
     sessionStorage.setItem('painel_role', role);
+    sessionStorage.setItem('painel_login_at', String(Date.now()));
     checkLogin();
 }
 
@@ -592,6 +618,7 @@ function applyRoleUI() {
 
 function logout() {
     sessionStorage.removeItem('painel_role');
+    sessionStorage.removeItem('painel_login_at');
     role = null;
     location.reload();
 }
@@ -610,7 +637,7 @@ const statusLabels = {
 
 async function loadData() {
     try {
-        const res = await fetch('/api/data');
+        const res = await fetch('/api/data?role=' + encodeURIComponent(role));
         if (!res.ok) throw new Error('Resposta ' + res.status);
         const data = await res.json();
         prospects = data.prospects || [];
@@ -628,7 +655,7 @@ async function save() {
         const res = await fetch('/api/data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prospects, goal: monthlyGoal })
+            body: JSON.stringify({ prospects, goal: monthlyGoal, role })
         });
         if (!res.ok) throw new Error('Resposta ' + res.status);
         hideBanner();
@@ -753,6 +780,35 @@ function render() {
     const monthValue = wonThisMonth.reduce((s, p) => s + Number(p.value || 0), 0);
     renderGoal(monthValue);
 
+    // Alerta de contatos atrasados
+    const overdueCount = prospects.filter(p => {
+        if (!p.nextContact || p.status === 'fechado' || p.status === 'perdido') return false;
+        return nextContactInfo(p.nextContact).cls === 'overdue';
+    }).length;
+    const overdueBanner = document.getElementById('overdueBanner');
+    if (overdueCount > 0) {
+        overdueBanner.textContent = `⚠️ ${overdueCount} contato${overdueCount > 1 ? 's' : ''} atrasado${overdueCount > 1 ? 's' : ''}. Dá uma olhada na Prospecção.`;
+        overdueBanner.hidden = false;
+    } else {
+        overdueBanner.hidden = true;
+    }
+
+    // Resumo de comissão (fechados pelo estagiário)
+    const estagiarioWon = won.filter(p => p.responsavel === 'estagiario');
+    const commTotalValue = estagiarioWon.reduce((s, p) => s + (calcCommission(Number(p.value || 0)) || 0), 0);
+    const estagiarioWonMonth = estagiarioWon.filter(p => {
+        const d = new Date(p.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const commMonthValue = estagiarioWonMonth.reduce((s, p) => s + (calcCommission(Number(p.value || 0)) || 0), 0);
+    const commMonthEl = document.getElementById('commMonth');
+    if (commMonthEl) {
+        commMonthEl.textContent = formatMoney(commMonthValue);
+        document.getElementById('commMonthSub').textContent = `${estagiarioWonMonth.length} negócio${estagiarioWonMonth.length === 1 ? '' : 's'} fechado${estagiarioWonMonth.length === 1 ? '' : 's'} este mês`;
+        document.getElementById('commTotal').textContent = formatMoney(commTotalValue);
+        document.getElementById('commTotalSub').textContent = `${estagiarioWon.length} negócio${estagiarioWon.length === 1 ? '' : 's'} no total`;
+    }
+
     // Table
     let filtered = currentFilter === 'todos' ? prospects : prospects.filter(p => p.status === currentFilter);
 
@@ -786,6 +842,7 @@ function render() {
                     <td>
                         <div class="client-name">${escapeHtml(p.name)}</div>
                         ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
+                        ${p.responsavel ? `<div class="client-contact">Resp: ${p.responsavel === 'dono' ? 'Dono' : 'Estagiário'}</div>` : ''}
                     </td>
                     <td>${escapeHtml(p.service || '—')}</td>
                     <td class="value-cell">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
@@ -830,6 +887,26 @@ function render() {
             </tr>
         `).join('');
     }
+}
+
+function exportCsv() {
+    const header = ['Cliente', 'Contato', 'Serviço', 'Valor', 'Recorrente', 'Status', 'Data', 'Próximo Contato', 'Responsável', 'Notas'];
+    const rows = prospects.map(p => [
+        p.name, p.contact || '', p.service || '', p.value || 0, p.recurring ? 'Sim' : 'Não',
+        statusLabels[p.status] || p.status, formatDate(p.date), p.nextContact || '',
+        p.responsavel === 'dono' ? 'Dono' : (p.responsavel === 'estagiario' ? 'Estagiário' : ''),
+        (p.notes || '').replace(/\n/g, ' ')
+    ]);
+    const csv = [header, ...rows]
+        .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'))
+        .join('\r\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prospectos_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 function escapeHtml(str) {
@@ -934,7 +1011,7 @@ document.getElementById('prospectForm').addEventListener('submit', (e) => {
         const p = prospects.find(x => x.id === id);
         Object.assign(p, data);
     } else {
-        prospects.push({ id: crypto.randomUUID(), date: new Date().toISOString(), ...data });
+        prospects.push({ id: crypto.randomUUID(), date: new Date().toISOString(), responsavel: role, ...data });
     }
 
     save();
