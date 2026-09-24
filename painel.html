@@ -326,6 +326,7 @@ body.intern .money-only{display:none !important;}
     <nav class="nav">
         <button class="nav-item active" id="navOverview"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></span><span>Visão Geral</span></button>
         <button class="nav-item" id="navProspects"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 20v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Prospecção</span></button>
+        <button class="nav-item" id="navCommissions"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><span>Comissões</span></button>
     </nav>
     <div class="sidebar-foot" id="sidebarFoot">Dados salvos no banco da Vercel.</div>
 </aside>
@@ -436,7 +437,7 @@ body.intern .money-only{display:none !important;}
                     <tr>
                         <th>Cliente</th>
                         <th>Serviço</th>
-                        <th class="sortable money-only" data-sort="value">Valor <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg></span></th>
+                        <th class="sortable" data-sort="value">Valor <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg></span></th>
                         <th>Status</th>
                         <th class="sortable sort-active" data-sort="date">Data <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></th>
                         <th>Próximo Contato</th>
@@ -449,6 +450,30 @@ body.intern .money-only{display:none !important;}
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg></span>
                 <p>Nenhum prospecto ainda. Clica em "Novo Prospecto" pra começar.</p>
             </div>
+        </div>
+    </div>
+
+    <div id="viewCommissions" hidden>
+        <div class="goal-card" style="margin-bottom:20px;">
+            <div class="goal-top" style="margin-bottom:0;">
+                <h3>Tabela de comissão por site fechado</h3>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Faixa do site</th>
+                        <th>Comissão</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>R$ 300 – R$ 599</td><td class="value-cell">R$ 50 fixo</td></tr>
+                    <tr><td>R$ 600 – R$ 999</td><td class="value-cell">10%</td></tr>
+                    <tr><td>R$ 1000 – R$ 1499</td><td class="value-cell">15%</td></tr>
+                    <tr><td>R$ 1500+</td><td class="value-cell">A combinar</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </main>
@@ -471,12 +496,12 @@ body.intern .money-only{display:none !important;}
                     <label for="fService">Serviço</label>
                     <input type="text" id="fService" placeholder="Ex: Landing Page">
                 </div>
-                <div class="field money-only">
+                <div class="field">
                     <label for="fValue">Valor (R$)</label>
                     <input type="number" id="fValue" min="0" step="0.01" placeholder="0,00">
                 </div>
             </div>
-            <div class="field money-only">
+            <div class="field">
                 <label class="checkbox-label">
                     <input type="checkbox" id="fRecurring">
                     <span>Esse é um valor <strong>mensal recorrente</strong> (não avulso)</span>
@@ -760,7 +785,7 @@ function render() {
                         ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
                     </td>
                     <td>${escapeHtml(p.service || '—')}</td>
-                    <td class="value-cell money-only">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
+                    <td class="value-cell">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
                     <td>
                         <select class="status-badge ${p.status}" onchange="quickStatus('${p.id}', this.value)">
                             ${Object.entries(statusLabels).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}
@@ -796,7 +821,7 @@ function render() {
                     ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
                 </td>
                 <td>${escapeHtml(p.service || '—')}</td>
-                <td class="value-cell money-only">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
+                <td class="value-cell">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
                 <td><span class="status-badge ${p.status}" style="pointer-events:none;">${statusLabels[p.status]}</span></td>
                 <td>${formatDate(p.date)}</td>
             </tr>
@@ -923,20 +948,27 @@ document.querySelectorAll('th.sortable').forEach(th => {
 const todayText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
 
 function showView(view) {
-    const isOverview = view === 'overview';
-    document.getElementById('viewOverview').hidden = !isOverview;
-    document.getElementById('viewProspects').hidden = isOverview;
-    document.getElementById('navOverview').classList.toggle('active', isOverview);
-    document.getElementById('navProspects').classList.toggle('active', !isOverview);
-    document.getElementById('pageTitle').textContent = isOverview ? 'Visão Geral' : 'Prospecção';
-    document.getElementById('pageSubtitle').textContent = isOverview
-        ? todayText.charAt(0).toUpperCase() + todayText.slice(1)
-        : 'Todos os seus clientes e negociações, num lugar só.';
+    document.getElementById('viewOverview').hidden = view !== 'overview';
+    document.getElementById('viewProspects').hidden = view !== 'prospects';
+    document.getElementById('viewCommissions').hidden = view !== 'commissions';
+    document.getElementById('navOverview').classList.toggle('active', view === 'overview');
+    document.getElementById('navProspects').classList.toggle('active', view === 'prospects');
+    document.getElementById('navCommissions').classList.toggle('active', view === 'commissions');
+
+    const titles = { overview: 'Visão Geral', prospects: 'Prospecção', commissions: 'Comissões' };
+    const subtitles = {
+        overview: todayText.charAt(0).toUpperCase() + todayText.slice(1),
+        prospects: 'Todos os seus clientes e negociações, num lugar só.',
+        commissions: 'Referência de comissão por valor de site fechado.'
+    };
+    document.getElementById('pageTitle').textContent = titles[view];
+    document.getElementById('pageSubtitle').textContent = subtitles[view];
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 document.getElementById('navOverview').addEventListener('click', () => showView('overview'));
 document.getElementById('navProspects').addEventListener('click', () => showView('prospects'));
+document.getElementById('navCommissions').addEventListener('click', () => showView('commissions'));
 
 document.getElementById('pageSubtitle').textContent = todayText.charAt(0).toUpperCase() + todayText.slice(1);
 
