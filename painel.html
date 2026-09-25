@@ -236,6 +236,15 @@ th.sortable.sort-active i{opacity:1;color:var(--blue);}
 
 .commission-hint{font-size:12px;color:var(--green);font-weight:600;margin-top:6px;}
 
+/* GRAFICO FECHADOS/MES */
+.chart-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px 16px;margin-bottom:28px;}
+.chart-bars{display:flex;align-items:flex-end;gap:14px;height:140px;}
+.chart-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:8px;}
+.chart-bar{width:100%;max-width:44px;background:linear-gradient(180deg,#3b82f6,#1d4ed8);border-radius:4px 4px 0 0;min-height:3px;transition:.2s;position:relative;}
+.chart-bar:hover{filter:brightness(1.15);}
+.chart-bar-label{font-size:11px;color:var(--text-dim);text-transform:capitalize;}
+.chart-bar-value{font-size:11px;color:var(--text-dim);font-weight:700;}
+
 .checkbox-label{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13.5px;color:var(--text-dim);font-weight:500;}
 .checkbox-label input{width:auto;margin-top:2px;accent-color:var(--blue);}
 .checkbox-label strong{color:var(--text);}
@@ -406,6 +415,11 @@ body.intern .money-only{display:none !important;}
             </div>
         </div>
 
+        <h2 class="section-heading">Fechados nos últimos 6 meses</h2>
+        <div class="chart-card" id="chartCard">
+            <div class="chart-bars" id="chartBars"></div>
+        </div>
+
         <h2 class="section-heading">Adicionados Recentemente</h2>
         <div class="table-wrap">
             <table>
@@ -422,7 +436,7 @@ body.intern .money-only{display:none !important;}
         <div class="search-row">
             <div class="search-box">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-                <input type="text" id="searchInput" placeholder="Buscar por nome do cliente...">
+                <input type="text" id="searchInput" placeholder="Buscar por cliente ou serviço...">
             </div>
             <button class="btn btn-ghost" onclick="exportCsv()"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span> Exportar CSV</button>
         </div>
@@ -435,11 +449,17 @@ body.intern .money-only{display:none !important;}
             <button class="filter-chip" data-filter="perdido">Perdidos</button>
         </div>
 
+        <div class="filters" id="filtersResp">
+            <button class="filter-chip active" data-resp="todos">Todos os responsáveis</button>
+            <button class="filter-chip" data-resp="dono">Cadastrados pelo Dono</button>
+            <button class="filter-chip" data-resp="estagiario">Cadastrados pelo Estagiário</button>
+        </div>
+
         <div class="table-wrap" id="tableSection">
             <table>
                 <thead>
                     <tr>
-                        <th>Cliente</th>
+                        <th class="sortable" data-sort="name">Cliente <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg></span></th>
                         <th>Serviço</th>
                         <th class="sortable" data-sort="value">Valor <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg></span></th>
                         <th>Status</th>
@@ -558,6 +578,7 @@ let currentFilter = 'todos';
 let searchTerm = '';
 let sortField = 'date';
 let sortDir = 'desc';
+let currentResponsavel = 'todos';
 let saveTimer = null;
 
 // ACESSO
@@ -711,6 +732,33 @@ function editGoal() {
     render();
 }
 
+function renderClosedChart() {
+    const el = document.getElementById('chartBars');
+    if (!el) return;
+    const months = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        months.push(d);
+    }
+    const counts = months.map(m => prospects.filter(p => {
+        if (p.status !== 'fechado') return false;
+        const d = new Date(p.date);
+        return d.getMonth() === m.getMonth() && d.getFullYear() === m.getFullYear();
+    }).length);
+    const max = Math.max(1, ...counts);
+    el.innerHTML = months.map((m, i) => {
+        const pct = Math.max(4, Math.round((counts[i] / max) * 100));
+        const label = m.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+        return `
+            <div class="chart-bar-col">
+                <span class="chart-bar-value">${counts[i]}</span>
+                <div class="chart-bar" style="height:${pct}%" title="${counts[i]} fechado${counts[i] === 1 ? '' : 's'} em ${label}"></div>
+                <span class="chart-bar-label">${label}</span>
+            </div>`;
+    }).join('');
+}
+
 function nextContactInfo(dateStr) {
     if (!dateStr) return { label: '—', cls: '' };
     const today = new Date();
@@ -809,18 +857,28 @@ function render() {
         document.getElementById('commTotalSub').textContent = `${estagiarioWon.length} negócio${estagiarioWon.length === 1 ? '' : 's'} no total`;
     }
 
+    // Gráfico de fechados por mês (últimos 6 meses)
+    renderClosedChart();
+
     // Table
     let filtered = currentFilter === 'todos' ? prospects : prospects.filter(p => p.status === currentFilter);
 
+    if (currentResponsavel !== 'todos') {
+        filtered = filtered.filter(p => p.responsavel === currentResponsavel);
+    }
+
     if (searchTerm.trim()) {
         const term = searchTerm.trim().toLowerCase();
-        filtered = filtered.filter(p => p.name.toLowerCase().includes(term));
+        filtered = filtered.filter(p =>
+            p.name.toLowerCase().includes(term) || (p.service || '').toLowerCase().includes(term)
+        );
     }
 
     filtered = filtered.slice().sort((a, b) => {
         let av = a[sortField], bv = b[sortField];
         if (sortField === 'date') { av = new Date(av); bv = new Date(bv); }
         if (sortField === 'value') { av = Number(av || 0); bv = Number(bv || 0); }
+        if (sortField === 'name') { av = (av || '').toLowerCase(); bv = (bv || '').toLowerCase(); }
         if (av < bv) return sortDir === 'asc' ? -1 : 1;
         if (av > bv) return sortDir === 'asc' ? 1 : -1;
         return 0;
@@ -1023,11 +1081,20 @@ document.getElementById('modalOverlay').addEventListener('click', (e) => {
     if (e.target.id === 'modalOverlay') closeModal();
 });
 
-document.querySelectorAll('.filter-chip').forEach(chip => {
+document.querySelectorAll('#filters .filter-chip').forEach(chip => {
     chip.addEventListener('click', () => {
-        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('#filters .filter-chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         currentFilter = chip.dataset.filter;
+        render();
+    });
+});
+
+document.querySelectorAll('#filtersResp .filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+        document.querySelectorAll('#filtersResp .filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        currentResponsavel = chip.dataset.resp;
         render();
     });
 });
