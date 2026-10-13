@@ -271,6 +271,8 @@
 
     // processo: linha que preenche
     var steps = $('#steps'), lis = $$('li', steps);
+    function setEnd() { var l = lis[lis.length - 1]; steps.style.setProperty('--end', Math.max(0, l.offsetHeight - parseFloat(getComputedStyle(d.documentElement).fontSize) * 1.2 - 24) + 'px'); }
+    setEnd(); window.addEventListener('resize', setEnd); window.addEventListener('load', setEnd);
     ST.create({ trigger: steps, start: 'top 70%', end: 'bottom 60%', scrub: true,
       onUpdate: function (s) {
         steps.style.setProperty('--p', s.progress.toFixed(3));

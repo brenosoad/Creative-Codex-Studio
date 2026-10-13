@@ -238,11 +238,11 @@ html.js .hero-foot[data-r].in{transform:translateX(-50%)}
 .proc-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(2rem,6vw,5rem);align-items:start}
 .proc-head{position:sticky;top:120px}
 .steps{position:relative;display:grid;gap:clamp(1.6rem,4vw,2.6rem);padding-left:4.2rem}
-.steps::before,.steps::after{content:"";position:absolute;left:23px;top:24px;bottom:24px;width:2px;border-radius:2px;background:rgba(255,255,255,.12)}
+.steps::before,.steps::after{content:"";position:absolute;left:23px;top:calc(1.2rem + 24px);bottom:var(--end,24px);width:2px;border-radius:2px;background:rgba(255,255,255,.12)}
 .steps::after{background:linear-gradient(var(--blue),var(--cyan));transform:scaleY(var(--p,0));transform-origin:top;box-shadow:0 0 14px rgba(34,211,238,.6)}
-.steps li{position:relative;padding:1.5rem 1.6rem;border-radius:22px;background:var(--card);border:1px solid var(--line);opacity:.45;transition:opacity .5s,border-color .5s,transform .5s var(--ease)}
-.steps li.on{opacity:1;border-color:rgba(91,140,255,.45);transform:translateX(6px)}
-.steps .n{position:absolute;left:-4.2rem;top:1.2rem;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font:800 1.15rem/1 var(--f-d);background:#0b1020;border:2px solid rgba(255,255,255,.18);color:#8b97b5;transition:all .5s}
+.steps li{position:relative;z-index:1;padding:1.5rem 1.6rem;border-radius:22px;background:var(--card);border:1px solid var(--line);opacity:.45;transition:opacity .5s,border-color .5s,transform .5s var(--ease)}
+.steps li.on{opacity:1;border-color:rgba(91,140,255,.45)}
+.steps .n{position:absolute;left:-4.2rem;top:1.2rem;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font:700 1.1rem/1 var(--f-b);font-variant-numeric:lining-nums;background:#0b1020;border:2px solid rgba(255,255,255,.18);color:#8b97b5;transition:all .5s}
 .steps li.on .n{color:#fff;border-color:transparent;background:linear-gradient(135deg,#2f6bff,#14b8e6);box-shadow:0 0 24px rgba(34,211,238,.55)}
 .steps h3{font:700 1.3rem/1.2 var(--f-d)}.steps p{color:var(--mut);margin-top:.4rem}
 @media (max-width:860px){.proc-grid{grid-template-columns:1fr}.proc-head{position:static}}
