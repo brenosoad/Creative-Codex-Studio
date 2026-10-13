@@ -305,26 +305,26 @@
       'vN=normalize(normalMatrix*nn);vec4 mv=modelViewMatrix*vec4(q,1.0);vV=normalize(-mv.xyz);vD=d;gl_Position=projectionMatrix*mv;}';
     var frag = 'varying vec3 vN;varying vec3 vV;varying float vD;' +
       'void main(){vec3 n=normalize(vN);vec3 v=normalize(vV);float f=pow(1.0-max(dot(n,v),0.0),2.4);' +
-      'vec3 deep=vec3(0.02,0.05,0.2);vec3 blue=vec3(0.18,0.42,1.0);vec3 cyan=vec3(0.13,0.83,0.93);' +
+      'vec3 deep=vec3(0.05,0.03,0.18);vec3 blue=vec3(0.29,0.2,0.85);vec3 cyan=vec3(0.55,0.49,1.0);' +
       'float band=0.5+0.5*sin(vD*9.0+n.y*3.0);vec3 base=mix(deep,blue,0.35+0.5*band*(0.4+f));' +
       'vec3 col=mix(base,cyan,f*0.95);vec3 L=normalize(vec3(-0.5,0.8,0.7));float sp=pow(max(dot(reflect(-L,n),v),0.0),38.0);' +
-      'col+=vec3(0.75,0.9,1.0)*sp*0.7;col+=cyan*pow(f,3.0)*0.35;gl_FragColor=vec4(col,1.0);}';
+      'col+=vec3(0.88,0.85,1.0)*sp*0.7;col+=cyan*pow(f,3.0)*0.35;gl_FragColor=vec4(col,1.0);}';
     var mat = new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: frag, uniforms: { uTime: { value: 0 }, uAmp: { value: 0.3 } } });
     var orb = new THREE.Mesh(new THREE.IcosahedronGeometry(1.7, 48), mat); group.add(orb);
 
-    var wire = new THREE.Mesh(new THREE.IcosahedronGeometry(2.25, 2), new THREE.MeshBasicMaterial({ color: 0x6aa5ff, wireframe: true, transparent: true, opacity: 0.12, depthWrite: false }));
+    var wire = new THREE.Mesh(new THREE.IcosahedronGeometry(2.25, 2), new THREE.MeshBasicMaterial({ color: 0x8b7cff, wireframe: true, transparent: true, opacity: 0.12, depthWrite: false }));
     group.add(wire);
-    var ring = new THREE.Mesh(new THREE.TorusGeometry(2.75, 0.008, 8, 220), new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.55 }));
+    var ring = new THREE.Mesh(new THREE.TorusGeometry(2.75, 0.008, 8, 220), new THREE.MeshBasicMaterial({ color: 0xa79cff, transparent: true, opacity: 0.55 }));
     ring.rotation.set(1.25, 0.3, 0); group.add(ring);
-    var ring2 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.006, 8, 220), new THREE.MeshBasicMaterial({ color: 0x5b8cff, transparent: true, opacity: 0.35 }));
+    var ring2 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.006, 8, 220), new THREE.MeshBasicMaterial({ color: 0x6f5cf0, transparent: true, opacity: 0.35 }));
     ring2.rotation.set(1.9, -0.5, 0.4); group.add(ring2);
-    var dotG = new THREE.SphereGeometry(0.06, 12, 12), dot1 = new THREE.Mesh(dotG, new THREE.MeshBasicMaterial({ color: 0x9be8ff })), dot2 = new THREE.Mesh(dotG, new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    var dotG = new THREE.SphereGeometry(0.06, 12, 12), dot1 = new THREE.Mesh(dotG, new THREE.MeshBasicMaterial({ color: 0xc9c2ff })), dot2 = new THREE.Mesh(dotG, new THREE.MeshBasicMaterial({ color: 0xffffff }));
     ring.add(dot1); ring2.add(dot2);
 
     var N = 420, arr = new Float32Array(N * 3);
     for (var i = 0; i < N; i++) { arr[i * 3] = (Math.random() - 0.5) * 26; arr[i * 3 + 1] = (Math.random() - 0.5) * 16; arr[i * 3 + 2] = Math.random() * 14 - 9; }
     var pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(arr, 3));
-    var pts = new THREE.Points(pg, new THREE.PointsMaterial({ color: 0x8fb8ff, size: 0.04, transparent: true, opacity: 0.6, depthWrite: false }));
+    var pts = new THREE.Points(pg, new THREE.PointsMaterial({ color: 0xa79cff, size: 0.04, transparent: true, opacity: 0.6, depthWrite: false }));
     scene.add(pts);
 
     var mx = 0, my = 0, tx = 0, ty = 0, vel = 0, lastY = window.pageYOffset, visible = true, running = true, T = 0, w = 0, h = 0, appear = 0, narrow = false;
