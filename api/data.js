@@ -7,11 +7,14 @@ const MAX_PROSPECTS = 2000;
 
 // Defina PAINEL_SENHA_DONO, PAINEL_SENHA_ESTAGIARIO e PAINEL_SECRET nas variáveis de ambiente da Vercel.
 // Os valores abaixo só existem para o painel não parar antes da configuração. Troque as senhas.
+// 'estagiario' é o Fábio (id mantido para não perder os dados antigos). Todos os acessos que não são 'dono' têm perfil de estagiário.
 const PASSWORDS = {
   dono: process.env.PAINEL_SENHA_DONO || 'BS100218*',
-  estagiario: process.env.PAINEL_SENHA_ESTAGIARIO || 'Fabio2026*'
+  estagiario: process.env.PAINEL_SENHA_ESTAGIARIO || 'Fabio2026*',
+  diogo: process.env.PAINEL_SENHA_DIOGO || 'Diogo2026*'
 };
-const SECRET = process.env.PAINEL_SECRET || ('cc:' + PASSWORDS.dono + ':' + PASSWORDS.estagiario);
+const ROLES = Object.keys(PASSWORDS);
+const SECRET = process.env.PAINEL_SECRET || ('cc:' + ROLES.map((k) => PASSWORDS[k]).join(':'));
 
 const sign = (payload) => createHmac('sha256', SECRET).update(payload).digest('base64url');
 
@@ -33,11 +36,11 @@ function readToken(req) {
   try {
     const data = JSON.parse(Buffer.from(payload, 'base64url').toString());
     if (!data.exp || data.exp < Date.now()) return null;
-    return data.role === 'dono' || data.role === 'estagiario' ? data.role : null;
+    return ROLES.includes(data.role) ? data.role : null;
   } catch { return null; }
 }
 
-const STATUS = ['prospectando', 'negociando', 'fechado', 'perdido'];
+const STATUS = ['prospectando', 'semresposta', 'negociando', 'fechado', 'perdido'];
 const str = (v, n) => String(v ?? '').slice(0, n);
 
 function clean(p, role) {
@@ -60,7 +63,7 @@ function clean(p, role) {
     notes: str(p.notes, 2000),
     lostReason: str(p.lostReason, 200),
     commissionPaid: !!p.commissionPaid,
-    responsavel: role === 'estagiario' ? 'estagiario' : (p.responsavel === 'estagiario' ? 'estagiario' : 'dono'),
+    responsavel: role !== 'dono' ? role : (ROLES.includes(p.responsavel) ? p.responsavel : 'dono'),
     history,
     updatedAt: Number(p.updatedAt) || Date.now()
   };
@@ -68,9 +71,9 @@ function clean(p, role) {
 
 function view(data, role) {
   if (role === 'dono') return data;
-  // estagiário só enxerga valores dos próprios negócios e não vê meta
+  // estagiário só enxerga valores e notas dos próprios negócios e não vê meta
   const prospects = (data.prospects || []).map((p) =>
-    p.responsavel === 'estagiario' ? p : { ...p, value: null, notes: '', history: [] }
+    p.responsavel === role ? p : { ...p, value: null, notes: '', history: [] }
   );
   return { prospects, goal: null, goals: null };
 }
@@ -90,7 +93,7 @@ export default async function handler(req, res) {
     if (req.method === 'POST' && req.query.action === 'login') {
       if (!(await loginLimit(req))) return res.status(429).json({ error: 'Muitas tentativas. Aguarde 10 minutos.' });
       const pw = (req.body || {}).password || '';
-      const role = safeEqual(pw, PASSWORDS.dono) ? 'dono' : safeEqual(pw, PASSWORDS.estagiario) ? 'estagiario' : null;
+      const role = ROLES.find((k) => safeEqual(pw, PASSWORDS[k])) || null;
       if (!role) return res.status(401).json({ error: 'Senha incorreta.' });
       return res.status(200).json({ token: makeToken(role), role, expiresIn: SESSION_MS });
     }
@@ -114,18 +117,18 @@ export default async function handler(req, res) {
         const p = clean(raw, role);
         if (!p) continue;
         const old = byId.get(p.id);
-        if (role === 'estagiario') {
-          if (old && old.responsavel !== 'estagiario') continue; // não mexe nos do dono
+        if (role !== 'dono') {
+          if (old && old.responsavel !== role) continue; // não mexe nos de outros
           p.commissionPaid = old ? old.commissionPaid : false;
         }
         if (old && old.updatedAt > p.updatedAt) continue; // versão mais nova já salva
-        if (old && role === 'estagiario' && old.value != null && p.value == null) p.value = old.value;
+        if (old && role !== 'dono' && old.value != null && p.value == null) p.value = old.value;
         byId.set(p.id, p);
       }
       for (const id of deleted) {
         const old = byId.get(id);
         if (!old) continue;
-        if (role === 'estagiario' && old.responsavel !== 'estagiario') continue;
+        if (role !== 'dono' && old.responsavel !== role) continue;
         byId.delete(id);
       }
 

@@ -121,6 +121,7 @@ tr.clk{cursor:pointer}
 .st{display:inline-flex;align-items:center;gap:6px;padding:.28rem .7rem;border-radius:99px;font-size:.78rem;font-weight:700;border:0;appearance:none;-webkit-appearance:none}
 select.st{padding-right:.7rem;cursor:pointer}
 .st.prospectando{background:rgba(162,159,184,.16);color:#d4d1e6}
+.st.semresposta{background:rgba(125,211,252,.14);color:#7dd3fc}
 .st.negociando{background:rgba(251,191,36,.15);color:var(--amber)}
 .st.fechado{background:rgba(52,211,153,.15);color:var(--green)}
 .st.perdido{background:rgba(248,113,113,.15);color:var(--red)}
@@ -138,7 +139,7 @@ select.st{padding-right:.7rem;cursor:pointer}
 .item.over{border-left:3px solid var(--red)}.item.today{border-left:3px solid var(--amber)}
 
 /* kanban */
-.kb{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:14px;overflow-x:auto;padding-bottom:10px;align-items:start}
+.kb{display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:14px;overflow-x:auto;padding-bottom:10px;align-items:start}
 .kc{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;min-height:200px}
 .kc.over{border-color:var(--brand);background:var(--panel2)}
 .kc h4{display:flex;align-items:center;gap:8px;font-size:.85rem;padding:2px 4px 10px}
@@ -216,7 +217,7 @@ body.intern .money{display:none!important}
   td.c-main{grid-column:1/-1}
   td.c-act{grid-column:1/-1}
   .acts{justify-content:flex-start}
-  .kb{grid-template-columns:repeat(4,82vw);scroll-snap-type:x mandatory}
+  .kb{grid-template-columns:repeat(5,82vw);scroll-snap-type:x mandatory}
   .kc{scroll-snap-align:start}
   .fr{grid-template-columns:90px 1fr 30px}
 }
@@ -283,14 +284,16 @@ body.intern .money{display:none!important}
 /* ---------- estado ---------- */
 const API = '/api/data';
 const S = { token: null, role: null, prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
-const STATUS = { prospectando: 'Prospectando', negociando: 'Negociando', fechado: 'Fechado', perdido: 'Perdido' };
-const STCOL = { prospectando: '#A29FB8', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
+const STATUS = { prospectando: 'Prospectando', semresposta: 'Sem resposta', negociando: 'Negociando', fechado: 'Fechado', perdido: 'Perdido' };
+const STCOL = { prospectando: '#A29FB8', semresposta: '#7dd3fc', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
+const USERS = { dono: 'Dono', estagiario: 'Fábio', diogo: 'Diogo' };
+const who = (id) => USERS[id] || 'Dono';
 const $ = (s, r = document) => r.querySelector(s);
 const ic = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const money = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const moneyS = (v) => v >= 1000 ? 'R$ ' + (v / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + 'k' : 'R$ ' + Math.round(v);
-const isIntern = () => S.role === 'estagiario';
+const isIntern = () => S.role !== 'dono';
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const pad = (n) => String(n).padStart(2, '0');
 const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -322,7 +325,7 @@ function nextInfo(p) {
   if (diff === 1) return { t: 'Amanhã', c: '', d: 1 };
   return { t: fdate(p.nextContact), c: '', d: diff };
 }
-const isOpen = (p) => p.status === 'prospectando' || p.status === 'negociando';
+const isOpen = (p) => p.status === 'prospectando' || p.status === 'semresposta' || p.status === 'negociando';
 const dueList = () => S.prospects.filter((p) => isOpen(p) && p.nextContact && p.nextContact <= today()).sort((a, b) => a.nextContact.localeCompare(b.nextContact));
 
 /* ---------- toast ---------- */
@@ -401,7 +404,7 @@ function showLogin() {
 function enter() {
   $('#login').hidden = true; $('#side').hidden = $('#main').hidden = $('#tabs').hidden = false;
   document.body.classList.toggle('intern', isIntern());
-  $('#who').textContent = isIntern() ? 'Modo estagiário' : 'Acesso completo';
+  $('#who').textContent = isIntern() ? who(S.role) + ' (estagiário)' : 'Acesso completo';
   try { const f = JSON.parse(sessionStorage.getItem('painel_ui') || '{}'); Object.assign(S, { filter: f.filter || 'todos', resp: f.resp || 'todos', view: f.view || 'overview' }); } catch {}
   load();
 }
@@ -586,10 +589,10 @@ function vList() {
   return `<div class="tools"><div class="search">${ic('search')}<input id="q" type="search" placeholder="Buscar por nome, serviço ou contato ( / )" value="${esc(S.q)}" aria-label="Buscar"></div>
     ${!isIntern() ? `<button class="btn gh" data-act="export">${ic('dl')}CSV</button><button class="btn gh" data-act="backup">${ic('dl')}Backup</button><button class="btn gh" data-act="restore">${ic('ul')}Restaurar</button>` : `<button class="btn gh" data-act="export">${ic('dl')}CSV</button>`}</div>
   <div class="chips" role="group" aria-label="Status">${['todos', ...Object.keys(STATUS)].map((k) => `<button class="chip ${S.filter === k ? 'on' : ''}" data-act="filter" data-k="${k}">${k === 'todos' ? 'Todos' : STATUS[k]}<b>${cnt(k)}</b></button>`).join('')}</div>
-  ${!isIntern() ? `<div class="chips" role="group" aria-label="Responsável">${[['todos', 'Todos os responsáveis'], ['dono', 'Do dono'], ['estagiario', 'Do estagiário']].map(([k, t]) => `<button class="chip ${S.resp === k ? 'on' : ''}" data-act="resp" data-k="${k}">${t}</button>`).join('')}</div>` : ''}
+  ${!isIntern() ? `<div class="chips" role="group" aria-label="Responsável">${[['todos', 'Todos os responsáveis'], ['dono', 'Do dono'], ['estagiario', 'Do Fábio'], ['diogo', 'Do Diogo']].map(([k, t]) => `<button class="chip ${S.resp === k ? 'on' : ''}" data-act="resp" data-k="${k}">${t}</button>`).join('')}</div>` : ''}
   <div class="tw">${l.length ? `<table><thead><tr>${th('name', 'Cliente')}<th>Serviço</th><th class="money s ${S.sort === 'value' ? 'on' : ''}" data-act="sort" data-k="value">Valor${S.sort === 'value' ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th><th>Status</th>${th('date', 'Cadastro')}${th('next', 'Próximo contato')}<th></th></tr></thead>
   <tbody>${l.map((p) => { const n = nextInfo(p), wa = waLink(p.contact); return `<tr>
-    <td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}${!isIntern() && p.responsavel === 'estagiario' ? '<div class="ct">Estagiário</div>' : ''}</td>
+    <td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}${!isIntern() && p.responsavel !== 'dono' ? `<div class="ct">${esc(who(p.responsavel))}</div>` : ''}</td>
     <td data-l="Serviço">${esc(p.service || '-')}</td>
     <td class="val money" data-l="Valor">${p.value == null ? '' : money(p.value)}${p.recurring ? '<span class="tag">/mês</span>' : ''}</td>
     <td><select class="st ${p.status}" data-act="status" data-id="${esc(p.id)}" aria-label="Status de ${esc(p.name)}">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
@@ -600,7 +603,7 @@ function vList() {
 }
 
 function vComm() {
-  const mine = S.prospects.filter((p) => p.status === 'fechado' && p.responsavel === 'estagiario').sort((a, b) => new Date(closedOf(b)) - new Date(closedOf(a)));
+  const mine = S.prospects.filter((p) => p.status === 'fechado' && (isIntern() ? p.responsavel === S.role : p.responsavel !== 'dono')).sort((a, b) => new Date(closedOf(b)) - new Date(closedOf(a)));
   const mk = mkey(new Date());
   const c = (p) => commission(num(p.value));
   const tot = mine.reduce((s, p) => s + (c(p) || 0), 0), month = mine.filter((p) => mkey(closedOf(p)) === mk);
@@ -610,7 +613,7 @@ function vComm() {
     <div class="card kpi"><div class="lbl">Acumulada</div><div class="big">${money(tot)}</div><div class="sub">${mine.length} negócio${mine.length === 1 ? '' : 's'}</div></div>
     <div class="card kpi"><div class="lbl">Já paga</div><div class="big">${money(paid)}</div><div class="sub">${mine.filter((p) => p.commissionPaid).length} pagamento${mine.filter((p) => p.commissionPaid).length === 1 ? '' : 's'}</div></div>
     <div class="card kpi"><div class="lbl">A pagar</div><div class="big warn">${money(tot - paid)}</div><div class="sub">pendente</div></div></div>
-  <div class="tw">${mine.length ? `<table><thead><tr><th>Cliente</th><th>Fechado em</th><th class="${isIntern() ? '' : ''}">Valor</th><th>Comissão</th><th>Pagamento</th></tr></thead><tbody>${mine.map((p) => { const cv = c(p); return `<tr><td class="c-main"><div class="nm">${esc(p.name)}</div><div class="ct">${esc(p.service || '')}</div></td><td class="nc" data-l="Fechado">${fdate(closedOf(p))}</td><td class="val" data-l="Valor">${money(p.value)}</td><td class="val ${cv ? 'pos' : ''}" data-l="Comissão">${cv ? money(cv) : p.value < 300 ? 'Sem comissão' : 'A combinar'}</td><td>${isIntern() ? (p.commissionPaid ? '<span class="st fechado">Paga</span>' : '<span class="st prospectando">Pendente</span>') : `<label class="ck"><input type="checkbox" data-act="paid" data-id="${esc(p.id)}" ${p.commissionPaid ? 'checked' : ''}><span>${p.commissionPaid ? 'Paga' : 'Marcar como paga'}</span></label>`}</td></tr>`; }).join('')}</tbody></table>` : `<div class="empty">${ic('coin')}<p>Nenhum negócio fechado pelo estagiário ainda.</p></div>`}</div>
+  <div class="tw">${mine.length ? `<table><thead><tr><th>Cliente</th>${isIntern() ? '' : '<th>Responsável</th>'}<th>Fechado em</th><th class="${isIntern() ? '' : ''}">Valor</th><th>Comissão</th><th>Pagamento</th></tr></thead><tbody>${mine.map((p) => { const cv = c(p); return `<tr><td class="c-main"><div class="nm">${esc(p.name)}</div><div class="ct">${esc(p.service || '')}</div></td>${isIntern() ? '' : `<td data-l="Resp.">${esc(who(p.responsavel))}</td>`}<td class="nc" data-l="Fechado">${fdate(closedOf(p))}</td><td class="val" data-l="Valor">${money(p.value)}</td><td class="val ${cv ? 'pos' : ''}" data-l="Comissão">${cv ? money(cv) : p.value < 300 ? 'Sem comissão' : 'A combinar'}</td><td>${isIntern() ? (p.commissionPaid ? '<span class="st fechado">Paga</span>' : '<span class="st prospectando">Pendente</span>') : `<label class="ck"><input type="checkbox" data-act="paid" data-id="${esc(p.id)}" ${p.commissionPaid ? 'checked' : ''}><span>${p.commissionPaid ? 'Paga' : 'Marcar como paga'}</span></label>`}</td></tr>`; }).join('')}</tbody></table>` : `<div class="empty">${ic('coin')}<p>Nenhum negócio fechado por estagiário ainda.</p></div>`}</div>
   <h2 class="sec">Tabela de comissão por site fechado</h2>
   <div class="tw"><table><thead><tr><th>Faixa do site</th><th>Comissão</th></tr></thead><tbody>
     <tr><td data-l="Faixa">R$ 300 a R$ 599</td><td class="val">R$ 50 fixo</td></tr><tr><td data-l="Faixa">R$ 600 a R$ 999</td><td class="val">10%</td></tr><tr><td data-l="Faixa">R$ 1.000 a R$ 1.499</td><td class="val">15%</td></tr><tr><td data-l="Faixa">R$ 1.500 ou mais</td><td class="val">A combinar</td></tr></tbody></table></div>`;
@@ -668,7 +671,7 @@ document.addEventListener('keydown', (e) => {
 function openProspect(id) {
   const p = id ? S.prospects.find((x) => x.id === id) : null;
   const v = (k, d = '') => p ? (p[k] ?? d) : d;
-  const showMoney = !isIntern() || !p || p.responsavel === 'estagiario';
+  const showMoney = !isIntern() || !p || p.responsavel === S.role;
   const ov = dialog({ title: p ? 'Editar prospecto' : 'Novo prospecto', ok: 'Salvar', small: false, body: `
     <div class="f"><label for="fName">Nome ou empresa</label><input id="fName" required value="${esc(v('name'))}" placeholder="Ex: Pet Café" maxlength="120"></div>
     <div class="f"><label for="fContact">Contato (WhatsApp ou e-mail)</label><input id="fContact" value="${esc(v('contact'))}" placeholder="(16) 99999-9999" maxlength="120" inputmode="tel"></div>
@@ -687,7 +690,7 @@ function openProspect(id) {
       const val = $('#fValue', d).disabled ? null : (parseFloat($('#fValue', d).value) || 0);
       const status = $('#fStatus', d).value;
       let item = p;
-      if (!item) { item = { id: uid(), date: new Date().toISOString(), status: 'prospectando', responsavel: isIntern() ? 'estagiario' : 'dono', history: [], closedAt: null }; S.prospects.push(item); touch(item, 'new', 'Cadastrado'); }
+      if (!item) { item = { id: uid(), date: new Date().toISOString(), status: 'prospectando', responsavel: isIntern() ? S.role : 'dono', history: [], closedAt: null }; S.prospects.push(item); touch(item, 'new', 'Cadastrado'); }
       const prev = item.status;
       Object.assign(item, { name, contact: $('#fContact', d).value.trim(), service: $('#fService', d).value.trim(), recurring: $('#fRec', d).checked, nextContact: $('#fNext', d).value, notes: $('#fNotes', d).value.trim() });
       if (val !== null) item.value = val; else if (item.value === undefined) item.value = null;
@@ -729,7 +732,7 @@ function editGoal() {
 
 function exportCsv() {
   const head = ['Cliente', 'Contato', 'Serviço', 'Valor', 'Recorrente', 'Status', 'Cadastro', 'Fechado em', 'Próximo contato', 'Responsável', 'Motivo da perda', 'Notas'];
-  const rows = filtered().map((p) => [p.name, p.contact || '', p.service || '', p.value == null ? '' : p.value, p.recurring ? 'Sim' : 'Não', STATUS[p.status], fdate(p.date), p.closedAt ? fdate(p.closedAt) : '', p.nextContact ? fdate(p.nextContact) : '', p.responsavel === 'estagiario' ? 'Estagiário' : 'Dono', p.lostReason || '', (p.notes || '').replace(/\n/g, ' ')]);
+  const rows = filtered().map((p) => [p.name, p.contact || '', p.service || '', p.value == null ? '' : p.value, p.recurring ? 'Sim' : 'Não', STATUS[p.status], fdate(p.date), p.closedAt ? fdate(p.closedAt) : '', p.nextContact ? fdate(p.nextContact) : '', who(p.responsavel), p.lostReason || '', (p.notes || '').replace(/\n/g, ' ')]);
   download(`prospectos_${today()}.csv`, '﻿' + [head, ...rows].map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n'), 'text/csv;charset=utf-8;');
 }
 function download(name, content, type) {
