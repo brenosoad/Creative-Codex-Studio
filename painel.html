@@ -4,1159 +4,788 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0D0B1A">
 <title>Painel | Creative Codex</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-    --bg:#0b1220;
-    --panel:#111a2e;
-    --panel-2:#0f1830;
-    --border:#1f2c47;
-    --text:#e8ecf6;
-    --text-dim:#8896b3;
-    --blue:#3b82f6;
-    --blue-dark:#1d4ed8;
-    --green:#22c55e;
-    --red:#ef4444;
-    --amber:#f59e0b;
-    --radius:14px;
+  --bg:#0D0B1A;--panel:#17142B;--panel2:#1d1a35;--line:#2A2640;--text:#F4F3F8;--dim:#A29FB8;
+  --brand:#8B7CFF;--brand-d:#4B32D9;--green:#34d399;--red:#f87171;--amber:#fbbf24;
+  --r:14px;--mono:'JetBrains Mono',ui-monospace,monospace;
+  --sans:'Satoshi','DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-body{
-    font-family:'Inter',sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    min-height:100vh;
-    display:flex;
-}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+[hidden]{display:none!important}
+.mono{font-family:var(--mono)}
+.ic{width:1.1em;height:1.1em;flex:none;vertical-align:-.17em}
 
-/* SIDEBAR */
-.sidebar{
-    width:220px;
-    flex-shrink:0;
-    background:var(--panel-2);
-    border-right:1px solid var(--border);
-    padding:24px 16px;
-    display:flex;
-    flex-direction:column;
-    gap:28px;
-    position:fixed;
-    height:100vh;
-    z-index:10;
-}
-.brand{display:flex;align-items:center;gap:10px;padding:0 8px;}
-.brand-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:15px;flex-shrink:0;}
-.brand-text{font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;line-height:1.2;}
-.brand-text span{display:block;font-size:11px;color:var(--text-dim);font-weight:500;}
+/* sidebar */
+.side{width:232px;flex:none;position:fixed;inset:0 auto 0 0;background:var(--bg);border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:26px;z-index:20}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px;font-weight:900;font-size:1.05rem;letter-spacing:-.01em}
+.brand svg{width:34px;height:22px}
+.brand small{display:block;font:500 .68rem var(--mono);color:var(--dim);letter-spacing:.02em;margin-top:2px}
+.nav{display:grid;gap:3px}
+.nav button{display:flex;align-items:center;gap:12px;padding:.7rem .8rem;border-radius:10px;border:0;background:none;color:var(--dim);font-weight:500;font-size:.95rem;text-align:left;width:100%;position:relative;transition:background .15s,color .15s}
+.nav button:hover{background:var(--panel);color:var(--text)}
+.nav button.on{background:var(--panel);color:var(--text);box-shadow:inset 3px 0 0 var(--brand)}
+.nav .badge{margin-left:auto;font:700 .7rem var(--mono);background:var(--red);color:#1a0b0b;border-radius:99px;padding:.1rem .45rem;min-width:20px;text-align:center}
+.side-foot{margin-top:auto;padding:0 8px;font-size:.8rem;color:var(--dim);display:grid;gap:8px}
+.sync{display:flex;align-items:center;gap:8px;font:500 .72rem var(--mono)}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.sync.busy i{background:var(--amber)}.sync.err i{background:var(--red)}
+.link{background:none;border:0;color:var(--dim);text-decoration:underline;text-underline-offset:3px;font-size:.8rem;text-align:left;padding:0}
+.link:hover{color:var(--text)}
 
-.nav{display:flex;flex-direction:column;gap:4px;}
-.nav-item{
-    display:flex;align-items:center;gap:12px;
-    padding:11px 12px;border-radius:10px;
-    color:var(--text-dim);font-size:14px;font-weight:500;
-    cursor:pointer;transition:.15s;border:none;background:none;width:100%;text-align:left;
-}
-.nav-item i{width:16px;text-align:center;font-size:14px;}
-.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
-.nav-item.active{background:var(--blue);color:#fff;}
+/* main */
+.main{margin-left:232px;flex:1;min-width:0;padding:30px clamp(18px,3vw,40px) 60px;max-width:1360px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:26px}
+.top h1{font-size:clamp(1.6rem,3vw,2.1rem);font-weight:900;letter-spacing:-.02em;line-height:1.1}
+.top p{color:var(--dim);font-size:.92rem;margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:.7rem 1.1rem;border-radius:10px;border:1px solid transparent;font-weight:700;font-size:.92rem;transition:transform .15s,background .15s,border-color .15s}
+.btn.pri{background:var(--brand-d);color:#fff}.btn.pri:hover{background:#5a40ea}
+.btn.gh{background:var(--panel);border-color:var(--line)}.btn.gh:hover{border-color:var(--brand)}
+.btn.sm{padding:.45rem .75rem;font-size:.82rem;border-radius:8px}
+.btn.wa{background:#1f9d55;color:#fff}.btn.wa:hover{background:#25b563}
+.btn.dg{background:none;color:var(--red);border-color:rgba(248,113,113,.35)}
+.btn{text-decoration:none}.btn:active{transform:scale(.98)}
 
-.sidebar-foot{margin-top:auto;padding:0 8px;font-size:12px;color:var(--text-dim);}
+/* cards */
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
+.card h3{font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.card h3 .more{margin-left:auto}
+.lbl{font:500 .72rem var(--mono);color:var(--dim);letter-spacing:.03em;text-transform:none}
+.big{font-family:var(--mono);font-weight:700;font-size:clamp(1.7rem,3.4vw,2.5rem);letter-spacing:-.03em;line-height:1.05;margin:8px 0 4px}
+.kpi .big{font-size:clamp(1.4rem,2.4vw,1.8rem)}
+.sub{font-size:.82rem;color:var(--dim)}
+.hero{background:var(--brand-d);border-color:transparent}
+.hero .lbl,.hero .sub{color:rgba(255,255,255,.78)}
+.hero.alt{background:#1b2a3a}
+.pos{color:var(--green)}.neg{color:var(--red)}.warn{color:var(--amber)}
+.sec{font-size:1rem;font-weight:700;margin:26px 0 12px}
+.alert{display:flex;gap:10px;align-items:center;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:#fecaca;border-radius:var(--r);padding:.8rem 1rem;margin-bottom:16px;font-size:.92rem}
+.alert button{margin-left:auto}
 
-/* LAYOUT */
-.main{margin-left:220px;flex:1;padding:32px 36px;max-width:1280px;}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
-.topbar h1{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;}
-.topbar p{color:var(--text-dim);font-size:14px;margin-top:2px;}
-.btn{
-    display:inline-flex;align-items:center;gap:8px;
-    padding:11px 18px;border-radius:10px;border:none;
-    font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;
-    transition:.15s;
-}
-.btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:#fff;box-shadow:0 8px 20px rgba(59,130,246,.25);}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(59,130,246,.35);}
-.btn-ghost{background:var(--panel);border:1px solid var(--border);color:var(--text);}
-.btn-ghost:hover{border-color:var(--blue);}
-.btn-danger-text{background:none;border:none;color:var(--red);font-size:13px;cursor:pointer;font-weight:600;}
+/* goal */
+.bar{height:10px;border-radius:99px;background:var(--bg);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.bar.ok i{background:var(--green)}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
 
-/* STAT CARDS */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:28px;}
-.stat-card{
-    border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;
-    border:1px solid var(--border);
-}
-.stat-card.accent{border:none;color:#fff;}
-.stat-card.accent.blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8);}
-.stat-card.accent.green{background:linear-gradient(135deg,#22c55e,#15803d);}
-.stat-card.accent.red{background:linear-gradient(135deg,#ef4444,#b91c1c);}
-.stat-card.accent.amber{background:linear-gradient(135deg,#f59e0b,#b45309);}
-.stat-card:not(.accent){background:var(--panel);}
-.stat-label{font-size:13px;font-weight:600;opacity:.85;margin-bottom:10px;}
-.stat-value{font-family:'Poppins',sans-serif;font-size:28px;font-weight:800;line-height:1;}
-.stat-sub{font-size:12px;margin-top:8px;opacity:.75;}
-.stat-card:not(.accent) .stat-label{color:var(--text-dim);}
-.stat-card:not(.accent) .stat-sub{color:var(--text-dim);}
+/* chart */
+.chart{display:flex;align-items:flex-end;gap:12px;height:170px;padding-top:10px}
+.col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;min-width:0}
+.col b{font:700 .72rem var(--mono);color:var(--text);white-space:nowrap}
+.col em{font:500 .72rem var(--mono);color:var(--dim);font-style:normal}
+.col span{display:block;width:100%;max-width:46px;background:var(--brand);border-radius:6px 6px 0 0;min-height:3px;transition:height .5s cubic-bezier(.2,.8,.2,1)}
+.col.now span{background:var(--brand-d)}
+.col.cur span{background:#fff}
+.funnel{display:grid;gap:10px}
+.fr{display:grid;grid-template-columns:110px 1fr 36px;gap:10px;align-items:center;font-size:.88rem}
+.fr .bar{height:12px}
+.fr b{font-family:var(--mono);text-align:right}
 
-/* FILTERS */
-.filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
-.filter-chip{
-    padding:8px 16px;border-radius:999px;border:1px solid var(--border);
-    background:var(--panel);color:var(--text-dim);font-size:13px;font-weight:600;
-    cursor:pointer;transition:.15s;
-}
-.filter-chip.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+/* filters */
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.search{position:relative;flex:1;min-width:220px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--dim)}
+.search input{width:100%;padding:.7rem .9rem .7rem 2.3rem;border-radius:10px;border:1px solid var(--line);background:var(--panel)}
+.search input:focus{border-color:var(--brand);outline:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{padding:.4rem .85rem;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--dim);font-weight:700;font-size:.82rem}
+.chip b{font-family:var(--mono);font-weight:500;margin-left:6px;opacity:.8}
+.chip.on{background:var(--brand-d);border-color:var(--brand-d);color:#fff}
 
-/* TABLE */
-.table-wrap{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
-table{width:100%;border-collapse:collapse;}
-th{
-    text-align:left;padding:14px 18px;font-size:12px;font-weight:700;
-    color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;
-    border-bottom:1px solid var(--border);white-space:nowrap;
-}
-td{padding:14px 18px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(255,255,255,.02);}
-.client-name{font-weight:600;}
-.client-contact{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
-.value-cell{font-weight:700;font-family:'Poppins',sans-serif;}
-.recurring-tag{display:inline-block;margin-left:5px;font-size:10.5px;font-weight:600;color:var(--green);background:rgba(34,197,94,.12);padding:2px 6px;border-radius:6px;font-family:'Inter',sans-serif;}
-.status-badge{
-    display:inline-flex;align-items:center;gap:6px;padding:5px 12px;
-    border-radius:999px;font-size:12px;font-weight:700;border:none;cursor:pointer;
-    font-family:inherit;
-}
-.status-badge.prospectando{background:rgba(148,163,184,.15);color:#cbd5e1;}
-.status-badge.negociando{background:rgba(245,158,11,.15);color:var(--amber);}
-.status-badge.fechado{background:rgba(34,197,94,.15);color:var(--green);}
-.status-badge.perdido{background:rgba(239,68,68,.15);color:var(--red);}
-.row-actions{display:flex;gap:14px;}
-.row-actions button{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;transition:.15s;}
-.row-actions button:hover{color:var(--text);}
-.row-actions button.del:hover{color:var(--red);}
+/* table */
+.tw{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:.8rem 1rem;font:500 .72rem var(--mono);color:var(--dim);border-bottom:1px solid var(--line);white-space:nowrap}
+th.s{cursor:pointer;user-select:none}th.s:hover{color:var(--text)}th.s.on{color:var(--brand)}
+td{padding:.85rem 1rem;border-bottom:1px solid var(--line);font-size:.92rem;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+tr.clk{cursor:pointer}
+.nm{font-weight:700}.ct{font-size:.8rem;color:var(--dim);margin-top:1px}
+.val{font-family:var(--mono);font-weight:700;white-space:nowrap}
+.tag{display:inline-block;margin-left:6px;font:700 .65rem var(--mono);color:var(--green);background:rgba(52,211,153,.12);padding:.12rem .4rem;border-radius:6px}
+.st{display:inline-flex;align-items:center;gap:6px;padding:.28rem .7rem;border-radius:99px;font-size:.78rem;font-weight:700;border:0;appearance:none;-webkit-appearance:none}
+select.st{padding-right:.7rem;cursor:pointer}
+.st.prospectando{background:rgba(162,159,184,.16);color:#d4d1e6}
+.st.negociando{background:rgba(251,191,36,.15);color:var(--amber)}
+.st.fechado{background:rgba(52,211,153,.15);color:var(--green)}
+.st.perdido{background:rgba(248,113,113,.15);color:var(--red)}
+.nc{font-size:.85rem;color:var(--dim)}.nc.over{color:var(--red);font-weight:700}.nc.today{color:var(--amber);font-weight:700}
+.acts{display:flex;gap:4px;justify-content:flex-end}
+.ib{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;border:0;background:none;color:var(--dim)}
+.ib:hover{background:var(--panel2);color:var(--text)}.ib.del:hover{color:var(--red)}
+.empty{padding:50px 20px;text-align:center;color:var(--dim)}
+.empty svg{width:34px;height:34px;opacity:.5;margin-bottom:10px}
 
-.empty-state{padding:60px 20px;text-align:center;color:var(--text-dim);}
-.empty-state i{font-size:32px;margin-bottom:12px;opacity:.5;}
+/* hoje */
+.todo{display:grid;gap:10px}
+.item{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;flex-wrap:wrap}
+.item .info{flex:1;min-width:200px}
+.item.over{border-left:3px solid var(--red)}.item.today{border-left:3px solid var(--amber)}
 
-/* HERO CARD - TOTAL EM CAIXA */
-.hero-card{
-    background:linear-gradient(135deg,#0f2557 0%,#1d4ed8 55%,#3b82f6 100%);
-    border-radius:20px;
-    padding:32px 36px;
-    margin-bottom:28px;
-    position:relative;
-    overflow:hidden;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:24px;
-    flex-wrap:wrap;
-    box-shadow:0 20px 50px rgba(29,78,216,.35);
-}
-.hero-card::before{
-    content:'';
-    position:absolute;
-    inset:0;
-    background:
-        radial-gradient(circle at 15% 20%, rgba(255,255,255,.12), transparent 45%),
-        radial-gradient(circle at 90% 80%, rgba(6,182,212,.25), transparent 50%);
-    pointer-events:none;
-}
-.hero-card-label{
-    display:flex;align-items:center;gap:8px;
-    font-size:13px;font-weight:700;color:rgba(255,255,255,.75);
-    text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;
-    position:relative;z-index:1;
-}
-.hero-card-value{
-    font-family:'Poppins',sans-serif;
-    font-size:52px;font-weight:800;color:#fff;line-height:1;
-    position:relative;z-index:1;
-}
-.hero-card-sub{
-    font-size:14px;color:rgba(255,255,255,.8);margin-top:10px;position:relative;z-index:1;
-}
-.hero-card-icon{
-    width:70px;height:70px;border-radius:18px;
-    background:rgba(255,255,255,.12);
-    display:flex;align-items:center;justify-content:center;
-    font-size:28px;color:#fff;flex-shrink:0;position:relative;z-index:1;
-    backdrop-filter:blur(6px);
-}
-@media (max-width:640px){
-    .hero-card{padding:26px;}
-    .hero-card-value{font-size:38px;}
-}
-.hero-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px;}
-.hero-row .hero-card{margin-bottom:0;}
-.hero-card.mrr{background:linear-gradient(135deg,#0f3d2e 0%,#15803d 55%,#22c55e 100%);box-shadow:0 20px 50px rgba(21,128,61,.35);}
-@media (max-width:760px){.hero-row{grid-template-columns:1fr;}}
+/* kanban */
+.kb{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:14px;overflow-x:auto;padding-bottom:10px;align-items:start}
+.kc{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;min-height:200px}
+.kc.over{border-color:var(--brand);background:var(--panel2)}
+.kc h4{display:flex;align-items:center;gap:8px;font-size:.85rem;padding:2px 4px 10px}
+.kc h4 .n{margin-left:auto;font:500 .75rem var(--mono);color:var(--dim)}
+.kc h4 .sumv{font:500 .72rem var(--mono);color:var(--dim)}
+.dot{width:9px;height:9px;border-radius:50%}
+.kcard{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-bottom:8px;cursor:grab;transition:border-color .15s,transform .15s}
+.kcard:hover{border-color:var(--brand)}
+.kcard.drag{opacity:.4}
+.kcard .nm{font-size:.92rem}
+.kcard .meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:.78rem;color:var(--dim);gap:8px}
 
-.section-heading{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;margin-bottom:14px;}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(5,4,12,.72);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;width:100%;max-width:520px;max-height:calc(100vh - 32px);overflow:auto;animation:pop .2s cubic-bezier(.2,.8,.2,1)}
+.modal.sm{max-width:400px}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}}
+.modal h2{font-size:1.2rem;font-weight:900;margin-bottom:16px;letter-spacing:-.01em}
+.f{margin-bottom:14px}
+.f label{display:block;font:500 .74rem var(--mono);color:var(--dim);margin-bottom:6px}
+.f input,.f select,.f textarea{width:100%;padding:.7rem .85rem;border-radius:10px;border:1px solid var(--line);background:var(--bg)}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--brand);outline:0}
+.f textarea{resize:vertical;min-height:70px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hint{font-size:.78rem;margin-top:5px;color:var(--dim)}.hint.ok{color:var(--green)}
+.f label.ck,label.ck{font:500 .88rem var(--sans);margin:0}
+.ck{display:flex;gap:10px;align-items:flex-start;font-size:.88rem;color:var(--dim);cursor:pointer}
+.ck input{width:auto;margin-top:3px;accent-color:var(--brand)}
+.ck strong{color:var(--text)}
+.mact{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+.hist{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.hist h5{font:500 .74rem var(--mono);color:var(--dim);margin-bottom:10px}
+.hi{display:flex;gap:10px;font-size:.85rem;padding:5px 0;color:var(--dim)}
+.hi time{font:500 .72rem var(--mono);flex:none;width:78px;padding-top:2px}
+.hi span{color:var(--text)}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 14px}
 
-/* META DO MÊS */
-.goal-card{
-    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
-    padding:20px 22px;margin-bottom:28px;
+/* toast + login */
+.toasts{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:400;width:min(92vw,420px)}
+.toast{background:#262244;border:1px solid var(--line);border-radius:12px;padding:.75rem 1rem;display:flex;gap:12px;align-items:center;font-size:.9rem;animation:pop .2s}
+.toast.err{border-color:rgba(248,113,113,.5)}.toast.ok{border-color:rgba(52,211,153,.4)}
+.toast button{margin-left:auto;background:none;border:0;color:var(--brand);font-weight:700}
+.login{position:fixed;inset:0;z-index:300;background:var(--bg);display:grid;place-items:center;padding:20px}
+.lb{width:100%;max-width:360px;text-align:center}
+.lb svg.sym{width:64px;height:40px;margin-bottom:18px}
+.lb h2{font-size:1.5rem;font-weight:900;letter-spacing:-.02em;margin-bottom:4px}
+.lb p{color:var(--dim);font-size:.9rem;margin-bottom:22px}
+.lb input{width:100%;padding:.85rem 1rem;border-radius:12px;border:1px solid var(--line);background:var(--panel);text-align:center;font-size:1rem}
+.lb input:focus{border-color:var(--brand);outline:0}
+.lb .btn{width:100%;margin-top:12px}
+.lb .er{color:var(--red);font-size:.85rem;margin-top:12px;min-height:1.2em}
+
+body.intern .money{display:none!important}
+
+/* mobile */
+.tabs{display:none}
+@media (max-width:900px){
+  .side{display:none}
+  .main{margin-left:0;padding:20px 16px 96px}
+  .tabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--line);z-index:30;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+  .tabs button{background:none;border:0;color:var(--dim);display:grid;justify-items:center;gap:3px;padding:6px 0;font-size:.68rem;font-weight:700;position:relative}
+  .tabs button svg{width:22px;height:22px}
+  .tabs button.on{color:var(--brand)}
+  .tabs .badge{position:absolute;top:2px;left:calc(50% + 8px);font:700 .62rem var(--mono);background:var(--red);color:#1a0b0b;border-radius:99px;padding:0 .35rem}
+  .g2{grid-template-columns:1fr}
+  .f2{grid-template-columns:1fr}
+  .top .btn.pri{position:fixed;right:16px;bottom:82px;z-index:35;border-radius:99px;padding:.9rem 1.2rem;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+  /* tabela vira cartões */
+  table,thead,tbody,tr,td{display:block}
+  thead{display:none}
+  tbody tr{padding:12px 14px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:4px 10px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:0}
+  td[data-l]::before{content:attr(data-l) ' ';font:500 .68rem var(--mono);color:var(--dim)}
+  td.c-main{grid-column:1/-1}
+  td.c-act{grid-column:1/-1}
+  .acts{justify-content:flex-start}
+  .kb{grid-template-columns:repeat(4,82vw);scroll-snap-type:x mandatory}
+  .kc{scroll-snap-align:start}
+  .fr{grid-template-columns:90px 1fr 30px}
 }
-.goal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
-.goal-top h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;}
-.goal-edit{background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;text-decoration:underline;}
-.goal-edit:hover{color:var(--blue);}
-.goal-numbers{display:flex;justify-content:space-between;font-size:13px;color:var(--text-dim);margin-bottom:8px;}
-.goal-numbers strong{color:var(--text);font-family:'Poppins',sans-serif;}
-.goal-bar-track{height:10px;border-radius:999px;background:var(--bg);overflow:hidden;}
-.goal-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#3b82f6,#22c55e);transition:width .4s ease;}
-
-/* BUSCA */
-.search-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
-.search-box{
-    flex:1;min-width:220px;position:relative;
-}
-.search-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;}
-.search-box input{
-    width:100%;padding:11px 14px 11px 38px;border-radius:10px;border:1px solid var(--border);
-    background:var(--panel);color:var(--text);font-family:inherit;font-size:14px;
-}
-.search-box input:focus{outline:none;border-color:var(--blue);}
-
-/* CABEÇALHO ORDENÁVEL */
-th.sortable{cursor:pointer;user-select:none;}
-th.sortable:hover{color:var(--text);}
-th.sortable i{margin-left:5px;font-size:10px;opacity:.5;}
-th.sortable.sort-active i{opacity:1;color:var(--blue);}
-
-/* CONTATO ATRASADO */
-.contact-tag{font-size:12px;color:var(--text-dim);}
-.contact-tag.overdue{color:var(--red);font-weight:700;}
-.contact-tag.today{color:var(--amber);font-weight:700;}
-
-.icon{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;flex-shrink:0;}
-.icon svg{width:100%;height:100%;display:block;}
-
-.commission-hint{font-size:12px;color:var(--green);font-weight:600;margin-top:6px;}
-
-/* GRAFICO FECHADOS/MES */
-.chart-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px 16px;margin-bottom:28px;}
-.chart-bars{display:flex;align-items:flex-end;gap:14px;height:140px;}
-.chart-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:8px;}
-.chart-bar{width:100%;max-width:44px;background:linear-gradient(180deg,#3b82f6,#1d4ed8);border-radius:4px 4px 0 0;min-height:3px;transition:.2s;position:relative;}
-.chart-bar:hover{filter:brightness(1.15);}
-.chart-bar-label{font-size:11px;color:var(--text-dim);text-transform:capitalize;}
-.chart-bar-value{font-size:11px;color:var(--text-dim);font-weight:700;}
-
-.checkbox-label{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13.5px;color:var(--text-dim);font-weight:500;}
-.checkbox-label input{width:auto;margin-top:2px;accent-color:var(--blue);}
-.checkbox-label strong{color:var(--text);}
-
-.error-banner{
-    position:fixed;top:0;left:0;right:0;z-index:200;
-    background:#7f1d1d;color:#fff;text-align:center;
-    padding:10px 20px;font-size:13.5px;font-weight:600;
-}
-.error-banner[hidden]{display:none;}
-
-/* LOGIN */
-.login-screen{
-    position:fixed;inset:0;z-index:300;background:var(--bg);
-    display:flex;align-items:center;justify-content:center;padding:20px;
-}
-.login-screen[hidden]{display:none;}
-.login-box{
-    width:100%;max-width:340px;text-align:center;
-    background:var(--panel);border:1px solid var(--border);border-radius:16px;
-    padding:36px 30px;
-}
-.login-box h2{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px;}
-.login-box p{font-size:13.5px;color:var(--text-dim);margin-bottom:20px;}
-.login-box input{
-    width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);
-    background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;text-align:center;
-}
-.login-box input:focus{outline:none;border-color:var(--blue);}
-.login-error{color:var(--red);font-size:13px;margin-top:10px;}
-.logout-link{background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;margin-top:4px;}
-.logout-link:hover{color:var(--blue);}
-
-/* CONTROLE DE ACESSO */
-body.intern .money-only{display:none !important;}
-
-/* MODAL */
-
-.modal-overlay{
-    position:fixed;inset:0;background:rgba(5,8,16,.7);z-index:100;
-    display:flex;align-items:center;justify-content:center;padding:20px;
-}
-.modal-overlay[hidden]{display:none;}
-.modal{
-    background:var(--panel-2);border:1px solid var(--border);border-radius:16px;
-    padding:28px;width:100%;max-width:440px;
-}
-.modal h2{font-family:'Poppins',sans-serif;font-size:19px;font-weight:700;margin-bottom:20px;}
-.field{margin-bottom:16px;}
-.field label{display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:6px;}
-.field input,.field select,.field textarea{
-    width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);
-    background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;
-}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue);}
-.field textarea{resize:vertical;min-height:70px;}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
-
-@media (max-width: 900px){
-    .sidebar{width:76px;padding:20px 10px;}
-    .brand-text,.nav-item span{display:none;}
-    .nav-item{justify-content:center;}
-    .main{margin-left:76px;padding:24px 18px;}
-    .stats{grid-template-columns:1fr 1fr;}
-    .field-row{grid-template-columns:1fr;}
-    .table-wrap{overflow-x:auto;}
-    table{min-width:760px;}
-}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
-<div class="login-screen" id="loginScreen">
-    <div class="login-box">
-        <div class="brand-icon" style="margin:0 auto 16px;">CC</div>
-        <h2>Painel Creative Codex</h2>
-        <p>Digite sua senha de acesso</p>
-        <input type="password" id="loginPassword" placeholder="Senha" autocomplete="off">
-        <button class="btn btn-primary" id="loginBtn" style="width:100%;justify-content:center;margin-top:12px;">Entrar</button>
-        <p class="login-error" id="loginError" hidden>Senha incorreta.</p>
-    </div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="sym" viewBox="0 0 64 40"><g fill="none" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8 8 20l12 12M44 8l12 12-12 12" stroke="#F4F3F8"/><path d="M36 6 28 34" stroke="#8B7CFF"/></g></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-kanban" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="11" rx="1"/><rect x="17" y="3" width="4" height="14" rx="1"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 20v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 20v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.5-1.5-3-1.5-1.8 0-3 .9-3 2.1 0 3 6 1.4 6 4.4 0 1.2-1.2 2-3 2-1.5 0-2.6-.6-3-1.6M12 6v2m0 8v2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+  <symbol id="i-ul" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="i-wa" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m20 6-11 11-5-5"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></symbol>
+</svg>
+
+<div class="login" id="login">
+  <form class="lb" id="loginForm">
+    <svg class="sym" viewBox="0 0 64 40" aria-hidden="true"><use href="#sym"/></svg>
+    <h2>Painel Creative Codex</h2>
+    <p>Digite sua senha de acesso</p>
+    <label class="sr" for="pw" style="position:absolute;left:-9999px">Senha</label>
+    <input type="password" id="pw" placeholder="Senha" autocomplete="current-password" required>
+    <button class="btn pri" type="submit" id="loginBtn">Entrar</button>
+    <p class="er" id="loginErr" role="alert"></p>
+  </form>
 </div>
 
-<aside class="sidebar" id="sidebarEl" hidden>
-    <div class="brand">
-        <div class="brand-icon">CC</div>
-        <div class="brand-text">Painel<span>Creative Codex</span></div>
-    </div>
-    <nav class="nav">
-        <button class="nav-item active" id="navOverview"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></span><span>Visão Geral</span></button>
-        <button class="nav-item" id="navProspects"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 20v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Prospecção</span></button>
-        <button class="nav-item" id="navCommissions"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><span>Comissões</span></button>
-    </nav>
-    <div class="sidebar-foot" id="sidebarFoot">Dados salvos no banco da Vercel.</div>
+<aside class="side" id="side" hidden>
+  <div class="brand"><svg viewBox="0 0 64 40" aria-hidden="true"><use href="#sym"/></svg><div>Painel<small>creative codex</small></div></div>
+  <nav class="nav" id="nav" aria-label="Seções"></nav>
+  <div class="side-foot">
+    <div class="sync" id="sync"><i></i><span>Salvo</span></div>
+    <span id="who"></span>
+    <button class="link" data-act="logout">Sair</button>
+  </div>
 </aside>
 
-<main class="main" id="mainEl" hidden>
-    <div class="topbar">
-        <div>
-            <h1 id="pageTitle">Visão Geral</h1>
-            <p id="pageSubtitle"></p>
-        </div>
-        <button class="btn btn-primary" onclick="openModal()"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span> Novo Prospecto</button>
-    </div>
+<nav class="tabs" id="tabs" aria-label="Seções" hidden></nav>
 
-    <div id="viewOverview">
-        <div class="error-banner" id="overdueBanner" style="position:static;border-radius:var(--radius);margin-bottom:20px;" hidden></div>
-        <div class="hero-row money-only">
-            <div class="hero-card">
-                <div>
-                    <div class="hero-card-label"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Total em Caixa</div>
-                    <div class="hero-card-value" id="heroTotal">R$ 0,00</div>
-                    <div class="hero-card-sub" id="heroTotalSub">de negócios fechados (avulsos)</div>
-                </div>
-                <div class="hero-card-icon"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span></div>
-            </div>
-
-            <div class="hero-card mrr">
-                <div>
-                    <div class="hero-card-label"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span> Receita Recorrente (MRR)</div>
-                    <div class="hero-card-value" id="heroMrr">R$ 0,00</div>
-                    <div class="hero-card-sub" id="heroMrrSub">por mês, em contratos ativos</div>
-                </div>
-                <div class="hero-card-icon"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span></div>
-            </div>
-        </div>
-
-        <div class="goal-card money-only">
-            <div class="goal-top">
-                <h3><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span> Meta do Mês</h3>
-                <button class="goal-edit" onclick="editGoal()">Editar meta</button>
-            </div>
-            <div class="goal-numbers">
-                <span id="goalCurrent"><strong>R$ 0,00</strong> faturados este mês</span>
-                <span id="goalTarget">Meta: R$ 0,00</span>
-            </div>
-            <div class="goal-bar-track">
-                <div class="goal-bar-fill" id="goalBarFill" style="width:0%"></div>
-            </div>
-        </div>
-
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-label">Total de Prospectos</div>
-                <div class="stat-value" id="statTotal">0</div>
-                <div class="stat-sub" id="statTotalSub">Nenhum cadastrado ainda</div>
-            </div>
-            <div class="stat-card accent green">
-                <div class="stat-label">Fechados</div>
-                <div class="stat-value" id="statWon">0</div>
-                <div class="stat-sub" id="statWonSub">R$ 0,00 faturados</div>
-            </div>
-            <div class="stat-card accent blue">
-                <div class="stat-label">Em Negociação</div>
-                <div class="stat-value" id="statPipeline">0</div>
-                <div class="stat-sub" id="statPipelineSub">R$ 0,00 em aberto</div>
-            </div>
-            <div class="stat-card accent red">
-                <div class="stat-label">Perdidos</div>
-                <div class="stat-value" id="statLost">0</div>
-                <div class="stat-sub" id="statLostSub">R$ 0,00 não convertidos</div>
-            </div>
-            <div class="stat-card accent amber">
-                <div class="stat-label">Taxa de Conversão</div>
-                <div class="stat-value" id="statConversion">0%</div>
-                <div class="stat-sub" id="statConversionSub">Sem negócios decididos ainda</div>
-            </div>
-        </div>
-
-        <h2 class="section-heading">Fechados nos últimos 6 meses</h2>
-        <div class="chart-card" id="chartCard">
-            <div class="chart-bars" id="chartBars"></div>
-        </div>
-
-        <h2 class="section-heading">Adicionados Recentemente</h2>
-        <div class="table-wrap">
-            <table>
-                <tbody id="recentBody"></tbody>
-            </table>
-            <div class="empty-state" id="recentEmpty" hidden>
-                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>
-                <p>Nada por aqui ainda. Cadastre seu primeiro prospecto.</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="viewProspects" hidden>
-        <div class="search-row">
-            <div class="search-box">
-                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-                <input type="text" id="searchInput" placeholder="Buscar por cliente ou serviço...">
-            </div>
-            <button class="btn btn-ghost" onclick="exportCsv()"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span> Exportar CSV</button>
-        </div>
-
-        <div class="filters" id="filters">
-            <button class="filter-chip active" data-filter="todos">Todos</button>
-            <button class="filter-chip" data-filter="prospectando">Prospectando</button>
-            <button class="filter-chip" data-filter="negociando">Negociando</button>
-            <button class="filter-chip" data-filter="fechado">Fechados</button>
-            <button class="filter-chip" data-filter="perdido">Perdidos</button>
-        </div>
-
-        <div class="filters" id="filtersResp">
-            <button class="filter-chip active" data-resp="todos">Todos os responsáveis</button>
-            <button class="filter-chip" data-resp="dono">Cadastrados pelo Dono</button>
-            <button class="filter-chip" data-resp="estagiario">Cadastrados pelo Estagiário</button>
-        </div>
-
-        <div class="table-wrap" id="tableSection">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="sortable" data-sort="name">Cliente <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg></span></th>
-                        <th>Serviço</th>
-                        <th class="sortable" data-sort="value">Valor <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg></span></th>
-                        <th>Status</th>
-                        <th class="sortable sort-active" data-sort="date">Data <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></th>
-                        <th>Próximo Contato</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-            <div class="empty-state" id="emptyState" hidden>
-                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg></span>
-                <p>Nenhum prospecto ainda. Clica em "Novo Prospecto" pra começar.</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="viewCommissions" hidden>
-        <div class="stats" style="margin-bottom:20px;">
-            <div class="stat-card accent green">
-                <div class="stat-label">Comissão do mês</div>
-                <div class="stat-value" id="commMonth">R$ 0,00</div>
-                <div class="stat-sub" id="commMonthSub">0 negócios fechados</div>
-            </div>
-            <div class="stat-card accent blue">
-                <div class="stat-label">Comissão acumulada</div>
-                <div class="stat-value" id="commTotal">R$ 0,00</div>
-                <div class="stat-sub" id="commTotalSub">desde o início</div>
-            </div>
-        </div>
-        <div class="goal-card" style="margin-bottom:20px;">
-            <div class="goal-top" style="margin-bottom:0;">
-                <h3>Tabela de comissão por site fechado</h3>
-            </div>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Faixa do site</th>
-                        <th>Comissão</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>R$ 300 – R$ 599</td><td class="value-cell">R$ 50 fixo</td></tr>
-                    <tr><td>R$ 600 – R$ 999</td><td class="value-cell">10%</td></tr>
-                    <tr><td>R$ 1000 – R$ 1499</td><td class="value-cell">15%</td></tr>
-                    <tr><td>R$ 1500+</td><td class="value-cell">A combinar</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+<main class="main" id="main" hidden>
+  <div class="top">
+    <div><h1 id="title"></h1><p id="subtitle"></p></div>
+    <button class="btn pri" data-act="new"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><use href="#i-plus"/></svg>Novo prospecto</button>
+  </div>
+  <div id="view"></div>
 </main>
 
-<div class="modal-overlay" id="modalOverlay" hidden>
-    <div class="modal">
-        <h2 id="modalTitle">Novo Prospecto</h2>
-        <form id="prospectForm">
-            <input type="hidden" id="editId">
-            <div class="field">
-                <label for="fName">Nome / Empresa</label>
-                <input type="text" id="fName" required placeholder="Ex: Pet Café">
-            </div>
-            <div class="field">
-                <label for="fContact">Contato (WhatsApp, email...)</label>
-                <input type="text" id="fContact" placeholder="Ex: (16) 99999-9999">
-            </div>
-            <div class="field-row">
-                <div class="field">
-                    <label for="fService">Serviço</label>
-                    <input type="text" id="fService" placeholder="Ex: Landing Page">
-                </div>
-                <div class="field">
-                    <label for="fValue">Valor (R$)</label>
-                    <input type="number" id="fValue" min="0" step="0.01" placeholder="0,00">
-                    <div class="commission-hint" id="commissionHint"></div>
-                </div>
-            </div>
-            <div class="field">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="fRecurring">
-                    <span>Esse é um valor <strong>mensal recorrente</strong> (não avulso)</span>
-                </label>
-            </div>
-            <div class="field-row">
-                <div class="field">
-                    <label for="fStatus">Status</label>
-                    <select id="fStatus">
-                        <option value="prospectando">Prospectando</option>
-                        <option value="negociando">Negociando</option>
-                        <option value="fechado">Fechado</option>
-                        <option value="perdido">Perdido</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="fNextContact">Próximo Contato</label>
-                    <input type="date" id="fNextContact">
-                </div>
-            </div>
-            <div class="field">
-                <label for="fNotes">Notas (opcional)</label>
-                <textarea id="fNotes" placeholder="Detalhes da conversa, próximos passos..."></textarea>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-                <button type="submit" class="btn btn-primary"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> Salvar</button>
-            </div>
-        </form>
-    </div>
-</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script>
-let prospects = [];
-let monthlyGoal = 0;
-let currentFilter = 'todos';
-let searchTerm = '';
-let sortField = 'date';
-let sortDir = 'desc';
-let currentResponsavel = 'todos';
-let saveTimer = null;
+'use strict';
+/* ---------- estado ---------- */
+const API = '/api/data';
+const S = { token: null, role: null, prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
+const STATUS = { prospectando: 'Prospectando', negociando: 'Negociando', fechado: 'Fechado', perdido: 'Perdido' };
+const STCOL = { prospectando: '#A29FB8', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
+const $ = (s, r = document) => r.querySelector(s);
+const ic = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const money = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const moneyS = (v) => v >= 1000 ? 'R$ ' + (v / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + 'k' : 'R$ ' + Math.round(v);
+const isIntern = () => S.role === 'estagiario';
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const pad = (n) => String(n).padStart(2, '0');
+const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const today = () => ymd(new Date());
+const addDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return ymd(d); };
+const mkey = (iso) => { const d = new Date(iso); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; };
+const fdate = (iso) => iso ? new Date(iso.length === 10 ? iso + 'T00:00:00' : iso).toLocaleDateString('pt-BR') : '-';
+const closedOf = (p) => p.closedAt || p.date;
+const num = (v) => Number(v || 0);
 
-// ACESSO
-const PASSWORDS = {
-    dono: 'BS100218*',
-    estagiario: 'Fabio2026*'
-};
-const SESSION_HOURS = 12;
-let role = sessionStorage.getItem('painel_role') || null;
+function waLink(contact, text) {
+  const d = String(contact || '').replace(/\D/g, '');
+  if (d.length < 10) return null;
+  const n = d.length <= 11 ? '55' + d : d;
+  return 'https://wa.me/' + n + (text ? '?text=' + encodeURIComponent(text) : '');
+}
+function commission(v) {
+  if (!v || v < 300) return null;
+  if (v < 600) return 50;
+  if (v < 1000) return v * 0.10;
+  if (v < 1500) return v * 0.15;
+  return null;
+}
+function nextInfo(p) {
+  if (!p.nextContact) return { t: 'Sem data', c: '', d: null };
+  const diff = Math.round((new Date(p.nextContact + 'T00:00:00') - new Date(today() + 'T00:00:00')) / 86400000);
+  if (diff < 0) return { t: `Atrasado ${-diff}d`, c: 'over', d: diff };
+  if (diff === 0) return { t: 'Hoje', c: 'today', d: 0 };
+  if (diff === 1) return { t: 'Amanhã', c: '', d: 1 };
+  return { t: fdate(p.nextContact), c: '', d: diff };
+}
+const isOpen = (p) => p.status === 'prospectando' || p.status === 'negociando';
+const dueList = () => S.prospects.filter((p) => isOpen(p) && p.nextContact && p.nextContact <= today()).sort((a, b) => a.nextContact.localeCompare(b.nextContact));
 
-function sessionExpired() {
-    const ts = Number(sessionStorage.getItem('painel_login_at') || 0);
-    return !ts || (Date.now() - ts) > SESSION_HOURS * 3600 * 1000;
+/* ---------- toast ---------- */
+function toast(msg, o = {}) {
+  const el = document.createElement('div');
+  el.className = 'toast ' + (o.type || '');
+  el.innerHTML = `<span>${esc(msg)}</span>` + (o.action ? `<button type="button">${esc(o.action)}</button>` : '');
+  if (o.action) $('button', el).onclick = () => { o.onAction(); el.remove(); };
+  $('#toasts').append(el);
+  setTimeout(() => el.remove(), o.ms || 4200);
 }
 
-function checkLogin() {
-    if (role && sessionExpired()) {
-        sessionStorage.removeItem('painel_role');
-        sessionStorage.removeItem('painel_login_at');
-        role = null;
-    }
-    if (role === 'dono' || role === 'estagiario') {
-        document.getElementById('loginScreen').hidden = true;
-        document.getElementById('sidebarEl').hidden = false;
-        document.getElementById('mainEl').hidden = false;
-        applyRoleUI();
-        loadData();
-    } else {
-        document.getElementById('loginScreen').hidden = false;
-        document.getElementById('sidebarEl').hidden = true;
-        document.getElementById('mainEl').hidden = true;
-        document.getElementById('loginPassword').focus();
-    }
+/* ---------- API ---------- */
+async function api(method, body, qs = '') {
+  const res = await fetch(API + qs, {
+    method,
+    headers: { 'Content-Type': 'application/json', ...(S.token ? { Authorization: 'Bearer ' + S.token } : {}) },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  let data = {};
+  try { data = await res.json(); } catch {}
+  if (res.status === 401 && S.token) { logout(true); throw new Error('sessão'); }
+  if (!res.ok) throw new Error(data.error || 'Erro ' + res.status);
+  return data;
+}
+function applyServer(d) {
+  S.prospects = d.prospects || [];
+  S.goal = d.goal || 0;
+  S.goals = d.goals || {};
+}
+function setSync(state, text) {
+  const el = $('#sync'); if (!el) return;
+  el.className = 'sync ' + state; $('span', el).textContent = text;
+}
+let saveT = null, saving = false, again = false;
+function save() {
+  setSync('busy', 'Salvando');
+  clearTimeout(saveT);
+  saveT = setTimeout(flush, 350);
+}
+async function flush() {
+  if (saving) { again = true; return; }
+  saving = true;
+  const sent = S.deleted.slice();
+  try {
+    const d = await api('POST', { prospects: S.prospects, deleted: sent, goal: S.goal, goals: S.goals });
+    S.deleted = S.deleted.filter((id) => !sent.includes(id));
+    if (!again && !S.deleted.length) applyServer(d);
+    setSync('', 'Salvo');
+  } catch (e) {
+    if (e.message !== 'sessão') { setSync('err', 'Erro ao salvar'); toast('Não consegui salvar: ' + e.message, { type: 'err', action: 'Tentar de novo', onAction: flush }); }
+  }
+  saving = false;
+  if (again) { again = false; flush(); } else render();
+}
+async function load(silent) {
+  try {
+    const d = await api('GET');
+    applyServer(d); setSync('', 'Salvo');
+  } catch (e) {
+    if (e.message !== 'sessão' && !silent) toast('Não consegui carregar os dados: ' + e.message, { type: 'err' });
+    setSync('err', 'Sem conexão');
+  }
+  render();
 }
 
-function attemptLogin() {
-    const val = document.getElementById('loginPassword').value;
-    if (val === PASSWORDS.dono) {
-        role = 'dono';
-    } else if (val === PASSWORDS.estagiario) {
-        role = 'estagiario';
-    } else {
-        document.getElementById('loginError').hidden = false;
-        return;
-    }
-    document.getElementById('loginError').hidden = true;
-    sessionStorage.setItem('painel_role', role);
-    sessionStorage.setItem('painel_login_at', String(Date.now()));
-    checkLogin();
+/* ---------- sessão ---------- */
+function boot() {
+  const t = sessionStorage.getItem('painel_token'), r = sessionStorage.getItem('painel_role');
+  if (t && r) { S.token = t; S.role = r; enter(); } else showLogin();
+}
+function showLogin() {
+  $('#login').hidden = false; $('#side').hidden = $('#main').hidden = $('#tabs').hidden = true;
+  setTimeout(() => $('#pw').focus(), 50);
+}
+function enter() {
+  $('#login').hidden = true; $('#side').hidden = $('#main').hidden = $('#tabs').hidden = false;
+  document.body.classList.toggle('intern', isIntern());
+  $('#who').textContent = isIntern() ? 'Modo estagiário' : 'Acesso completo';
+  try { const f = JSON.parse(sessionStorage.getItem('painel_ui') || '{}'); Object.assign(S, { filter: f.filter || 'todos', resp: f.resp || 'todos', view: f.view || 'overview' }); } catch {}
+  load();
+}
+function logout(expired) {
+  sessionStorage.removeItem('painel_token'); sessionStorage.removeItem('painel_role');
+  S.token = S.role = null; S.prospects = [];
+  showLogin();
+  if (expired) $('#loginErr').textContent = 'Sessão expirada. Entre novamente.';
+}
+$('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const b = $('#loginBtn'); b.disabled = true; $('#loginErr').textContent = '';
+  try {
+    const d = await api('POST', { password: $('#pw').value }, '?action=login');
+    S.token = d.token; S.role = d.role;
+    sessionStorage.setItem('painel_token', d.token); sessionStorage.setItem('painel_role', d.role);
+    $('#pw').value = ''; enter();
+  } catch (err) { $('#loginErr').textContent = err.message; $('#pw').select(); }
+  b.disabled = false;
+});
+function saveUI() { try { sessionStorage.setItem('painel_ui', JSON.stringify({ filter: S.filter, resp: S.resp, view: S.view })); } catch {} }
+
+/* ---------- navegação ---------- */
+const VIEWS = [
+  ['overview', 'Visão geral', 'home'],
+  ['today', 'Hoje', 'bell'],
+  ['funnel', 'Funil', 'kanban'],
+  ['list', 'Prospecção', 'users'],
+  ['comm', 'Comissões', 'coin']
+];
+function renderNav() {
+  const due = dueList().length;
+  const html = (tab) => VIEWS.map(([k, n, i]) =>
+    `<button type="button" data-act="view" data-v="${k}" class="${S.view === k ? 'on' : ''}" ${S.view === k ? 'aria-current="page"' : ''}>${ic(i)}<span>${n}</span>${k === 'today' && due ? `<span class="badge">${due}</span>` : ''}</button>`).join('');
+  $('#nav').innerHTML = html(); $('#tabs').innerHTML = html();
+}
+function setView(v) { S.view = v; saveUI(); render(); window.scrollTo(0, 0); }
+
+/* ---------- métricas ---------- */
+function metrics() {
+  const P = S.prospects, won = P.filter((p) => p.status === 'fechado'), lost = P.filter((p) => p.status === 'perdido'), open = P.filter(isOpen);
+  const sum = (a) => a.reduce((s, p) => s + num(p.value), 0);
+  const oneOff = won.filter((p) => !p.recurring), rec = won.filter((p) => p.recurring);
+  const mk = mkey(new Date()), wonMonth = won.filter((p) => mkey(closedOf(p)) === mk);
+  const decided = won.length + lost.length;
+  return { P, won, lost, open, oneOff, rec, wonMonth, cash: sum(oneOff), mrr: sum(rec), monthVal: sum(wonMonth.filter((p) => !p.recurring)) + sum(wonMonth.filter((p) => p.recurring)),
+    pipeVal: sum(open), lostVal: sum(lost), wonVal: sum(won), conv: decided ? Math.round(won.length / decided * 100) : 0, decided, mk, sum };
+}
+function months(n) {
+  const out = [], now = new Date();
+  for (let i = n - 1; i >= 0; i--) out.push(new Date(now.getFullYear(), now.getMonth() - i, 1));
+  return out;
+}
+function chartHtml(m, field) {
+  const ms = months(6), now = mkey(new Date());
+  const vals = ms.map((d) => {
+    const k = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+    const list = m.won.filter((p) => mkey(closedOf(p)) === k);
+    return field === 'count' ? list.length : list.reduce((s, p) => s + num(p.value), 0);
+  });
+  const max = Math.max(1, ...vals);
+  return `<div class="chart">${ms.map((d, i) => {
+    const k = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+    const lab = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+    return `<div class="col ${k === now ? 'cur' : ''}"><b>${field === 'count' ? vals[i] : moneyS(vals[i])}</b><span style="height:${Math.max(2, Math.round(vals[i] / max * 100))}%" title="${esc(lab)}: ${field === 'count' ? vals[i] : money(vals[i])}"></span><em>${esc(lab)}</em></div>`;
+  }).join('')}</div>`;
 }
 
-function applyRoleUI() {
-    document.body.classList.toggle('intern', role === 'estagiario');
-    document.getElementById('sidebarFoot').innerHTML = role === 'dono'
-        ? 'Dados salvos no banco da Vercel.<br><button class="logout-link" onclick="logout()">Sair</button>'
-        : 'Modo estagiário.<br><button class="logout-link" onclick="logout()">Sair</button>';
+/* ---------- render ---------- */
+function render() {
+  if (!S.token) return;
+  renderNav();
+  const v = VIEWS.find((x) => x[0] === S.view) || VIEWS[0];
+  $('#title').textContent = v[1];
+  const sub = {
+    overview: () => new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }),
+    today: () => { const n = dueList().length; return n ? `${n} contato${n > 1 ? 's' : ''} para fazer` : 'Nenhum contato pendente'; },
+    funnel: () => 'Arraste os cartões entre as colunas',
+    list: () => `${S.prospects.length} cadastrado${S.prospects.length === 1 ? '' : 's'}`,
+    comm: () => 'Comissão por site fechado'
+  };
+  $('#subtitle').textContent = sub[S.view]();
+  const el = $('#view');
+  const focus = document.activeElement && document.activeElement.id === 'q' ? document.activeElement.selectionStart : null;
+  el.innerHTML = ({ overview: vOverview, today: vToday, funnel: vFunnel, list: vList, comm: vComm }[S.view])();
+  if (S.view === 'funnel') bindDnD();
+  if (focus !== null) { const q = $('#q'); if (q) { q.focus(); q.setSelectionRange(focus, focus); } }
 }
 
-function logout() {
-    sessionStorage.removeItem('painel_role');
-    sessionStorage.removeItem('painel_login_at');
-    role = null;
-    location.reload();
+function rowSimple(p) {
+  return `<tr class="clk" data-act="edit" data-id="${esc(p.id)}"><td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}</td><td>${esc(p.service || '-')}</td><td class="val money">${p.value == null ? '' : money(p.value)}${p.recurring ? '<span class="tag">/mês</span>' : ''}</td><td><span class="st ${p.status}">${STATUS[p.status]}</span></td><td class="nc">${fdate(p.date)}</td></tr>`;
 }
 
-document.getElementById('loginBtn').addEventListener('click', attemptLogin);
-document.getElementById('loginPassword').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') attemptLogin();
+function vOverview() {
+  const m = metrics(), due = dueList();
+  const goal = S.goals[m.mk] ?? S.goal ?? 0, pct = goal > 0 ? Math.min(100, Math.round(m.monthVal / goal * 100)) : 0;
+  const upcoming = S.prospects.filter((p) => isOpen(p) && p.nextContact && p.nextContact >= today()).sort((a, b) => a.nextContact.localeCompare(b.nextContact)).slice(0, 4);
+  const recent = S.prospects.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+  const fmax = Math.max(1, S.prospects.length);
+  const money_ = !isIntern();
+  return `
+  ${due.length ? `<div class="alert" role="status">${ic('bell')}<span><b>${due.length}</b> contato${due.length > 1 ? 's' : ''} para fazer hoje ou atrasado${due.length > 1 ? 's' : ''}.</span><button class="btn sm gh" data-act="view" data-v="today">Ver agora</button></div>` : ''}
+  ${money_ ? `<div class="grid g2" style="margin-bottom:14px">
+    <div class="card hero"><div class="lbl">Total em caixa</div><div class="big">${money(m.cash)}</div><div class="sub">${m.oneOff.length ? `${m.oneOff.length} negócio${m.oneOff.length > 1 ? 's' : ''} avulso${m.oneOff.length > 1 ? 's' : ''} fechado${m.oneOff.length > 1 ? 's' : ''}` : 'Nenhum negócio avulso fechado'}</div></div>
+    <div class="card hero alt"><div class="lbl">Receita recorrente (MRR)</div><div class="big">${money(m.mrr)}</div><div class="sub">${m.rec.length ? `${m.rec.length} cliente${m.rec.length > 1 ? 's' : ''} pagando por mês` : 'Nenhum contrato recorrente'}</div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="row"><h3 style="margin:0">${ic('target')}Meta do mês</h3><button class="link" data-act="goal">Editar meta</button></div>
+    <div class="row" style="margin:12px 0 8px"><span class="sub"><b class="mono" style="color:var(--text)">${money(m.monthVal)}</b> fechados em ${new Date().toLocaleDateString('pt-BR', { month: 'long' })}</span><span class="sub mono">${goal > 0 ? `Meta ${money(goal)} (${pct}%)` : 'Sem meta definida'}</span></div>
+    <div class="bar ${pct >= 100 ? 'ok' : ''}"><i style="width:${pct}%"></i></div>
+  </div>` : ''}
+  <div class="grid g4">
+    <div class="card kpi"><div class="lbl">Prospectos</div><div class="big">${m.P.length}</div><div class="sub">${m.open.length} em andamento</div></div>
+    <div class="card kpi"><div class="lbl">Fechados</div><div class="big pos">${m.won.length}</div><div class="sub">${money_ ? money(m.wonVal) + ' no total' : m.wonMonth.length + ' neste mês'}</div></div>
+    <div class="card kpi"><div class="lbl">Em aberto</div><div class="big warn">${m.open.length}</div><div class="sub">${money_ ? money(m.pipeVal) + ' no funil' : 'negociando ou prospectando'}</div></div>
+    <div class="card kpi"><div class="lbl">Conversão</div><div class="big">${m.conv}%</div><div class="sub">${m.decided ? `${m.won.length} de ${m.decided} decididos` : 'Sem negócios decididos'}</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h3>${money_ ? 'Fechado por mês (R$)' : 'Fechados por mês'}</h3>${chartHtml(m, money_ ? 'value' : 'count')}</div>
+    <div class="card"><h3>Funil</h3><div class="funnel">${Object.keys(STATUS).map((k) => { const n = m.P.filter((p) => p.status === k).length; return `<div class="fr"><span>${STATUS[k]}</span><div class="bar"><i style="width:${Math.round(n / fmax * 100)}%;background:${STCOL[k]}"></i></div><b>${n}</b></div>`; }).join('')}</div>
+      ${upcoming.length ? `<h3 style="margin-top:20px">Próximos contatos</h3><div class="funnel">${upcoming.map((p) => `<div class="row"><span class="nm" style="font-size:.9rem">${esc(p.name)}</span><span class="nc">${nextInfo(p).t}</span></div>`).join('')}</div>` : ''}</div>
+  </div>
+  <h2 class="sec">Adicionados recentemente</h2>
+  <div class="tw">${recent.length ? `<table><tbody>${recent.map(rowSimple).join('')}</tbody></table>` : `<div class="empty">${ic('users')}<p>Nada por aqui ainda. Cadastre o primeiro prospecto.</p></div>`}</div>`;
+}
+
+function vToday() {
+  const due = dueList();
+  const none = S.prospects.filter((p) => isOpen(p) && !p.nextContact);
+  const card = (p) => {
+    const n = nextInfo(p), wa = waLink(p.contact, `Olá, ${p.name.split(' ')[0]}! Tudo bem?`);
+    return `<div class="item ${n.c}"><div class="info"><div class="nm">${esc(p.name)} <span class="st ${p.status}" style="margin-left:6px">${STATUS[p.status]}</span></div><div class="ct">${esc(p.service || 'Sem serviço')}${p.contact ? ' | ' + esc(p.contact) : ''}${p.notes && !isIntern() || (p.notes && p.responsavel === 'estagiario') ? '' : ''}</div></div>
+      <span class="nc ${n.c}">${n.t}</span>
+      <div class="acts">${wa ? `<a class="btn sm wa" href="${wa}" target="_blank" rel="noopener">${ic('wa')}WhatsApp</a>` : ''}<button class="btn sm gh" data-act="contacted" data-id="${esc(p.id)}">${ic('check')}Contatei</button><button class="ib" data-act="edit" data-id="${esc(p.id)}" aria-label="Editar">${ic('edit')}</button></div></div>`;
+  };
+  return `${due.length ? `<div class="todo">${due.map(card).join('')}</div>` : `<div class="card empty">${ic('check')}<p>Tudo em dia. Nenhum contato atrasado ou marcado para hoje.</p></div>`}
+  ${none.length ? `<h2 class="sec">Sem data de próximo contato</h2><div class="todo">${none.map(card).join('')}</div>` : ''}`;
+}
+
+function vFunnel() {
+  const cols = Object.keys(STATUS).map((k) => {
+    const list = S.prospects.filter((p) => p.status === k).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const tot = list.reduce((s, p) => s + num(p.value), 0);
+    return `<div class="kc" data-status="${k}"><h4><i class="dot" style="background:${STCOL[k]}"></i>${STATUS[k]}<span class="n">${list.length}</span></h4>${!isIntern() ? `<div class="sumv" style="padding:0 4px 10px">${money(tot)}</div>` : ''}
+      ${list.map((p) => { const n = nextInfo(p); return `<div class="kcard" draggable="true" data-id="${esc(p.id)}" data-act="edit"><div class="nm">${esc(p.name)}</div><div class="ct">${esc(p.service || '')}</div><div class="meta"><span class="val money">${p.value == null ? '' : money(p.value)}</span>${isOpen(p) ? `<span class="nc ${n.c}">${n.t}</span>` : ''}</div></div>`; }).join('') || '<div class="ct" style="padding:8px 4px">Vazio</div>'}</div>`;
+  }).join('');
+  return `<div class="kb">${cols}</div>`;
+}
+function bindDnD() {
+  let dragId = null;
+  document.querySelectorAll('.kcard').forEach((c) => {
+    c.addEventListener('dragstart', (e) => { dragId = c.dataset.id; c.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragId); });
+    c.addEventListener('dragend', () => c.classList.remove('drag'));
+  });
+  document.querySelectorAll('.kc').forEach((col) => {
+    col.addEventListener('dragover', (e) => { e.preventDefault(); col.classList.add('over'); });
+    col.addEventListener('dragleave', () => col.classList.remove('over'));
+    col.addEventListener('drop', (e) => { e.preventDefault(); col.classList.remove('over'); if (dragId) setStatus(dragId, col.dataset.status); dragId = null; });
+  });
+}
+
+function filtered() {
+  let l = S.prospects.slice();
+  if (S.filter !== 'todos') l = l.filter((p) => p.status === S.filter);
+  if (S.resp !== 'todos') l = l.filter((p) => p.responsavel === S.resp);
+  const q = S.q.trim().toLowerCase();
+  if (q) l = l.filter((p) => (p.name + ' ' + (p.service || '') + ' ' + (p.contact || '')).toLowerCase().includes(q));
+  const k = S.sort, d = S.dir === 'asc' ? 1 : -1;
+  l.sort((a, b) => {
+    let x = a[k], y = b[k];
+    if (k === 'date') { x = new Date(x); y = new Date(y); }
+    else if (k === 'value') { x = num(x); y = num(y); }
+    else if (k === 'next') { x = a.nextContact || '9999'; y = b.nextContact || '9999'; }
+    else { x = String(x || '').toLowerCase(); y = String(y || '').toLowerCase(); }
+    return x < y ? -d : x > y ? d : 0;
+  });
+  return l;
+}
+function vList() {
+  const l = filtered(), cnt = (k) => k === 'todos' ? S.prospects.length : S.prospects.filter((p) => p.status === k).length;
+  const th = (k, t) => `<th class="s ${S.sort === k ? 'on' : ''}" data-act="sort" data-k="${k}">${t}${S.sort === k ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th>`;
+  return `<div class="tools"><div class="search">${ic('search')}<input id="q" type="search" placeholder="Buscar por nome, serviço ou contato ( / )" value="${esc(S.q)}" aria-label="Buscar"></div>
+    ${!isIntern() ? `<button class="btn gh" data-act="export">${ic('dl')}CSV</button><button class="btn gh" data-act="backup">${ic('dl')}Backup</button><button class="btn gh" data-act="restore">${ic('ul')}Restaurar</button>` : `<button class="btn gh" data-act="export">${ic('dl')}CSV</button>`}</div>
+  <div class="chips" role="group" aria-label="Status">${['todos', ...Object.keys(STATUS)].map((k) => `<button class="chip ${S.filter === k ? 'on' : ''}" data-act="filter" data-k="${k}">${k === 'todos' ? 'Todos' : STATUS[k]}<b>${cnt(k)}</b></button>`).join('')}</div>
+  ${!isIntern() ? `<div class="chips" role="group" aria-label="Responsável">${[['todos', 'Todos os responsáveis'], ['dono', 'Do dono'], ['estagiario', 'Do estagiário']].map(([k, t]) => `<button class="chip ${S.resp === k ? 'on' : ''}" data-act="resp" data-k="${k}">${t}</button>`).join('')}</div>` : ''}
+  <div class="tw">${l.length ? `<table><thead><tr>${th('name', 'Cliente')}<th>Serviço</th><th class="money s ${S.sort === 'value' ? 'on' : ''}" data-act="sort" data-k="value">Valor${S.sort === 'value' ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th><th>Status</th>${th('date', 'Cadastro')}${th('next', 'Próximo contato')}<th></th></tr></thead>
+  <tbody>${l.map((p) => { const n = nextInfo(p), wa = waLink(p.contact); return `<tr>
+    <td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}${!isIntern() && p.responsavel === 'estagiario' ? '<div class="ct">Estagiário</div>' : ''}</td>
+    <td data-l="Serviço">${esc(p.service || '-')}</td>
+    <td class="val money" data-l="Valor">${p.value == null ? '' : money(p.value)}${p.recurring ? '<span class="tag">/mês</span>' : ''}</td>
+    <td><select class="st ${p.status}" data-act="status" data-id="${esc(p.id)}" aria-label="Status de ${esc(p.name)}">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
+    <td class="nc" data-l="Cadastro">${fdate(p.date)}</td>
+    <td data-l="Próximo"><span class="nc ${isOpen(p) ? n.c : ''}">${isOpen(p) ? n.t : '-'}</span></td>
+    <td class="c-act"><div class="acts">${wa ? `<a class="ib" href="${wa}" target="_blank" rel="noopener" aria-label="WhatsApp">${ic('wa')}</a>` : ''}<button class="ib" data-act="edit" data-id="${esc(p.id)}" aria-label="Editar">${ic('edit')}</button><button class="ib del" data-act="del" data-id="${esc(p.id)}" aria-label="Excluir">${ic('trash')}</button></div></td></tr>`; }).join('')}</tbody></table>`
+    : `<div class="empty">${ic('users')}<p>${S.prospects.length ? 'Nada encontrado com esses filtros.' : 'Nenhum prospecto ainda. Clique em "Novo prospecto".'}</p></div>`}</div>`;
+}
+
+function vComm() {
+  const mine = S.prospects.filter((p) => p.status === 'fechado' && p.responsavel === 'estagiario').sort((a, b) => new Date(closedOf(b)) - new Date(closedOf(a)));
+  const mk = mkey(new Date());
+  const c = (p) => commission(num(p.value));
+  const tot = mine.reduce((s, p) => s + (c(p) || 0), 0), month = mine.filter((p) => mkey(closedOf(p)) === mk);
+  const monthV = month.reduce((s, p) => s + (c(p) || 0), 0), paid = mine.filter((p) => p.commissionPaid).reduce((s, p) => s + (c(p) || 0), 0);
+  return `<div class="grid g4" style="margin-bottom:14px">
+    <div class="card kpi"><div class="lbl">Comissão do mês</div><div class="big pos">${money(monthV)}</div><div class="sub">${month.length} negócio${month.length === 1 ? '' : 's'}</div></div>
+    <div class="card kpi"><div class="lbl">Acumulada</div><div class="big">${money(tot)}</div><div class="sub">${mine.length} negócio${mine.length === 1 ? '' : 's'}</div></div>
+    <div class="card kpi"><div class="lbl">Já paga</div><div class="big">${money(paid)}</div><div class="sub">${mine.filter((p) => p.commissionPaid).length} pagamento${mine.filter((p) => p.commissionPaid).length === 1 ? '' : 's'}</div></div>
+    <div class="card kpi"><div class="lbl">A pagar</div><div class="big warn">${money(tot - paid)}</div><div class="sub">pendente</div></div></div>
+  <div class="tw">${mine.length ? `<table><thead><tr><th>Cliente</th><th>Fechado em</th><th class="${isIntern() ? '' : ''}">Valor</th><th>Comissão</th><th>Pagamento</th></tr></thead><tbody>${mine.map((p) => { const cv = c(p); return `<tr><td class="c-main"><div class="nm">${esc(p.name)}</div><div class="ct">${esc(p.service || '')}</div></td><td class="nc" data-l="Fechado">${fdate(closedOf(p))}</td><td class="val" data-l="Valor">${money(p.value)}</td><td class="val ${cv ? 'pos' : ''}" data-l="Comissão">${cv ? money(cv) : p.value < 300 ? 'Sem comissão' : 'A combinar'}</td><td>${isIntern() ? (p.commissionPaid ? '<span class="st fechado">Paga</span>' : '<span class="st prospectando">Pendente</span>') : `<label class="ck"><input type="checkbox" data-act="paid" data-id="${esc(p.id)}" ${p.commissionPaid ? 'checked' : ''}><span>${p.commissionPaid ? 'Paga' : 'Marcar como paga'}</span></label>`}</td></tr>`; }).join('')}</tbody></table>` : `<div class="empty">${ic('coin')}<p>Nenhum negócio fechado pelo estagiário ainda.</p></div>`}</div>
+  <h2 class="sec">Tabela de comissão por site fechado</h2>
+  <div class="tw"><table><thead><tr><th>Faixa do site</th><th>Comissão</th></tr></thead><tbody>
+    <tr><td data-l="Faixa">R$ 300 a R$ 599</td><td class="val">R$ 50 fixo</td></tr><tr><td data-l="Faixa">R$ 600 a R$ 999</td><td class="val">10%</td></tr><tr><td data-l="Faixa">R$ 1.000 a R$ 1.499</td><td class="val">15%</td></tr><tr><td data-l="Faixa">R$ 1.500 ou mais</td><td class="val">A combinar</td></tr></tbody></table></div>`;
+}
+
+/* ---------- ações ---------- */
+function touch(p, histType, text) {
+  p.updatedAt = Date.now();
+  if (histType) { p.history = p.history || []; p.history.push({ at: new Date().toISOString(), type: histType, text }); p.history = p.history.slice(-60); }
+}
+function setStatus(id, status, reason) {
+  const p = S.prospects.find((x) => x.id === id);
+  if (!p || p.status === status) return;
+  if (status === 'perdido' && reason === undefined) {
+    dialog({ title: 'Motivo da perda', body: `<div class="f"><label for="dReason">Por que não fechou? (opcional)</label><input id="dReason" placeholder="Ex: achou caro, sumiu, escolheu outro"></div>`, ok: 'Marcar como perdido',
+      onOk: (d) => setStatus(id, status, $('#dReason', d).value.trim()), onCancel: () => render() });
+    return;
+  }
+  const old = p.status;
+  p.status = status;
+  if (status === 'fechado') { p.closedAt = new Date().toISOString(); p.nextContact = ''; }
+  else if (old === 'fechado') p.closedAt = null;
+  if (status === 'perdido') { p.nextContact = ''; p.lostReason = reason || ''; }
+  touch(p, 'status', `${STATUS[old]} para ${STATUS[status]}${reason ? ': ' + reason : ''}`);
+  save(); render();
+  if (status === 'fechado') toast('Fechado! Parabéns.', { type: 'ok' });
+}
+function deleteProspect(id) {
+  const i = S.prospects.findIndex((x) => x.id === id); if (i < 0) return;
+  const p = S.prospects[i];
+  dialog({ title: 'Excluir prospecto', body: `<p style="color:var(--dim)">Excluir <b style="color:var(--text)">${esc(p.name)}</b>? Você pode desfazer logo depois.</p>`, ok: 'Excluir', danger: true, onOk: () => {
+    S.prospects.splice(i, 1); S.deleted.push(id); save(); render();
+    toast('Prospecto excluído.', { action: 'Desfazer', ms: 7000, onAction: () => { S.prospects.push(p); S.deleted = S.deleted.filter((x) => x !== id); p.updatedAt = Date.now(); save(); render(); } });
+  } });
+}
+
+/* ---------- diálogos ---------- */
+function dialog({ title, body, ok = 'Salvar', danger, onOk, onCancel, small = true }) {
+  const ov = document.createElement('div'); ov.className = 'ov';
+  ov.innerHTML = `<form class="modal ${small ? 'sm' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><h2>${esc(title)}</h2>${body}<div class="mact"><button type="button" class="btn gh" data-x>Cancelar</button><button type="submit" class="btn ${danger ? 'dg' : 'pri'}">${esc(ok)}</button></div></form>`;
+  const close = (cancel) => { ov.remove(); if (cancel && onCancel) onCancel(); };
+  ov.addEventListener('mousedown', (e) => { if (e.target === ov) close(true); });
+  $('[data-x]', ov).onclick = () => close(true);
+  $('form', ov).addEventListener('submit', (e) => { e.preventDefault(); const r = onOk && onOk(ov); if (r !== false) close(false); });
+  ov._close = close;
+  document.body.append(ov);
+  const f = $('input,select,textarea', ov); if (f) f.focus(); else $('button[type=submit]', ov).focus();
+  return ov;
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { const o = document.querySelector('.ov:last-of-type'); if (o && o._close) o._close(true); }
+  if (e.key === '/' && S.view === 'list' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !document.querySelector('.ov')) { e.preventDefault(); const q = $('#q'); if (q) q.focus(); }
 });
 
-const statusLabels = {
-    prospectando: 'Prospectando',
-    negociando: 'Negociando',
-    fechado: 'Fechado',
-    perdido: 'Perdido'
-};
-
-async function loadData() {
-    try {
-        const res = await fetch('/api/data?role=' + encodeURIComponent(role));
-        if (!res.ok) throw new Error('Resposta ' + res.status);
-        const data = await res.json();
-        prospects = data.prospects || [];
-        monthlyGoal = data.goal || 0;
-        hideBanner();
-    } catch (err) {
-        console.error('Falha ao carregar dados:', err);
-        showBanner('Não consegui carregar seus dados do servidor. Verifique sua conexão e recarregue a página.');
-    }
-    render();
+function openProspect(id) {
+  const p = id ? S.prospects.find((x) => x.id === id) : null;
+  const v = (k, d = '') => p ? (p[k] ?? d) : d;
+  const showMoney = !isIntern() || !p || p.responsavel === 'estagiario';
+  const ov = dialog({ title: p ? 'Editar prospecto' : 'Novo prospecto', ok: 'Salvar', small: false, body: `
+    <div class="f"><label for="fName">Nome ou empresa</label><input id="fName" required value="${esc(v('name'))}" placeholder="Ex: Pet Café" maxlength="120"></div>
+    <div class="f"><label for="fContact">Contato (WhatsApp ou e-mail)</label><input id="fContact" value="${esc(v('contact'))}" placeholder="(16) 99999-9999" maxlength="120" inputmode="tel"></div>
+    ${p && waLink(p.contact) ? `<div class="quick"><a class="btn sm wa" href="${waLink(p.contact)}" target="_blank" rel="noopener">${ic('wa')}Abrir WhatsApp</a><button type="button" class="btn sm gh" data-contacted>${ic('check')}Registrar contato</button></div>` : ''}
+    <div class="f2"><div class="f"><label for="fService">Serviço</label><input id="fService" list="svcs" value="${esc(v('service'))}" placeholder="Ex: Landing Page" maxlength="120"><datalist id="svcs"><option>Landing Page</option><option>Site Institucional</option><option>Cardápio Digital</option><option>Manutenção de Site</option><option>Design Gráfico</option><option>Cartão ou Convite</option></datalist></div>
+    <div class="f"><label for="fValue">Valor (R$)</label><input id="fValue" type="number" min="0" step="0.01" inputmode="decimal" value="${showMoney ? esc(v('value', '')) : ''}" ${showMoney ? '' : 'disabled'} placeholder="0,00"><div class="hint" id="fHint"></div></div></div>
+    <div class="f"><label class="ck"><input type="checkbox" id="fRec" ${v('recurring') ? 'checked' : ''}><span>Valor <strong>mensal recorrente</strong> (não avulso)</span></label></div>
+    <div class="f2"><div class="f"><label for="fStatus">Status</label><select id="fStatus">${Object.entries(STATUS).map(([k, t]) => `<option value="${k}" ${v('status', 'prospectando') === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+    <div class="f"><label for="fNext">Próximo contato</label><input id="fNext" type="date" value="${esc(v('nextContact'))}"></div></div>
+    <div class="quick" id="fQuick"><button type="button" class="btn sm gh" data-d="1">Amanhã</button><button type="button" class="btn sm gh" data-d="3">+3 dias</button><button type="button" class="btn sm gh" data-d="7">+7 dias</button></div>
+    <div class="f" id="fLostW" ${v('status') === 'perdido' ? '' : 'hidden'}><label for="fLost">Motivo da perda</label><input id="fLost" value="${esc(v('lostReason'))}" maxlength="200"></div>
+    <div class="f"><label for="fNotes">Notas</label><textarea id="fNotes" maxlength="2000" placeholder="Detalhes da conversa, próximos passos...">${esc(v('notes'))}</textarea></div>
+    ${p && (p.history || []).length ? `<div class="hist"><h5>Histórico</h5>${p.history.slice().reverse().slice(0, 8).map((h) => `<div class="hi"><time>${fdate(h.at)}</time><span>${esc(h.text)}</span></div>`).join('')}</div>` : ''}`,
+    onOk: (d) => {
+      const name = $('#fName', d).value.trim(); if (!name) return false;
+      const val = $('#fValue', d).disabled ? null : (parseFloat($('#fValue', d).value) || 0);
+      const status = $('#fStatus', d).value;
+      let item = p;
+      if (!item) { item = { id: uid(), date: new Date().toISOString(), status: 'prospectando', responsavel: isIntern() ? 'estagiario' : 'dono', history: [], closedAt: null }; S.prospects.push(item); touch(item, 'new', 'Cadastrado'); }
+      const prev = item.status;
+      Object.assign(item, { name, contact: $('#fContact', d).value.trim(), service: $('#fService', d).value.trim(), recurring: $('#fRec', d).checked, nextContact: $('#fNext', d).value, notes: $('#fNotes', d).value.trim() });
+      if (val !== null) item.value = val; else if (item.value === undefined) item.value = null;
+      if (status !== prev) {
+        item.status = status;
+        if (status === 'fechado') { item.closedAt = new Date().toISOString(); item.nextContact = ''; } else if (prev === 'fechado') item.closedAt = null;
+        if (status === 'perdido') { item.lostReason = $('#fLost', d).value.trim(); item.nextContact = ''; }
+        touch(item, 'status', `${STATUS[prev]} para ${STATUS[status]}`);
+      } else if (status === 'perdido') item.lostReason = $('#fLost', d).value.trim();
+      touch(item); save(); render();
+    } });
+  const hint = () => {
+    const el = $('#fHint', ov), x = parseFloat($('#fValue', ov).value) || 0;
+    el.className = 'hint' + (x >= 300 && x < 1500 ? ' ok' : ''); el.textContent = !x ? '' : x < 300 ? 'Abaixo do mínimo de comissão.' : x >= 1500 ? 'Comissão: a combinar.' : 'Comissão estimada: ' + money(commission(x));
+  };
+  $('#fValue', ov).addEventListener('input', hint); hint();
+  $('#fStatus', ov).addEventListener('change', (e) => { $('#fLostW', ov).hidden = e.target.value !== 'perdido'; });
+  $('#fQuick', ov).addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if (b) $('#fNext', ov).value = addDays(+b.dataset.d); });
+  const cb = $('[data-contacted]', ov);
+  if (cb) cb.onclick = () => { ov._close(false); contacted(p.id); };
 }
 
-async function save() {
-    try {
-        const res = await fetch('/api/data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prospects, goal: monthlyGoal, role })
-        });
-        if (!res.ok) throw new Error('Resposta ' + res.status);
-        hideBanner();
-    } catch (err) {
-        console.error('Falha ao salvar dados:', err);
-        showBanner('Não consegui salvar. Sua última alteração pode não ter sido gravada — verifique sua conexão.');
-    }
-}
-
-function showBanner(msg) {
-    let b = document.getElementById('errorBanner');
-    if (!b) {
-        b = document.createElement('div');
-        b.id = 'errorBanner';
-        b.className = 'error-banner';
-        document.body.prepend(b);
-    }
-    b.textContent = msg;
-    b.hidden = false;
-}
-
-function hideBanner() {
-    const b = document.getElementById('errorBanner');
-    if (b) b.hidden = true;
-}
-
-function formatMoney(v) {
-    return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-function formatDate(iso) {
-    const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR');
-}
-
-function renderGoal(currentValue) {
-    const pct = monthlyGoal > 0 ? Math.min(100, Math.round((currentValue / monthlyGoal) * 100)) : 0;
-    document.getElementById('goalCurrent').innerHTML = `<strong>${formatMoney(currentValue)}</strong> faturados este mês`;
-    document.getElementById('goalTarget').textContent = monthlyGoal > 0 ? `Meta: ${formatMoney(monthlyGoal)} (${pct}%)` : 'Nenhuma meta definida';
-    document.getElementById('goalBarFill').style.width = pct + '%';
+function contacted(id) {
+  const p = S.prospects.find((x) => x.id === id); if (!p) return;
+  dialog({ title: 'Registrar contato', body: `<div class="f"><label for="cNote">O que foi combinado? (opcional)</label><input id="cNote" placeholder="Ex: enviou orçamento"></div><div class="f"><label for="cNext">Próximo contato</label><input id="cNext" type="date" value="${addDays(3)}"></div><div class="quick"><button type="button" class="btn sm gh" data-d="1">Amanhã</button><button type="button" class="btn sm gh" data-d="3">+3 dias</button><button type="button" class="btn sm gh" data-d="7">+7 dias</button></div>`, ok: 'Registrar', onOk: (d) => {
+    p.nextContact = $('#cNext', d).value; if (p.status === 'prospectando') p.status = 'negociando';
+    touch(p, 'contact', 'Contato feito' + ($('#cNote', d).value.trim() ? ': ' + $('#cNote', d).value.trim() : ''));
+    save(); render(); toast('Contato registrado.', { type: 'ok' });
+  } }).addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if (b) $('#cNext').value = addDays(+b.dataset.d); });
 }
 
 function editGoal() {
-    const input = prompt('Qual a meta de faturamento deste mês? (R$)', monthlyGoal || '');
-    if (input === null) return;
-    const value = parseFloat(input.replace(',', '.'));
-    if (isNaN(value) || value < 0) {
-        alert('Digite um número válido.');
-        return;
-    }
-    monthlyGoal = value;
-    save();
-    render();
-}
-
-function renderClosedChart() {
-    const el = document.getElementById('chartBars');
-    if (!el) return;
-    const months = [];
-    const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        months.push(d);
-    }
-    const counts = months.map(m => prospects.filter(p => {
-        if (p.status !== 'fechado') return false;
-        const d = new Date(p.date);
-        return d.getMonth() === m.getMonth() && d.getFullYear() === m.getFullYear();
-    }).length);
-    const max = Math.max(1, ...counts);
-    el.innerHTML = months.map((m, i) => {
-        const pct = Math.max(4, Math.round((counts[i] / max) * 100));
-        const label = m.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
-        return `
-            <div class="chart-bar-col">
-                <span class="chart-bar-value">${counts[i]}</span>
-                <div class="chart-bar" style="height:${pct}%" title="${counts[i]} fechado${counts[i] === 1 ? '' : 's'} em ${label}"></div>
-                <span class="chart-bar-label">${label}</span>
-            </div>`;
-    }).join('');
-}
-
-function nextContactInfo(dateStr) {
-    if (!dateStr) return { label: '—', cls: '' };
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const target = new Date(dateStr + 'T00:00:00');
-    const diffDays = Math.round((target - today) / 86400000);
-
-    if (diffDays < 0) return { label: `Atrasado (${formatDate(dateStr)})`, cls: 'overdue' };
-    if (diffDays === 0) return { label: 'Hoje', cls: 'today' };
-    return { label: formatDate(dateStr), cls: '' };
-}
-
-function render() {
-    // Stats
-    const total = prospects.length;
-    const won = prospects.filter(p => p.status === 'fechado');
-    const lost = prospects.filter(p => p.status === 'perdido');
-    const pipeline = prospects.filter(p => p.status === 'prospectando' || p.status === 'negociando');
-
-    document.getElementById('statTotal').textContent = total;
-    document.getElementById('statTotalSub').textContent = total === 0 ? 'Nenhum cadastrado ainda' : `${pipeline.length} em andamento`;
-
-    const wonOneTime = won.filter(p => !p.recurring);
-    const wonRecurring = won.filter(p => p.recurring);
-
-    const totalWonValue = wonOneTime.reduce((s, p) => s + Number(p.value || 0), 0);
-    document.getElementById('heroTotal').textContent = formatMoney(totalWonValue);
-    document.getElementById('heroTotalSub').textContent = wonOneTime.length === 0
-        ? 'Nenhum negócio avulso fechado ainda'
-        : `de ${wonOneTime.length} negócio${wonOneTime.length > 1 ? 's' : ''} fechado${wonOneTime.length > 1 ? 's' : ''} (avulsos)`;
-
-    const mrrValue = wonRecurring.reduce((s, p) => s + Number(p.value || 0), 0);
-    document.getElementById('heroMrr').textContent = formatMoney(mrrValue);
-    document.getElementById('heroMrrSub').textContent = wonRecurring.length === 0
-        ? 'Nenhum contrato recorrente ainda'
-        : `${wonRecurring.length} cliente${wonRecurring.length > 1 ? 's' : ''} pagando por mês`;
-
-    const isIntern = role === 'estagiario';
-
-    document.getElementById('statWon').textContent = won.length;
-    document.getElementById('statWonSub').textContent = isIntern
-        ? `${won.length} negócio${won.length === 1 ? '' : 's'} fechado${won.length === 1 ? '' : 's'}`
-        : formatMoney(won.reduce((s, p) => s + Number(p.value || 0), 0)) + ' faturados';
-
-    document.getElementById('statPipeline').textContent = pipeline.length;
-    document.getElementById('statPipelineSub').textContent = isIntern
-        ? `${pipeline.length} em andamento`
-        : formatMoney(pipeline.reduce((s, p) => s + Number(p.value || 0), 0)) + ' em aberto';
-
-    document.getElementById('statLost').textContent = lost.length;
-    document.getElementById('statLostSub').textContent = isIntern
-        ? `${lost.length} não convertido${lost.length === 1 ? '' : 's'}`
-        : formatMoney(lost.reduce((s, p) => s + Number(p.value || 0), 0)) + ' não convertidos';
-
-    const decided = won.length + lost.length;
-    const conversionRate = decided === 0 ? 0 : Math.round((won.length / decided) * 100);
-    document.getElementById('statConversion').textContent = conversionRate + '%';
-    document.getElementById('statConversionSub').textContent = decided === 0
-        ? 'Sem negócios decididos ainda'
-        : `${won.length} de ${decided} decididos`;
-
-    const now = new Date();
-    const wonThisMonth = won.filter(p => {
-        const d = new Date(p.date);
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    });
-    const monthValue = wonThisMonth.reduce((s, p) => s + Number(p.value || 0), 0);
-    renderGoal(monthValue);
-
-    // Alerta de contatos atrasados
-    const overdueCount = prospects.filter(p => {
-        if (!p.nextContact || p.status === 'fechado' || p.status === 'perdido') return false;
-        return nextContactInfo(p.nextContact).cls === 'overdue';
-    }).length;
-    const overdueBanner = document.getElementById('overdueBanner');
-    if (overdueCount > 0) {
-        overdueBanner.textContent = `⚠️ ${overdueCount} contato${overdueCount > 1 ? 's' : ''} atrasado${overdueCount > 1 ? 's' : ''}. Dá uma olhada na Prospecção.`;
-        overdueBanner.hidden = false;
-    } else {
-        overdueBanner.hidden = true;
-    }
-
-    // Resumo de comissão (fechados pelo estagiário)
-    const estagiarioWon = won.filter(p => p.responsavel === 'estagiario');
-    const commTotalValue = estagiarioWon.reduce((s, p) => s + (calcCommission(Number(p.value || 0)) || 0), 0);
-    const estagiarioWonMonth = estagiarioWon.filter(p => {
-        const d = new Date(p.date);
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    });
-    const commMonthValue = estagiarioWonMonth.reduce((s, p) => s + (calcCommission(Number(p.value || 0)) || 0), 0);
-    const commMonthEl = document.getElementById('commMonth');
-    if (commMonthEl) {
-        commMonthEl.textContent = formatMoney(commMonthValue);
-        document.getElementById('commMonthSub').textContent = `${estagiarioWonMonth.length} negócio${estagiarioWonMonth.length === 1 ? '' : 's'} fechado${estagiarioWonMonth.length === 1 ? '' : 's'} este mês`;
-        document.getElementById('commTotal').textContent = formatMoney(commTotalValue);
-        document.getElementById('commTotalSub').textContent = `${estagiarioWon.length} negócio${estagiarioWon.length === 1 ? '' : 's'} no total`;
-    }
-
-    // Gráfico de fechados por mês (últimos 6 meses)
-    renderClosedChart();
-
-    // Table
-    let filtered = currentFilter === 'todos' ? prospects : prospects.filter(p => p.status === currentFilter);
-
-    if (currentResponsavel !== 'todos') {
-        filtered = filtered.filter(p => p.responsavel === currentResponsavel);
-    }
-
-    if (searchTerm.trim()) {
-        const term = searchTerm.trim().toLowerCase();
-        filtered = filtered.filter(p =>
-            p.name.toLowerCase().includes(term) || (p.service || '').toLowerCase().includes(term)
-        );
-    }
-
-    filtered = filtered.slice().sort((a, b) => {
-        let av = a[sortField], bv = b[sortField];
-        if (sortField === 'date') { av = new Date(av); bv = new Date(bv); }
-        if (sortField === 'value') { av = Number(av || 0); bv = Number(bv || 0); }
-        if (sortField === 'name') { av = (av || '').toLowerCase(); bv = (bv || '').toLowerCase(); }
-        if (av < bv) return sortDir === 'asc' ? -1 : 1;
-        if (av > bv) return sortDir === 'asc' ? 1 : -1;
-        return 0;
-    });
-
-    const tbody = document.getElementById('tableBody');
-    const empty = document.getElementById('emptyState');
-
-    if (filtered.length === 0) {
-        tbody.innerHTML = '';
-        empty.hidden = false;
-    } else {
-        empty.hidden = true;
-        tbody.innerHTML = filtered
-            .map(p => {
-                const nc = nextContactInfo(p.nextContact);
-                return `
-                <tr>
-                    <td>
-                        <div class="client-name">${escapeHtml(p.name)}</div>
-                        ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
-                        ${p.responsavel ? `<div class="client-contact">Resp: ${p.responsavel === 'dono' ? 'Dono' : 'Estagiário'}</div>` : ''}
-                    </td>
-                    <td>${escapeHtml(p.service || '—')}</td>
-                    <td class="value-cell">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
-                    <td>
-                        <select class="status-badge ${p.status}" onchange="quickStatus('${p.id}', this.value)">
-                            ${Object.entries(statusLabels).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}
-                        </select>
-                    </td>
-                    <td>${formatDate(p.date)}</td>
-                    <td><span class="contact-tag ${nc.cls}">${nc.label}</span></td>
-                    <td>
-                        <div class="row-actions">
-                            <button onclick="editProspect('${p.id}')" title="Editar"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></button>
-                            <button class="del" onclick="deleteProspect('${p.id}')" title="Excluir"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></span></button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            }).join('');
-    }
-
-    // Recentes (Visão Geral)
-    const recentBody = document.getElementById('recentBody');
-    const recentEmpty = document.getElementById('recentEmpty');
-    const recent = prospects.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
-
-    if (recent.length === 0) {
-        recentBody.innerHTML = '';
-        recentEmpty.hidden = false;
-    } else {
-        recentEmpty.hidden = true;
-        recentBody.innerHTML = recent.map(p => `
-            <tr>
-                <td>
-                    <div class="client-name">${escapeHtml(p.name)}</div>
-                    ${p.contact ? `<div class="client-contact">${escapeHtml(p.contact)}</div>` : ''}
-                </td>
-                <td>${escapeHtml(p.service || '—')}</td>
-                <td class="value-cell">${formatMoney(p.value)}${p.recurring ? '<span class="recurring-tag">/mês</span>' : ''}</td>
-                <td><span class="status-badge ${p.status}" style="pointer-events:none;">${statusLabels[p.status]}</span></td>
-                <td>${formatDate(p.date)}</td>
-            </tr>
-        `).join('');
-    }
+  const mk = mkey(new Date());
+  dialog({ title: 'Meta do mês', body: `<div class="f"><label for="gv">Meta de faturamento de ${new Date().toLocaleDateString('pt-BR', { month: 'long' })} (R$)</label><input id="gv" type="number" min="0" step="50" inputmode="decimal" value="${S.goals[mk] ?? S.goal ?? ''}"></div>`, ok: 'Salvar meta', onOk: (d) => {
+    const v = parseFloat($('#gv', d).value); if (isNaN(v) || v < 0) { toast('Digite um valor válido.', { type: 'err' }); return false; }
+    S.goals[mk] = v; S.goal = v; save(); render();
+  } });
 }
 
 function exportCsv() {
-    const header = ['Cliente', 'Contato', 'Serviço', 'Valor', 'Recorrente', 'Status', 'Data', 'Próximo Contato', 'Responsável', 'Notas'];
-    const rows = prospects.map(p => [
-        p.name, p.contact || '', p.service || '', p.value || 0, p.recurring ? 'Sim' : 'Não',
-        statusLabels[p.status] || p.status, formatDate(p.date), p.nextContact || '',
-        p.responsavel === 'dono' ? 'Dono' : (p.responsavel === 'estagiario' ? 'Estagiário' : ''),
-        (p.notes || '').replace(/\n/g, ' ')
-    ]);
-    const csv = [header, ...rows]
-        .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'))
-        .join('\r\n');
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `prospectos_${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const head = ['Cliente', 'Contato', 'Serviço', 'Valor', 'Recorrente', 'Status', 'Cadastro', 'Fechado em', 'Próximo contato', 'Responsável', 'Motivo da perda', 'Notas'];
+  const rows = filtered().map((p) => [p.name, p.contact || '', p.service || '', p.value == null ? '' : p.value, p.recurring ? 'Sim' : 'Não', STATUS[p.status], fdate(p.date), p.closedAt ? fdate(p.closedAt) : '', p.nextContact ? fdate(p.nextContact) : '', p.responsavel === 'estagiario' ? 'Estagiário' : 'Dono', p.lostReason || '', (p.notes || '').replace(/\n/g, ' ')]);
+  download(`prospectos_${today()}.csv`, '﻿' + [head, ...rows].map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n'), 'text/csv;charset=utf-8;');
+}
+function download(name, content, type) {
+  const url = URL.createObjectURL(new Blob([content], { type })), a = document.createElement('a');
+  a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 500);
+}
+function restore() {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = async () => {
+    try {
+      const d = JSON.parse(await inp.files[0].text());
+      if (!Array.isArray(d.prospects)) throw new Error('arquivo inválido');
+      dialog({ title: 'Restaurar backup', body: `<p style="color:var(--dim)">Mesclar <b style="color:var(--text)">${d.prospects.length}</b> prospecto(s) do arquivo com os atuais? Registros com o mesmo ID serão substituídos pela versão mais recente.</p>`, ok: 'Restaurar', onOk: () => {
+        const by = new Map(S.prospects.map((p) => [p.id, p]));
+        d.prospects.forEach((p) => { if (p && p.id) { const o = by.get(p.id); if (!o || (p.updatedAt || 0) >= (o.updatedAt || 0)) by.set(p.id, { ...p, updatedAt: Date.now() }); } });
+        S.prospects = [...by.values()]; if (d.goals) Object.assign(S.goals, d.goals); save(); render(); toast('Backup restaurado.', { type: 'ok' });
+      } });
+    } catch (e) { toast('Não consegui ler o arquivo: ' + e.message, { type: 'err' }); }
+  };
+  inp.click();
 }
 
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-}
-
-function quickStatus(id, newStatus) {
-    const p = prospects.find(x => x.id === id);
-    if (p) {
-        p.status = newStatus;
-        save();
-        render();
-    }
-}
-
-function openModal(prospect) {
-    document.getElementById('modalTitle').textContent = prospect ? 'Editar Prospecto' : 'Novo Prospecto';
-    document.getElementById('editId').value = prospect ? prospect.id : '';
-    document.getElementById('fName').value = prospect ? prospect.name : '';
-    document.getElementById('fContact').value = prospect ? prospect.contact : '';
-    document.getElementById('fService').value = prospect ? prospect.service : '';
-    document.getElementById('fValue').value = prospect ? prospect.value : '';
-    document.getElementById('fStatus').value = prospect ? prospect.status : 'prospectando';
-    document.getElementById('fNextContact').value = prospect ? (prospect.nextContact || '') : '';
-    document.getElementById('fRecurring').checked = prospect ? !!prospect.recurring : false;
-    document.getElementById('fNotes').value = prospect ? prospect.notes : '';
-    document.getElementById('modalOverlay').hidden = false;
-    document.getElementById('fName').focus();
-    updateCommissionHint();
-}
-
-function calcCommission(value) {
-    if (!value || value < 300) return null;
-    if (value < 600) return 50;
-    if (value < 1000) return value * 0.10;
-    if (value < 1500) return value * 0.15;
-    return null; // a combinar
-}
-
-function updateCommissionHint() {
-    const hint = document.getElementById('commissionHint');
-    const value = parseFloat(document.getElementById('fValue').value) || 0;
-    if (!value) { hint.textContent = ''; return; }
-    if (value < 300) { hint.textContent = 'Abaixo do valor mínimo de comissão.'; return; }
-    if (value >= 1500) { hint.textContent = 'Comissão: a combinar.'; return; }
-    hint.textContent = `Comissão estimada: ${formatMoney(calcCommission(value))}`;
-}
-
-document.getElementById('fValue').addEventListener('input', updateCommissionHint);
-
-document.getElementById('fContact').addEventListener('input', (e) => {
-    const el = e.target;
-    if (/[a-zA-Z@]/.test(el.value)) return; // deixa email/texto livre, sem máscara
-    let digits = el.value.replace(/\D/g, '').slice(0, 11);
-    let formatted = digits;
-    if (digits.length > 10) {
-        formatted = digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    } else if (digits.length > 6) {
-        formatted = digits.replace(/(\d{2})(\d{4})(\d*)/, (m, a, b, c) => `(${a}) ${b}${c ? '-' + c : ''}`);
-    } else if (digits.length > 2) {
-        formatted = digits.replace(/(\d{2})(\d*)/, '($1) $2');
-    } else if (digits.length > 0) {
-        formatted = '(' + digits;
-    }
-    el.value = formatted;
+/* ---------- eventos ---------- */
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-act]'); if (!t) return;
+  if (e.target.closest('a[href]') && t.dataset.act !== 'view') return;
+  const a = t.dataset.act, id = t.dataset.id;
+  if (t.tagName === 'SELECT' || t.tagName === 'INPUT') return;
+  if ((a === 'edit') && e.target.closest('select,button.ib,a,.acts') && !t.classList.contains('ib')) { if (e.target.closest('.acts')) return; }
+  switch (a) {
+    case 'view': setView(t.dataset.v); break;
+    case 'new': openProspect(); break;
+    case 'edit': openProspect(id); break;
+    case 'del': deleteProspect(id); break;
+    case 'contacted': contacted(id); break;
+    case 'goal': editGoal(); break;
+    case 'export': exportCsv(); break;
+    case 'backup': download(`backup_painel_${today()}.json`, JSON.stringify({ prospects: S.prospects, goals: S.goals, goal: S.goal, at: new Date().toISOString() }, null, 1), 'application/json'); break;
+    case 'restore': restore(); break;
+    case 'logout': logout(); break;
+    case 'filter': S.filter = t.dataset.k; saveUI(); render(); break;
+    case 'resp': S.resp = t.dataset.k; saveUI(); render(); break;
+    case 'sort': { const k = t.dataset.k; if (S.sort === k) S.dir = S.dir === 'asc' ? 'desc' : 'asc'; else { S.sort = k; S.dir = k === 'name' ? 'asc' : 'desc'; } render(); break; }
+  }
 });
-
-function closeModal() {
-    document.getElementById('modalOverlay').hidden = true;
-    document.getElementById('prospectForm').reset();
-}
-
-function editProspect(id) {
-    const p = prospects.find(x => x.id === id);
-    if (p) openModal(p);
-}
-
-function deleteProspect(id) {
-    if (!confirm('Excluir esse prospecto? Essa ação não pode ser desfeita.')) return;
-    prospects = prospects.filter(x => x.id !== id);
-    save();
-    render();
-}
-
-document.getElementById('prospectForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const id = document.getElementById('editId').value;
-    const data = {
-        name: document.getElementById('fName').value.trim(),
-        contact: document.getElementById('fContact').value.trim(),
-        service: document.getElementById('fService').value.trim(),
-        value: parseFloat(document.getElementById('fValue').value) || 0,
-        status: document.getElementById('fStatus').value,
-        nextContact: document.getElementById('fNextContact').value || null,
-        recurring: document.getElementById('fRecurring').checked,
-        notes: document.getElementById('fNotes').value.trim()
-    };
-
-    if (id) {
-        const p = prospects.find(x => x.id === id);
-        Object.assign(p, data);
-    } else {
-        prospects.push({ id: crypto.randomUUID(), date: new Date().toISOString(), responsavel: role, ...data });
-    }
-
-    save();
-    render();
-    closeModal();
+document.addEventListener('change', (e) => {
+  const t = e.target.closest('[data-act]'); if (!t) return;
+  if (t.dataset.act === 'status') setStatus(t.dataset.id, t.value);
+  if (t.dataset.act === 'paid' && !isIntern()) { const p = S.prospects.find((x) => x.id === t.dataset.id); if (p) { p.commissionPaid = t.checked; touch(p, 'paid', t.checked ? 'Comissão paga' : 'Pagamento desmarcado'); save(); render(); } }
 });
+let qT;
+document.addEventListener('input', (e) => { if (e.target.id === 'q') { S.q = e.target.value; clearTimeout(qT); qT = setTimeout(render, 120); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S.token && !saving && !S.deleted.length && !document.querySelector('.ov')) load(true); });
+setInterval(() => { if (S.token && !document.hidden && !saving && !document.querySelector('.ov')) load(true); }, 90000);
 
-document.getElementById('modalOverlay').addEventListener('click', (e) => {
-    if (e.target.id === 'modalOverlay') closeModal();
-});
-
-document.querySelectorAll('#filters .filter-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-        document.querySelectorAll('#filters .filter-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        currentFilter = chip.dataset.filter;
-        render();
-    });
-});
-
-document.querySelectorAll('#filtersResp .filter-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-        document.querySelectorAll('#filtersResp .filter-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        currentResponsavel = chip.dataset.resp;
-        render();
-    });
-});
-
-document.getElementById('searchInput').addEventListener('input', (e) => {
-    searchTerm = e.target.value;
-    render();
-});
-
-const SVG_SORT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 9 12 5 16 9"/><polyline points="16 15 12 19 8 15"/></svg>';
-const SVG_SORT_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
-const SVG_SORT_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-
-document.querySelectorAll('th.sortable').forEach(th => {
-    th.addEventListener('click', () => {
-        const field = th.dataset.sort;
-        if (sortField === field) {
-            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-        } else {
-            sortField = field;
-            sortDir = 'desc';
-        }
-
-        document.querySelectorAll('th.sortable').forEach(t => {
-            t.classList.remove('sort-active');
-            t.querySelector('.icon').innerHTML = SVG_SORT;
-        });
-        th.classList.add('sort-active');
-        th.querySelector('.icon').innerHTML = sortDir === 'asc' ? SVG_SORT_UP : SVG_SORT_DOWN;
-
-        render();
-    });
-});
-
-const todayText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
-
-function showView(view) {
-    document.getElementById('viewOverview').hidden = view !== 'overview';
-    document.getElementById('viewProspects').hidden = view !== 'prospects';
-    document.getElementById('viewCommissions').hidden = view !== 'commissions';
-    document.getElementById('navOverview').classList.toggle('active', view === 'overview');
-    document.getElementById('navProspects').classList.toggle('active', view === 'prospects');
-    document.getElementById('navCommissions').classList.toggle('active', view === 'commissions');
-
-    const titles = { overview: 'Visão Geral', prospects: 'Prospecção', commissions: 'Comissões' };
-    const subtitles = {
-        overview: todayText.charAt(0).toUpperCase() + todayText.slice(1),
-        prospects: 'Todos os seus clientes e negociações, num lugar só.',
-        commissions: 'Referência de comissão por valor de site fechado.'
-    };
-    document.getElementById('pageTitle').textContent = titles[view];
-    document.getElementById('pageSubtitle').textContent = subtitles[view];
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-document.getElementById('navOverview').addEventListener('click', () => showView('overview'));
-document.getElementById('navProspects').addEventListener('click', () => showView('prospects'));
-document.getElementById('navCommissions').addEventListener('click', () => showView('commissions'));
-
-document.getElementById('pageSubtitle').textContent = todayText.charAt(0).toUpperCase() + todayText.slice(1);
-
-checkLogin();
+boot();
 </script>
 </body>
 </html>
