@@ -248,13 +248,16 @@
     if (!hasGsap() || reduce) return;
     var gsap = window.gsap, ST = window.ScrollTrigger;
     gsap.registerPlugin(ST);
+    if (ST.config) ST.config({ ignoreMobileResize: true });
 
     // serviços: cards empilhados recuam
-    var cards = $$('.svc');
-    cards.forEach(function (c, i) {
-      var next = cards[i + 1]; if (!next) return;
-      gsap.to($('.svc-in', c), { scale: 0.93, '--dim': 0.4, ease: 'none',
-        scrollTrigger: { trigger: next, start: 'top 88%', end: 'top ' + (92 + (i + 1) * 18) + 'px', scrub: true } });
+    gsap.matchMedia().add('(min-width: 761px)', function () {
+      var cards = $$('.svc');
+      cards.forEach(function (c, i) {
+        var next = cards[i + 1]; if (!next) return;
+        gsap.to($('.svc-in', c), { scale: 0.93, '--dim': 0.4, ease: 'none',
+          scrollTrigger: { trigger: next, start: 'top 88%', end: 'top ' + (92 + (i + 1) * 18) + 'px', scrub: true } });
+      });
     });
 
     // projetos: rolagem horizontal presa

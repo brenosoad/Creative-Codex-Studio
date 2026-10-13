@@ -126,7 +126,7 @@ html.js .hero-foot[data-r].in{transform:translateX(-50%)}
 .scroll-hint{display:flex;align-items:center;gap:.7rem;font-size:.82rem;color:var(--mut)}
 .scroll-hint i{display:block;width:1px;height:46px;background:linear-gradient(var(--cyan),transparent);animation:drip 2s var(--ease) infinite;transform-origin:top}
 @keyframes drip{0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
-@media (max-width:760px){
+@media (max-width:860px){
   .hero{padding:110px 0 400px;justify-content:flex-start}
   .hero-fade{background:linear-gradient(180deg,rgba(13,11,26,.88) 0%,rgba(13,11,26,.55) 55%,rgba(13,11,26,.2) 100%),linear-gradient(0deg,#0D0B1A 0%,transparent 25%)}
   .scroll-hint{display:none}
@@ -370,3 +370,32 @@ html.js .hero-foot[data-r].in{transform:translateX(-50%)}
 .brand .sym{width:36px;height:23px;flex:none}
 .hl{font-size:clamp(2.1rem,4.5vw,3.9rem)}
 .err:empty{display:none}
+
+/* ---------- v6: responsividade ---------- */
+.about-txt .h3{margin-top:1.8rem}
+@media (max-width:1100px){.skills{grid-template-columns:1fr}}
+@media (max-width:860px){.hero{padding:112px 0 min(52vh,460px)}.hero-copy{max-width:560px}.hl{font-size:clamp(2.1rem,8.4vw,3.6rem)}}
+@media (max-width:760px){
+  .stack{gap:1.1rem;padding-bottom:0}
+  .svc{position:static}
+  .svc-in{border-radius:24px;padding:1.4rem}
+  .svc-in::after{display:none}
+  .sec{padding-block:4.2rem}
+  .wa-float{right:14px;bottom:14px;width:50px;height:50px}
+  .wa-float .i{width:24px;height:24px}
+  .foot-bot{flex-direction:column;align-items:flex-start;gap:.8rem}
+}
+@media (max-width:420px){
+  :root{--gut:18px}
+  .nav{width:calc(100% - 20px);top:10px;padding:.45rem .45rem .45rem .8rem;gap:.5rem}
+  .nav-right{gap:.35rem}
+  .brand{font-size:.98rem;gap:.5rem}
+  .brand .sym{width:30px;height:19px}
+  .foot-grid{grid-template-columns:1fr;gap:1.8rem}
+  .hero-cta .btn{width:100%}
+  .chip{font-size:.74rem;padding:.4rem .7rem}
+  .h2{font-size:clamp(1.65rem,8vw,2rem)}
+  .pc{flex-basis:88vw}
+  .cf-i{padding:1.2rem}
+}
+@media (max-width:360px){.lang{display:none}.hl{font-size:2rem}}
