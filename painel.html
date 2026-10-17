@@ -367,7 +367,7 @@ let saveT = null, saving = false, again = false;
 function save() {
   setSync('busy', 'Salvando');
   clearTimeout(saveT);
-  saveT = setTimeout(flush, 350);
+  saveT = setTimeout(() => { saveT = null; flush(); }, 350);
 }
 async function flush() {
   if (saving) { again = true; return; }
@@ -385,6 +385,7 @@ async function flush() {
   if (again) { again = false; flush(); } else render();
 }
 async function load(silent) {
+  if (saveT || saving) return;
   try {
     const d = await api('GET');
     applyServer(d); setSync('', 'Salvo');
@@ -576,7 +577,8 @@ function bindDnD() {
 
 function filtered() {
   let l = S.prospects.slice();
-  if (S.filter !== 'todos') l = l.filter((p) => p.status === S.filter);
+  if (S.filter === 'todos') l = l.filter((p) => p.status !== 'perdido');
+  else l = l.filter((p) => p.status === S.filter);
   if (S.resp !== 'todos') l = l.filter((p) => p.responsavel === S.resp);
   const q = S.q.trim().toLowerCase();
   if (q) l = l.filter((p) => (p.name + ' ' + (p.service || '') + ' ' + (p.contact || '')).toLowerCase().includes(q));
@@ -592,7 +594,7 @@ function filtered() {
   return l;
 }
 function vList() {
-  const l = filtered(), cnt = (k) => k === 'todos' ? S.prospects.length : S.prospects.filter((p) => p.status === k).length;
+  const l = filtered(), cnt = (k) => k === 'todos' ? S.prospects.filter((p) => p.status !== 'perdido').length : S.prospects.filter((p) => p.status === k).length;
   const th = (k, t) => `<th class="s ${S.sort === k ? 'on' : ''}" data-act="sort" data-k="${k}">${t}${S.sort === k ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th>`;
   return `<div class="tools"><div class="search">${ic('search')}<input id="q" type="search" placeholder="Buscar por nome, serviço ou contato ( / )" value="${esc(S.q)}" aria-label="Buscar"></div>
     ${!isIntern() ? `<button class="btn gh" data-act="export">${ic('dl')}CSV</button><button class="btn gh" data-act="backup">${ic('dl')}Backup</button><button class="btn gh" data-act="restore">${ic('ul')}Restaurar</button>` : `<button class="btn gh" data-act="export">${ic('dl')}CSV</button>`}</div>
