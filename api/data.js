@@ -1,9 +1,26 @@
 import { kv } from '@vercel/kv';
+import { readFileSync } from 'node:fs';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 const KEY = 'painel_dados';
 const SESSION_MS = 12 * 3600 * 1000;
 const MAX_PROSPECTS = 2000;
+const SEED_FLAG = 'painel_seed_v1';
+
+// Carga inicial única de prospectos (api/seed.json). Registros apagados depois não voltam.
+async function applySeed(current) {
+  if (await kv.get(SEED_FLAG)) return current;
+  let seed = [];
+  try { seed = JSON.parse(readFileSync(new URL('./seed.json', import.meta.url), 'utf8')); } catch { return current; }
+  const have = new Set(current.prospects.map((p) => p.id));
+  for (const raw of seed) {
+    const p = clean(raw, 'dono');
+    if (p && !have.has(p.id)) current.prospects.push(p);
+  }
+  await kv.set(KEY, current);
+  await kv.set(SEED_FLAG, 1);
+  return current;
+}
 
 // Defina PAINEL_SENHA_DONO, PAINEL_SENHA_ESTAGIARIO e PAINEL_SECRET nas variáveis de ambiente da Vercel.
 // Os valores abaixo só existem para o painel não parar antes da configuração. Troque as senhas.
@@ -104,6 +121,7 @@ export default async function handler(req, res) {
     const current = (await kv.get(KEY)) || { prospects: [], goal: 0, goals: {} };
     current.prospects = current.prospects || [];
     current.goals = current.goals || {};
+    await applySeed(current);
 
     if (req.method === 'GET') return res.status(200).json(view(current, role));
 
