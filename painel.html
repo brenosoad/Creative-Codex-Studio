@@ -178,6 +178,9 @@ select.st{padding-right:.7rem;cursor:pointer}
 .quick{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 14px}
 
 /* toast + login */
+.pwb{position:relative}.pwb input{width:100%;padding-right:48px}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:40px;height:40px;display:grid;place-items:center;background:none;border:0;border-radius:8px;color:var(--dim,#A29FB8);cursor:pointer}
+.eye:hover,.eye:focus-visible{color:#F4F3F8}.eye .sl{display:none}.eye[aria-pressed=true] .sl{display:block}
 .toasts{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:400;width:min(92vw,420px)}
 .toast{background:#262244;border:1px solid var(--line);border-radius:12px;padding:.75rem 1rem;display:flex;gap:12px;align-items:center;font-size:.9rem;animation:pop .2s}
 .toast.err{border-color:rgba(248,113,113,.5)}.toast.ok{border-color:rgba(52,211,153,.4)}
@@ -251,7 +254,7 @@ body.intern .money{display:none!important}
     <h2>Painel Creative Codex</h2>
     <p>Digite sua senha de acesso</p>
     <label class="sr" for="pw" style="position:absolute;left:-9999px">Senha</label>
-    <input type="password" id="pw" placeholder="Senha" autocomplete="current-password" required>
+    <div class="pwb"><input type="password" id="pw" placeholder="Senha" autocomplete="current-password" required><button type="button" class="eye" id="pwEye" aria-label="Mostrar senha" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="sl" d="M4 4l16 16"/></svg></button></div>
     <button class="btn pri" type="submit" id="loginBtn">Entrar</button>
     <p class="er" id="loginErr" role="alert"></p>
   </form>
@@ -414,6 +417,11 @@ function logout(expired) {
   showLogin();
   if (expired) $('#loginErr').textContent = 'Sessão expirada. Entre novamente.';
 }
+$('#pwEye').addEventListener('click', () => {
+  const i = $('#pw'), on = i.type === 'password';
+  i.type = on ? 'text' : 'password';
+  $('#pwEye').setAttribute('aria-pressed', on); $('#pwEye').setAttribute('aria-label', on ? 'Ocultar senha' : 'Mostrar senha');
+});
 $('#loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const b = $('#loginBtn'); b.disabled = true; $('#loginErr').textContent = '';
