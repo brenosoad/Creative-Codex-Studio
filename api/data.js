@@ -1,5 +1,6 @@
 import { kv } from '@vercel/kv';
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 const KEY = 'painel_dados';
@@ -11,7 +12,7 @@ const SEED_FLAG = 'painel_seed_v1';
 async function applySeed(current) {
   if (await kv.get(SEED_FLAG)) return current;
   let seed = [];
-  try { seed = JSON.parse(readFileSync(new URL('./seed.json', import.meta.url), 'utf8')); } catch { return current; }
+  try { seed = JSON.parse(readFileSync(join(process.cwd(), 'api', 'seed.json'), 'utf8')); } catch { return current; }
   const have = new Set(current.prospects.map((p) => p.id));
   for (const raw of seed) {
     const p = clean(raw, 'dono');
@@ -121,7 +122,7 @@ export default async function handler(req, res) {
     const current = (await kv.get(KEY)) || { prospects: [], goal: 0, goals: {} };
     current.prospects = current.prospects || [];
     current.goals = current.goals || {};
-    await applySeed(current);
+    try { await applySeed(current); } catch (e) { console.error('seed', e); }
 
     if (req.method === 'GET') return res.status(200).json(view(current, role));
 
