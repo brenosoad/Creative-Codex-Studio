@@ -33,7 +33,7 @@ const PASSWORDS = {
 };
 const ROLES = Object.keys(PASSWORDS);
 // Perfis que trabalham em TODOS os prospectos (contato, status, notas), sem acesso a valores, comissões e meta.
-const OPERADORES = ['diogo'];
+const OPERADORES = ['diogo', 'estagiario'];
 const SECRET = process.env.PAINEL_SECRET || ('cc:' + ROLES.map((k) => PASSWORDS[k]).join(':'));
 
 const sign = (payload) => createHmac('sha256', SECRET).update(payload).digest('base64url');

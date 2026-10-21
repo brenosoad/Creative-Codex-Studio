@@ -410,7 +410,7 @@ function showLogin() {
 function enter() {
   $('#login').hidden = true; $('#side').hidden = $('#main').hidden = $('#tabs').hidden = false;
   document.body.classList.toggle('intern', isIntern());
-  $('#who').textContent = isIntern() ? who(S.role) + (S.role === 'diogo' ? '' : ' (estagiário)') : 'Acesso completo';
+  $('#who').textContent = isIntern() ? who(S.role) + '' : 'Acesso completo';
   try { const f = JSON.parse(sessionStorage.getItem('painel_ui') || '{}'); Object.assign(S, { filter: f.filter || 'todos', resp: f.resp || 'todos', view: f.view || 'overview' }); } catch {}
   load();
 }
