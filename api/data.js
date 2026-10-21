@@ -32,6 +32,8 @@ const PASSWORDS = {
   diogo: process.env.PAINEL_SENHA_DIOGO || 'Diogo2026*'
 };
 const ROLES = Object.keys(PASSWORDS);
+// Perfis que trabalham em TODOS os prospectos (contato, status, notas), sem acesso a valores, comissões e meta.
+const OPERADORES = ['diogo'];
 const SECRET = process.env.PAINEL_SECRET || ('cc:' + ROLES.map((k) => PASSWORDS[k]).join(':'));
 
 const sign = (payload) => createHmac('sha256', SECRET).update(payload).digest('base64url');
@@ -89,9 +91,10 @@ function clean(p, role) {
 
 function view(data, role) {
   if (role === 'dono') return data;
-  // estagiário só enxerga valores e notas dos próprios negócios e não vê meta
+  // sem acesso a valores de outros e sem meta; operadores veem notas e histórico de todos, estagiário só dos próprios
+  const op = OPERADORES.includes(role);
   const prospects = (data.prospects || []).map((p) =>
-    p.responsavel === role ? p : { ...p, value: null, notes: '', history: [] }
+    p.responsavel === role ? p : { ...p, value: null, ...(op ? {} : { notes: '', history: [] }) }
   );
   return { prospects, goal: null, goals: null };
 }
@@ -137,8 +140,12 @@ export default async function handler(req, res) {
         if (!p) continue;
         const old = byId.get(p.id);
         if (role !== 'dono') {
-          if (old && old.responsavel !== role) continue; // não mexe nos de outros
+          const op = OPERADORES.includes(role);
+          if (old && old.responsavel !== role && !op) continue; // não mexe nos de outros
           p.commissionPaid = old ? old.commissionPaid : false;
+          if (old && old.responsavel !== role) { // operador em prospecto de outro: só dados de trabalho
+            p.value = old.value; p.recurring = old.recurring; p.responsavel = old.responsavel;
+          }
         }
         if (old && old.updatedAt > p.updatedAt) continue; // versão mais nova já salva
         if (old && role !== 'dono' && old.value != null && p.value == null) p.value = old.value;
