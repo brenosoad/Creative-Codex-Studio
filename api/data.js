@@ -221,7 +221,7 @@ export default async function handler(req, res) {
           p.commissionPaid = old ? old.commissionPaid : false;
           if (old && old.responsavel === 'dono' && !claimOf(old)) {
             p.responsavel = role; // lead livre do dono: quem assume passa a ser o responsável e recebe a comissão
-            p.value = old.value || 0; p.recurring = old.recurring;
+            p.value = p.value != null ? p.value : (old.value || 0);
           } else if (old && old.responsavel !== role) { // em prospecto de outro: só dados de trabalho
             p.value = old.value; p.recurring = old.recurring; p.responsavel = old.responsavel;
           }

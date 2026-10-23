@@ -208,7 +208,8 @@ body.intern .money{display:none!important}
   .tabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--line);z-index:30;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
   .tabs button{background:none;border:0;color:var(--dim);display:grid;justify-items:center;gap:3px;padding:6px 0;font-size:.68rem;font-weight:700;position:relative}
   .tabs button svg{width:22px;height:22px}
-  .tabs.six button{font-size:.58rem;letter-spacing:-.02em}
+  .tabs.six button{font-size:.56rem;letter-spacing:-.03em;padding:6px 0}
+  .tabs.six button svg{width:20px;height:20px}
   .tabs button.on{color:var(--brand)}
   .tabs .badge{position:absolute;top:2px;left:calc(50% + 8px);font:700 .62rem var(--mono);background:var(--red);color:#1a0b0b;border-radius:99px;padding:0 .35rem}
   .g2{grid-template-columns:1fr}
@@ -239,6 +240,7 @@ body.intern .money{display:none!important}
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
   <symbol id="i-kanban" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="11" rx="1"/><rect x="17" y="3" width="4" height="14" rx="1"/></symbol>
   <symbol id="i-team" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></symbol>
   <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 20v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 20v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
   <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.5-1.5-3-1.5-1.8 0-3 .9-3 2.1 0 3 6 1.4 6 4.4 0 1.2-1.2 2-3 2-1.5 0-2.6-.6-3-1.6M12 6v2m0 8v2"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
@@ -456,7 +458,7 @@ const VIEWS = [
   ['list', 'Prospecção', 'users'],
   ['comm', 'Comissões', 'coin']
 ];
-const views = () => isIntern() ? VIEWS : [...VIEWS, ['team', 'Equipe', 'team']];
+const views = () => isIntern() ? VIEWS : [...VIEWS, ['finance', 'Financeiro', 'chart'], ['team', 'Equipe', 'team']];
 function renderNav() {
   const due = dueList().length;
   $('#tabs').classList.toggle('six', views().length > 5);
@@ -502,7 +504,7 @@ function chartHtml(m, field) {
 function render() {
   if (!S.token) return;
   renderNav();
-  if (S.view === 'team' && isIntern()) S.view = 'overview';
+  if ((S.view === 'team' || S.view === 'finance') && isIntern()) S.view = 'overview';
   const v = views().find((x) => x[0] === S.view) || VIEWS[0];
   $('#title').textContent = v[1];
   const sub = {
@@ -511,12 +513,13 @@ function render() {
     funnel: () => 'Arraste os cartões entre as colunas',
     list: () => `${S.prospects.length} cadastrado${S.prospects.length === 1 ? '' : 's'}`,
     comm: () => 'Comissão por site fechado',
+    finance: () => 'Faturamento, comissões e lucro',
     team: () => 'Quem trabalha nos seus leads'
   };
   $('#subtitle').textContent = sub[S.view]();
   const el = $('#view');
   const focus = document.activeElement && document.activeElement.id === 'q' ? document.activeElement.selectionStart : null;
-  el.innerHTML = ({ overview: vOverview, today: vToday, funnel: vFunnel, list: vList, comm: vComm, team: vTeam }[S.view])();
+  el.innerHTML = ({ overview: vOverview, today: vToday, funnel: vFunnel, list: vList, comm: vComm, finance: vFinance, team: vTeam }[S.view])();
   if (S.view === 'funnel') bindDnD();
   if (focus !== null) { const q = $('#q'); if (q) { q.focus(); q.setSelectionRange(focus, focus); } }
 }
@@ -664,6 +667,38 @@ function empDialog(e) {
 async function saveEmp(body, okMsg) {
   try { await api('POST', body, '?action=employees'); toast(okMsg || 'Equipe atualizada.', { type: 'ok' }); await load(true); await loadTeam(); }
   catch (e) { if (e.message !== 'sessão') toast(e.message, { type: 'err' }); }
+}
+
+/* ---------- financeiro (só o dono) ---------- */
+function vFinance() {
+  const m = metrics();
+  const pay = m.won.filter((p) => p.responsavel !== 'dono');
+  const cm = (p) => commission(num(p.value));
+  const sumC = (a) => a.reduce((t, p) => t + (cm(p) || 0), 0);
+  const totalC = sumC(pay), paidC = sumC(pay.filter((p) => p.commissionPaid)), dueC = totalC - paidC;
+  const combinar = pay.filter((p) => num(p.value) >= 1500 && !p.commissionPaid).length;
+  const net = m.wonVal - totalC;
+  const people = [...new Set(pay.map((p) => p.responsavel))].map((id) => {
+    const l = pay.filter((p) => p.responsavel === id);
+    return { id, n: l.length, rev: m.sum(l), tot: sumC(l), paid: sumC(l.filter((p) => p.commissionPaid)), comb: l.filter((p) => num(p.value) >= 1500 && !p.commissionPaid).length };
+  }).sort((a, b) => b.rev - a.rev);
+  const ms = months(6).reverse().map((d) => {
+    const k = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+    const l = m.won.filter((p) => mkey(closedOf(p)) === k);
+    const c = sumC(l.filter((p) => p.responsavel !== 'dono')), rev = m.sum(l);
+    return { label: d.toLocaleDateString('pt-BR', { month: 'long' }).replace(/^./, (c) => c.toUpperCase()) + ' de ' + d.getFullYear(), n: l.length, rev, c, net: rev - c };
+  });
+  const k = (lbl, big, sub, cls = '') => `<div class="card kpi"><div class="lbl">${lbl}</div><div class="big ${cls}">${big}</div><div class="sub">${sub}</div></div>`;
+  return `<div class="grid g4" style="margin-bottom:14px">
+    ${k('Faturamento total', money(m.wonVal), `${m.won.length} venda${m.won.length === 1 ? '' : 's'} fechada${m.won.length === 1 ? '' : 's'}`, 'pos')}
+    ${k('Neste mês', money(m.monthVal), `${m.wonMonth.length} fechada${m.wonMonth.length === 1 ? '' : 's'}`)}
+    ${k('Comissões a pagar', money(dueC), combinar ? `+ ${combinar} a combinar` : 'em aberto', 'warn')}
+    ${k('Lucro após comissões', money(net), `${money(paidC)} já pagos em comissão`, net >= 0 ? 'pos' : '')}
+  </div>
+  <h2 class="sec">Por funcionário</h2>
+  ${people.length ? `<div class="tw"><table><thead><tr><th>Nome</th><th>Vendas</th><th>Faturamento</th><th>Comissão</th><th>Paga</th><th>A pagar</th></tr></thead><tbody>${people.map((x) => `<tr><td class="c-main"><div class="nm">${esc(who(x.id))}</div></td><td data-l="Vendas">${x.n}</td><td data-l="Faturamento" class="money">${money(x.rev)}</td><td data-l="Comissão" class="money">${money(x.tot)}${x.comb ? ` <span class="tag">+${x.comb} a combinar</span>` : ''}</td><td data-l="Paga" class="money">${money(x.paid)}</td><td data-l="A pagar" class="money"><b>${money(x.tot - x.paid)}</b></td></tr>`).join('')}</tbody></table></div><div class="hint" style="margin:8px 2px 0">Para marcar uma comissão como paga, use a aba Comissões.</div>` : '<div class="card empty"><p>Nenhuma venda de funcionário fechada ainda.</p></div>'}
+  <h2 class="sec">Por mês</h2>
+  <div class="tw"><table><thead><tr><th>Mês</th><th>Vendas</th><th>Faturamento</th><th>Comissões</th><th>Líquido</th></tr></thead><tbody>${ms.map((x) => `<tr><td class="c-main"><div class="nm">${esc(x.label)}</div></td><td data-l="Vendas">${x.n}</td><td data-l="Faturamento" class="money">${money(x.rev)}</td><td data-l="Comissões" class="money">${money(x.c)}</td><td data-l="Líquido" class="money"><b>${money(x.net)}</b></td></tr>`).join('')}</tbody></table></div>`;
 }
 
 function vComm() {
