@@ -429,6 +429,14 @@ export default async function handler(req, res) {
             }
           }
         }
+        if (e && b.release === true) { // devolve todos os leads em aberto dele para a fila
+          let n = 0;
+          for (const p of current.prospects) {
+            if (claimOf(p) === e.id && p.status !== 'fechado' && p.status !== 'perdido') { p.claimedBy = ''; if (p.responsavel === e.id) p.responsavel = 'dono'; p.updatedAt = Date.now(); n++; }
+          }
+          await kv.set(KEY, current);
+          return res.status(200).json({ ok: true, released: n });
+        }
         await kv.set(EMP_KEY, emps);
         return res.status(200).json({ ok: true });
       }
