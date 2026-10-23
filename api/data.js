@@ -1,7 +1,7 @@
 import { kv } from '@vercel/kv';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHmac, timingSafeEqual, randomBytes, scryptSync } from 'node:crypto';
 
 const KEY = 'painel_dados';
 const SESSION_MS = 12 * 3600 * 1000;
@@ -23,40 +23,61 @@ async function applySeed(current) {
   return current;
 }
 
-// Defina PAINEL_SENHA_DONO, PAINEL_SENHA_ESTAGIARIO e PAINEL_SECRET nas variáveis de ambiente da Vercel.
-// Os valores abaixo só existem para o painel não parar antes da configuração. Troque as senhas.
-// 'estagiario' é o Fábio (id mantido para não perder os dados antigos). Todos os acessos que não são 'dono' têm perfil de estagiário.
-const PASSWORDS = {
-  dono: process.env.PAINEL_SENHA_DONO || 'BS100218*',
-  estagiario: process.env.PAINEL_SENHA_ESTAGIARIO || 'Fabio2026*',
-  diogo: process.env.PAINEL_SENHA_DIOGO || 'Diogo2026*'
-};
-const ROLES = Object.keys(PASSWORDS);
-// Perfis que trabalham em TODOS os prospectos (contato, status, notas), sem acesso a valores, comissões e meta.
-const OPERADORES = ['diogo', 'estagiario'];
-const SECRET = process.env.PAINEL_SECRET || ('cc:' + ROLES.map((k) => PASSWORDS[k]).join(':'));
+// Dono: senha em PAINEL_SENHA_DONO (ou o padrão abaixo). Funcionários: ficam no banco (aba Equipe), com senha criptografada.
+// Fábio ('estagiario') e Diogo ('diogo') são criados na primeira execução com as senhas iniciais abaixo; depois a senha é trocada pela aba Equipe.
+const DONO_PW = process.env.PAINEL_SENHA_DONO || 'BS100218*';
+const EMP_KEY = 'painel_funcionarios';
+const SECRET_KEY = 'painel_secret';
+const INICIAIS = [
+  { id: 'estagiario', name: 'Fábio', pw: process.env.PAINEL_SENHA_ESTAGIARIO || 'Fabio2026*' },
+  { id: 'diogo', name: 'Diogo', pw: process.env.PAINEL_SENHA_DIOGO || 'Diogo2026*' }
+];
 
-const sign = (payload) => createHmac('sha256', SECRET).update(payload).digest('base64url');
+const hashPw = (pw) => { const salt = randomBytes(16).toString('hex'); return salt + ':' + scryptSync(String(pw), salt, 32).toString('hex'); };
+function checkPw(pw, stored) {
+  const [salt, h] = String(stored || '').split(':');
+  if (!salt || !h) return false;
+  return safeEqual(scryptSync(String(pw), salt, 32).toString('hex'), h);
+}
+
+async function loadEmployees() {
+  let list = await kv.get(EMP_KEY);
+  if (!Array.isArray(list)) {
+    list = INICIAIS.map((e) => ({ id: e.id, name: e.name, hash: hashPw(e.pw), active: true, createdAt: Date.now() }));
+    await kv.set(EMP_KEY, list);
+  }
+  return list;
+}
+async function getSecret() {
+  if (process.env.PAINEL_SECRET) return process.env.PAINEL_SECRET;
+  let sec = await kv.get(SECRET_KEY);
+  if (!sec) { await kv.set(SECRET_KEY, randomBytes(32).toString('hex'), { nx: true }); sec = await kv.get(SECRET_KEY); }
+  return sec;
+}
+
+const sign = (payload, secret) => createHmac('sha256', secret).update(payload).digest('base64url');
 
 function safeEqual(a, b) {
   const x = Buffer.from(String(a)), y = Buffer.from(String(b));
   return x.length === y.length && timingSafeEqual(x, y);
 }
 
-function makeToken(role) {
+function makeToken(role, secret) {
   const payload = Buffer.from(JSON.stringify({ role, exp: Date.now() + SESSION_MS })).toString('base64url');
-  return payload + '.' + sign(payload);
+  return payload + '.' + sign(payload, secret);
 }
 
-function readToken(req) {
+// devolve o perfil ('dono' ou id de funcionário ativo) ou null
+function readToken(req, secret, emps) {
   const h = req.headers.authorization || '';
   const token = h.startsWith('Bearer ') ? h.slice(7) : '';
   const [payload, sig] = token.split('.');
-  if (!payload || !sig || !safeEqual(sig, sign(payload))) return null;
+  if (!payload || !sig || !safeEqual(sig, sign(payload, secret))) return null;
   try {
     const data = JSON.parse(Buffer.from(payload, 'base64url').toString());
     if (!data.exp || data.exp < Date.now()) return null;
-    return ROLES.includes(data.role) ? data.role : null;
+    if (data.role === 'dono') return 'dono';
+    return emps.some((e) => e.id === data.role && e.active) ? data.role : null;
   } catch { return null; }
 }
 
@@ -65,7 +86,7 @@ const STATUS = ['prospectando', 'semresposta', 'negociando', 'fechado', 'perdido
 const claimOf = (p) => (p && (p.claimedBy || (p.responsavel && p.responsavel !== 'dono' ? p.responsavel : ''))) || '';
 const str = (v, n) => String(v ?? '').slice(0, n);
 
-function clean(p, role) {
+function clean(p, role, ids = ['dono']) {
   if (!p || typeof p !== 'object' || !p.id) return null;
   const status = STATUS.includes(p.status) ? p.status : 'prospectando';
   const history = Array.isArray(p.history)
@@ -85,23 +106,27 @@ function clean(p, role) {
     notes: str(p.notes, 2000),
     lostReason: str(p.lostReason, 200),
     commissionPaid: !!p.commissionPaid,
-    claimedBy: ROLES.includes(p.claimedBy) && p.claimedBy !== 'dono' ? p.claimedBy : '',
-    responsavel: role !== 'dono' ? role : (ROLES.includes(p.responsavel) ? p.responsavel : 'dono'),
+    claimedBy: ids.includes(p.claimedBy) && p.claimedBy !== 'dono' ? p.claimedBy : '',
+    responsavel: role !== 'dono' ? role : (ids.includes(p.responsavel) ? p.responsavel : 'dono'),
     history,
     updatedAt: Number(p.updatedAt) || Date.now()
   };
 }
 
-function view(data, role) {
-  if (role === 'dono') return data;
-  // sem acesso a valores de outros e sem meta; operadores veem notas e histórico de todos, estagiário só dos próprios
-  const op = OPERADORES.includes(role);
+// Funcionários (todo perfil que não é 'dono') trabalham em TODOS os prospectos, sem acesso a valores de outros, comissões e meta.
+// O nome de quem assumiu um prospecto fica escondido deles: veem só que está indisponível.
+function view(data, role, emps) {
+  const users = {};
+  if (role === 'dono') for (const e of emps) users[e.id] = { name: e.name, active: e.active };
+  if (role === 'dono') return { ...data, users };
+  const me = emps.find((e) => e.id === role);
+  users[role] = { name: me ? me.name : '', active: true };
   const prospects = (data.prospects || []).map((p) =>
     p.responsavel === role && claimOf(p) === role ? p
-      : claimOf(p) && claimOf(p) !== role ? { ...p, value: null, contact: '', notes: '', history: [], nextContact: '' } // assumido por outra pessoa
-      : { ...p, value: null, ...(op ? {} : { notes: '', history: [] }) }
+      : claimOf(p) && claimOf(p) !== role ? { ...p, value: null, contact: '', notes: '', history: [], nextContact: '', claimedBy: '*', responsavel: '*' }
+      : { ...p, value: null, responsavel: p.responsavel === 'dono' ? 'dono' : '*' }
   );
-  return { prospects, goal: null, goals: null };
+  return { prospects, goal: null, goals: null, users };
 }
 
 async function loginLimit(req) {
@@ -112,27 +137,72 @@ async function loginLimit(req) {
   return n <= 8;
 }
 
+const trim = (v, n) => String(v ?? '').trim().slice(0, n);
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   try {
+    const emps = await loadEmployees();
+    const secret = await getSecret();
+
     // login
     if (req.method === 'POST' && req.query.action === 'login') {
       if (!(await loginLimit(req))) return res.status(429).json({ error: 'Muitas tentativas. Aguarde 10 minutos.' });
       const pw = (req.body || {}).password || '';
-      const role = ROLES.find((k) => safeEqual(pw, PASSWORDS[k])) || null;
+      let role = safeEqual(pw, DONO_PW) ? 'dono' : null;
+      if (!role) { const e = emps.find((x) => x.active && checkPw(pw, x.hash)); if (e) role = e.id; }
       if (!role) return res.status(401).json({ error: 'Senha incorreta.' });
-      return res.status(200).json({ token: makeToken(role), role, expiresIn: SESSION_MS });
+      return res.status(200).json({ token: makeToken(role, secret), role, expiresIn: SESSION_MS });
     }
 
-    const role = readToken(req);
+    const role = readToken(req, secret, emps);
     if (!role) return res.status(401).json({ error: 'Sessão expirada. Entre novamente.' });
+    const ids = ['dono', ...emps.map((e) => e.id)];
 
     const current = (await kv.get(KEY)) || { prospects: [], goal: 0, goals: {} };
     current.prospects = current.prospects || [];
     current.goals = current.goals || {};
     try { await applySeed(current); } catch (e) { console.error('seed', e); }
 
-    if (req.method === 'GET') return res.status(200).json(view(current, role));
+    // cadastro de funcionários (só o dono)
+    if (req.query.action === 'employees') {
+      if (role !== 'dono') return res.status(403).json({ error: 'Sem permissão.' });
+      if (req.method === 'GET') {
+        const list = emps.map((e) => {
+          const mine = current.prospects.filter((p) => claimOf(p) === e.id);
+          return { id: e.id, name: e.name, active: e.active, createdAt: e.createdAt, leads: mine.length, closed: mine.filter((p) => p.status === 'fechado').length };
+        });
+        return res.status(200).json({ employees: list });
+      }
+      if (req.method === 'POST') {
+        const b = req.body || {};
+        const name = trim(b.name, 40), pw = String(b.password || '');
+        let e = b.id ? emps.find((x) => x.id === String(b.id)) : null;
+        if (b.id && !e) return res.status(404).json({ error: 'Funcionário não encontrado.' });
+        if (!e && name.length < 2) return res.status(400).json({ error: 'Informe o nome.' });
+        if (!e && pw.length < 6) return res.status(400).json({ error: 'A senha precisa ter pelo menos 6 caracteres.' });
+        if (e && pw && pw.length < 6) return res.status(400).json({ error: 'A senha precisa ter pelo menos 6 caracteres.' });
+        if (pw && (safeEqual(pw, DONO_PW) || emps.some((x) => x !== e && x.active && checkPw(pw, x.hash)))) return res.status(400).json({ error: 'Essa senha já está em uso. Escolha outra.' });
+        if (!e) { e = { id: 'f' + randomBytes(3).toString('hex'), name, hash: hashPw(pw), active: true, createdAt: Date.now() }; emps.push(e); }
+        else {
+          if (name) e.name = name;
+          if (pw) e.hash = hashPw(pw);
+          if (typeof b.active === 'boolean' && b.active !== e.active) {
+            e.active = b.active;
+            if (!e.active) { // libera os leads em aberto dele para outras pessoas
+              for (const p of current.prospects) {
+                if (claimOf(p) === e.id && p.status !== 'fechado' && p.status !== 'perdido') { p.claimedBy = ''; if (p.responsavel === e.id) p.responsavel = 'dono'; p.updatedAt = Date.now(); }
+              }
+              await kv.set(KEY, current);
+            }
+          }
+        }
+        await kv.set(EMP_KEY, emps);
+        return res.status(200).json({ ok: true });
+      }
+    }
+
+    if (req.method === 'GET') return res.status(200).json(view(current, role, emps));
 
     if (req.method === 'POST') {
       const body = req.body || {};
@@ -142,20 +212,18 @@ export default async function handler(req, res) {
       const conflicts = [];
 
       for (const raw of incoming.slice(0, MAX_PROSPECTS)) {
-        const p = clean(raw, role);
+        const p = clean(raw, role, ids);
         if (!p) continue;
         const old = byId.get(p.id);
         if (role !== 'dono') {
-          const op = OPERADORES.includes(role);
-          if (old && old.responsavel !== role && !op) continue; // não mexe nos de outros
           if (old && claimOf(old) && claimOf(old) !== role) { conflicts.push(p.id); continue; } // outra pessoa já assumiu
           p.claimedBy = role; // quem mexe primeiro assume o prospecto
           p.commissionPaid = old ? old.commissionPaid : false;
-          if (old && old.responsavel !== role) { // operador em prospecto de outro: só dados de trabalho
+          if (old && old.responsavel !== role) { // em prospecto de outro: só dados de trabalho
             p.value = old.value; p.recurring = old.recurring; p.responsavel = old.responsavel;
           }
         }
-        if (role === 'dono' && old && !raw.hasOwnProperty('claimedBy')) p.claimedBy = old.claimedBy || '';
+        if (role === 'dono' && old && !Object.prototype.hasOwnProperty.call(raw, 'claimedBy')) p.claimedBy = old.claimedBy || '';
         if (old && old.updatedAt > p.updatedAt) continue; // versão mais nova já salva
         if (old && role !== 'dono' && old.value != null && p.value == null) p.value = old.value;
         byId.set(p.id, p);
@@ -177,7 +245,7 @@ export default async function handler(req, res) {
         }
       }
       await kv.set(KEY, next);
-      return res.status(200).json({ ok: true, conflicts, ...view(next, role) });
+      return res.status(200).json({ ok: true, conflicts, ...view(next, role, emps) });
     }
 
     res.setHeader('Allow', ['GET', 'POST']);

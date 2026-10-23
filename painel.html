@@ -208,6 +208,7 @@ body.intern .money{display:none!important}
   .tabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--line);z-index:30;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
   .tabs button{background:none;border:0;color:var(--dim);display:grid;justify-items:center;gap:3px;padding:6px 0;font-size:.68rem;font-weight:700;position:relative}
   .tabs button svg{width:22px;height:22px}
+  .tabs.six button{font-size:.58rem;letter-spacing:-.02em}
   .tabs button.on{color:var(--brand)}
   .tabs .badge{position:absolute;top:2px;left:calc(50% + 8px);font:700 .62rem var(--mono);background:var(--red);color:#1a0b0b;border-radius:99px;padding:0 .35rem}
   .g2{grid-template-columns:1fr}
@@ -237,6 +238,7 @@ body.intern .money{display:none!important}
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
   <symbol id="i-kanban" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="11" rx="1"/><rect x="17" y="3" width="4" height="14" rx="1"/></symbol>
+  <symbol id="i-team" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></symbol>
   <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 20v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 20v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
   <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.5-1.5-3-1.5-1.8 0-3 .9-3 2.1 0 3 6 1.4 6 4.4 0 1.2-1.2 2-3 2-1.5 0-2.6-.6-3-1.6M12 6v2m0 8v2"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
@@ -289,15 +291,15 @@ body.intern .money{display:none!important}
 'use strict';
 /* ---------- estado ---------- */
 const API = '/api/data';
-const S = { token: null, role: null, prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
+const S = { token: null, role: null, users: {}, team: null, prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
 const STATUS = { prospectando: 'Prospectando', semresposta: 'Sem resposta', negociando: 'Negociando', fechado: 'Fechado', perdido: 'Perdido' };
 const STCOL = { prospectando: '#A29FB8', semresposta: '#7dd3fc', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
-const USERS = { dono: 'Dono', estagiario: 'Fábio', diogo: 'Diogo' };
-const who = (id) => USERS[id] || 'Dono';
+const who = (id) => id === 'dono' || !id ? 'Dono' : id === '*' ? 'Outra pessoa' : ((S.users[id] && S.users[id].name) || 'Funcionário');
+const staff = () => Object.entries(S.users || {}).filter(([k, u]) => k !== 'dono' && u.active).map(([k, u]) => [k, u.name]);
 const claim = (p) => p.claimedBy || (p.responsavel && p.responsavel !== 'dono' ? p.responsavel : '');
 const locked = (p) => isIntern() && claim(p) && claim(p) !== S.role;
 function take(p) { if (isIntern() && !claim(p)) { p.claimedBy = S.role; touch(p, 'claim', 'Assumido por ' + who(S.role)); } }
-const badge = (p) => claim(p) ? `<span class="tag">${claim(p) === S.role ? 'Seu' : 'Em atendimento: ' + esc(who(claim(p)))}</span>` : (isIntern() ? '<span class="tag">Livre</span>' : '');
+const badge = (p) => claim(p) ? `<span class="tag">${claim(p) === S.role ? 'Seu' : isIntern() ? 'Em atendimento' : 'Em atendimento: ' + esc(who(claim(p)))}</span>` : (isIntern() ? '<span class="tag">Livre</span>' : '');
 const $ = (s, r = document) => r.querySelector(s);
 const ic = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -365,6 +367,7 @@ function applyServer(d) {
   S.prospects = d.prospects || [];
   S.goal = d.goal || 0;
   S.goals = d.goals || {};
+  S.users = d.users || S.users || {};
 }
 function setSync(state, text) {
   const el = $('#sync'); if (!el) return;
@@ -419,6 +422,7 @@ function enter() {
   $('#who').textContent = isIntern() ? who(S.role) + '' : 'Acesso completo';
   try { const f = JSON.parse(sessionStorage.getItem('painel_ui') || '{}'); Object.assign(S, { filter: f.filter || 'todos', resp: f.resp || 'todos', view: f.view || 'overview' }); } catch {}
   load();
+  if (S.view === 'team' && !isIntern()) loadTeam();
 }
 function logout(expired) {
   sessionStorage.removeItem('painel_token'); sessionStorage.removeItem('painel_role');
@@ -452,13 +456,17 @@ const VIEWS = [
   ['list', 'Prospecção', 'users'],
   ['comm', 'Comissões', 'coin']
 ];
+const views = () => isIntern() ? VIEWS : [...VIEWS, ['team', 'Equipe', 'team']];
 function renderNav() {
   const due = dueList().length;
-  const html = (tab) => VIEWS.map(([k, n, i]) =>
+  $('#tabs').classList.toggle('six', views().length > 5);
+  $('#tabs').style.gridTemplateColumns = `repeat(${views().length},1fr)`;
+  $('#who').textContent = isIntern() ? who(S.role) : 'Acesso completo';
+  const html = (tab) => views().map(([k, n, i]) =>
     `<button type="button" data-act="view" data-v="${k}" class="${S.view === k ? 'on' : ''}" ${S.view === k ? 'aria-current="page"' : ''}>${ic(i)}<span>${n}</span>${k === 'today' && due ? `<span class="badge">${due}</span>` : ''}</button>`).join('');
   $('#nav').innerHTML = html(); $('#tabs').innerHTML = html();
 }
-function setView(v) { S.view = v; saveUI(); render(); window.scrollTo(0, 0); }
+function setView(v) { S.view = v; saveUI(); render(); window.scrollTo(0, 0); if (v === 'team') loadTeam(); }
 
 /* ---------- métricas ---------- */
 function metrics() {
@@ -494,19 +502,21 @@ function chartHtml(m, field) {
 function render() {
   if (!S.token) return;
   renderNav();
-  const v = VIEWS.find((x) => x[0] === S.view) || VIEWS[0];
+  if (S.view === 'team' && isIntern()) S.view = 'overview';
+  const v = views().find((x) => x[0] === S.view) || VIEWS[0];
   $('#title').textContent = v[1];
   const sub = {
     overview: () => new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }),
     today: () => { const n = dueList().length; return n ? `${n} contato${n > 1 ? 's' : ''} para fazer` : 'Nenhum contato pendente'; },
     funnel: () => 'Arraste os cartões entre as colunas',
     list: () => `${S.prospects.length} cadastrado${S.prospects.length === 1 ? '' : 's'}`,
-    comm: () => 'Comissão por site fechado'
+    comm: () => 'Comissão por site fechado',
+    team: () => 'Quem trabalha nos seus leads'
   };
   $('#subtitle').textContent = sub[S.view]();
   const el = $('#view');
   const focus = document.activeElement && document.activeElement.id === 'q' ? document.activeElement.selectionStart : null;
-  el.innerHTML = ({ overview: vOverview, today: vToday, funnel: vFunnel, list: vList, comm: vComm }[S.view])();
+  el.innerHTML = ({ overview: vOverview, today: vToday, funnel: vFunnel, list: vList, comm: vComm, team: vTeam }[S.view])();
   if (S.view === 'funnel') bindDnD();
   if (focus !== null) { const q = $('#q'); if (q) { q.focus(); q.setSelectionRange(focus, focus); } }
 }
@@ -610,7 +620,7 @@ function vList() {
     ${!isIntern() ? `<button class="btn gh" data-act="export">${ic('dl')}CSV</button><button class="btn gh" data-act="backup">${ic('dl')}Backup</button><button class="btn gh" data-act="restore">${ic('ul')}Restaurar</button>` : `<button class="btn gh" data-act="export">${ic('dl')}CSV</button>`}</div>
   <div class="chips" role="group" aria-label="Status">${['todos', ...Object.keys(STATUS)].map((k) => `<button class="chip ${S.filter === k ? 'on' : ''}" data-act="filter" data-k="${k}">${k === 'todos' ? 'Todos' : STATUS[k]}<b>${cnt(k)}</b></button>`).join('')}</div>
   ${isIntern() ? `<div class="chips" role="group" aria-label="Atendimento">${[['todos', 'Todos'], ['livres', 'Livres'], ['meus', 'Meus']].map(([k, t]) => `<button class="chip ${S.resp === k ? 'on' : ''}" data-act="resp" data-k="${k}">${t}</button>`).join('')}</div>` : ''}
-  ${!isIntern() ? `<div class="chips" role="group" aria-label="Responsável">${[['todos', 'Todos os responsáveis'], ['dono', 'Do dono'], ['estagiario', 'Do Fábio'], ['diogo', 'Do Diogo']].map(([k, t]) => `<button class="chip ${S.resp === k ? 'on' : ''}" data-act="resp" data-k="${k}">${t}</button>`).join('')}</div>` : ''}
+  ${!isIntern() ? `<div class="chips" role="group" aria-label="Responsável">${[['todos', 'Todos os responsáveis'], ['dono', 'Do dono'], ...staff().map(([k, n]) => [k, 'De ' + n])].map(([k, t]) => `<button class="chip ${S.resp === k ? 'on' : ''}" data-act="resp" data-k="${k}">${t}</button>`).join('')}</div>` : ''}
   <div class="tw">${l.length ? `<table><thead><tr>${th('name', 'Cliente')}<th>Serviço</th><th class="money s ${S.sort === 'value' ? 'on' : ''}" data-act="sort" data-k="value">Valor${S.sort === 'value' ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th><th>Status</th>${th('date', 'Cadastro')}${th('next', 'Próximo contato')}<th></th></tr></thead>
   <tbody>${l.map((p) => { const n = nextInfo(p), wa = waLink(p.contact); return `<tr>
     <td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}${!isIntern() && p.responsavel !== 'dono' ? `<div class="ct">${esc(who(p.responsavel))}</div>` : ''}${isIntern() ? `<div class="ct">${badge(p)}</div>` : (claim(p) ? `<div class="ct">${badge(p)}</div>` : '')}</td>
@@ -621,6 +631,39 @@ function vList() {
     <td data-l="Próximo"><span class="nc ${isOpen(p) ? n.c : ''}">${isOpen(p) ? n.t : '-'}</span></td>
     <td class="c-act"><div class="acts">${locked(p) ? '' : `${wa ? `<a class="ib" data-wa="${esc(p.id)}" href="${wa}" target="_blank" rel="noopener" aria-label="WhatsApp">${ic('wa')}</a>` : ''}<button class="ib" data-act="edit" data-id="${esc(p.id)}" aria-label="Editar">${ic('edit')}</button><button class="ib del" data-act="del" data-id="${esc(p.id)}" aria-label="Excluir">${ic('trash')}</button>`}</div></td></tr>`; }).join('')}</tbody></table>`
     : `<div class="empty">${ic('users')}<p>${S.prospects.length ? 'Nada encontrado com esses filtros.' : 'Nenhum prospecto ainda. Clique em "Novo prospecto".'}</p></div>`}</div>`;
+}
+
+/* ---------- equipe (só o dono) ---------- */
+async function loadTeam() {
+  try { const d = await api('GET', null, '?action=employees'); S.team = d.employees; }
+  catch (e) { if (e.message !== 'sessão') toast('Não consegui carregar a equipe: ' + e.message, { type: 'err' }); S.team = S.team || []; }
+  if (S.view === 'team') render();
+}
+function vTeam() {
+  const t = S.team;
+  const head = `<div class="tools"><div class="hint" style="margin:0;flex:1">Cada pessoa entra com a própria senha. Quem pega um lead primeiro fica com ele, e os outros não veem o nome.</div><button class="btn pri" data-act="emp-new">${ic('plus')}Novo funcionário</button></div>`;
+  if (!t) return head + '<div class="card empty"><p>Carregando...</p></div>';
+  return head + `<div class="tw"><table><thead><tr><th>Nome</th><th>Status</th><th>Leads atendendo</th><th>Fechados</th><th></th></tr></thead><tbody>${t.map((e) => `<tr>
+    <td class="c-main"><div class="nm">${esc(e.name)}</div></td>
+    <td data-l="Status"><span class="tag" style="margin:0;${e.active ? '' : 'color:var(--dim);background:rgba(255,255,255,.06)'}">${e.active ? 'Ativo' : 'Inativo'}</span></td>
+    <td data-l="Leads">${e.leads}</td><td data-l="Fechados">${e.closed}</td>
+    <td class="c-act"><div class="acts"><button class="btn sm gh" data-act="emp-edit" data-id="${esc(e.id)}">${ic('edit')}Editar</button><button class="btn sm gh" data-act="emp-toggle" data-id="${esc(e.id)}">${e.active ? 'Desativar' : 'Reativar'}</button></div></td></tr>`).join('')}</tbody></table></div>`;
+}
+const genPw = () => { const c = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'; let r = ''; const a = crypto.getRandomValues(new Uint8Array(9)); a.forEach((n) => { r += c[n % c.length]; }); return r + '*'; };
+function empDialog(e) {
+  const ov = dialog({ title: e ? 'Editar funcionário' : 'Novo funcionário', ok: 'Salvar', body: `
+    <div class="f"><label for="eName">Nome</label><input id="eName" required maxlength="40" value="${esc(e ? e.name : '')}" placeholder="Ex: Maria"></div>
+    <div class="f"><label for="ePw">${e ? 'Nova senha (deixe vazio para manter)' : 'Senha de acesso'}</label><div style="display:flex;gap:8px"><input id="ePw" ${e ? '' : 'required'} minlength="6" autocomplete="off" style="flex:1" placeholder="Mínimo 6 caracteres"><button type="button" class="btn sm gh" data-gen>Gerar</button></div><div class="hint">A senha fica criptografada. Anote antes de salvar, depois não dá para ver.</div></div>`,
+    onOk: (d) => {
+      const name = $('#eName', d).value.trim(), password = $('#ePw', d).value;
+      if (!e && password.length < 6) { toast('A senha precisa ter pelo menos 6 caracteres.', { type: 'err' }); return false; }
+      saveEmp({ id: e && e.id, name, password });
+    } });
+  $('[data-gen]', ov).onclick = () => { $('#ePw', ov).value = genPw(); };
+}
+async function saveEmp(body, okMsg) {
+  try { await api('POST', body, '?action=employees'); toast(okMsg || 'Equipe atualizada.', { type: 'ok' }); await load(true); await loadTeam(); }
+  catch (e) { if (e.message !== 'sessão') toast(e.message, { type: 'err' }); }
 }
 
 function vComm() {
@@ -648,7 +691,7 @@ function touch(p, histType, text) {
 function setStatus(id, status, reason) {
   const p = S.prospects.find((x) => x.id === id);
   if (!p || p.status === status) return;
-  if (locked(p)) { toast(who(claim(p)) + ' já está atendendo este prospecto.', { type: 'err' }); render(); return; }
+  if (locked(p)) { toast('Outra pessoa já está atendendo este prospecto.', { type: 'err' }); render(); return; }
   if (status === 'perdido' && reason === undefined) {
     dialog({ title: 'Motivo da perda', body: `<div class="f"><label for="dReason">Por que não fechou? (opcional)</label><input id="dReason" placeholder="Ex: achou caro, sumiu, escolheu outro"></div>`, ok: 'Marcar como perdido',
       onOk: (d) => setStatus(id, status, $('#dReason', d).value.trim()), onCancel: () => render() });
@@ -693,7 +736,7 @@ document.addEventListener('keydown', (e) => {
 
 function openProspect(id) {
   const p = id ? S.prospects.find((x) => x.id === id) : null;
-  if (p && locked(p)) { toast('Em atendimento por ' + who(claim(p)) + '. Só ele pode mexer neste prospecto.', { type: 'err' }); return; }
+  if (p && locked(p)) { toast('Este prospecto já está em atendimento por outra pessoa.', { type: 'err' }); return; }
   const v = (k, d = '') => p ? (p[k] ?? d) : d;
   const showMoney = !isIntern() || !p || p.responsavel === S.role;
   const ov = dialog({ title: p ? 'Editar prospecto' : 'Novo prospecto', ok: 'Salvar', small: false, body: `
@@ -707,7 +750,7 @@ function openProspect(id) {
     <div class="f"><label for="fNext">Próximo contato</label><input id="fNext" type="date" value="${esc(v('nextContact'))}"></div></div>
     <div class="quick" id="fQuick"><button type="button" class="btn sm gh" data-d="1">Amanhã</button><button type="button" class="btn sm gh" data-d="3">+3 dias</button><button type="button" class="btn sm gh" data-d="7">+7 dias</button></div>
     <div class="f" id="fLostW" ${v('status') === 'perdido' ? '' : 'hidden'}><label for="fLost">Motivo da perda</label><input id="fLost" value="${esc(v('lostReason'))}" maxlength="200"></div>
-    ${!isIntern() ? `<div class="f"><label for="fClaim">Quem está atendendo</label><select id="fClaim"><option value="" ${!claim(p || {}) ? 'selected' : ''}>Livre (qualquer um pode assumir)</option><option value="estagiario" ${claim(p || {}) === 'estagiario' ? 'selected' : ''}>Fábio</option><option value="diogo" ${claim(p || {}) === 'diogo' ? 'selected' : ''}>Diogo</option></select></div>` : ''}
+    ${!isIntern() ? `<div class="f"><label for="fClaim">Quem está atendendo</label><select id="fClaim"><option value="" ${!claim(p || {}) ? 'selected' : ''}>Livre (qualquer um pode assumir)</option>${staff().map(([k, n]) => `<option value="${k}" ${claim(p || {}) === k ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div>` : ''}
     <div class="f"><label for="fNotes">Notas</label><textarea id="fNotes" maxlength="2000" placeholder="Detalhes da conversa, próximos passos...">${esc(v('notes'))}</textarea></div>
     ${p && (p.history || []).length ? `<div class="hist"><h5>Histórico</h5>${p.history.slice().reverse().slice(0, 8).map((h) => `<div class="hi"><time>${fdate(h.at)}</time><span>${esc(h.text)}</span></div>`).join('')}</div>` : ''}`,
     onOk: (d) => {
@@ -742,7 +785,7 @@ function openProspect(id) {
 
 function contacted(id) {
   const p = S.prospects.find((x) => x.id === id); if (!p) return;
-  if (locked(p)) { toast(who(claim(p)) + ' já está atendendo este prospecto.', { type: 'err' }); return; }
+  if (locked(p)) { toast('Outra pessoa já está atendendo este prospecto.', { type: 'err' }); return; }
   dialog({ title: 'Registrar contato', body: `<div class="f"><label for="cNote">O que foi combinado? (opcional)</label><input id="cNote" placeholder="Ex: enviou orçamento"></div><div class="f"><label for="cNext">Próximo contato</label><input id="cNext" type="date" value="${addDays(3)}"></div><div class="quick"><button type="button" class="btn sm gh" data-d="1">Amanhã</button><button type="button" class="btn sm gh" data-d="3">+3 dias</button><button type="button" class="btn sm gh" data-d="7">+7 dias</button></div>`, ok: 'Registrar', onOk: (d) => {
     take(p);
     p.nextContact = $('#cNext', d).value; if (p.status === 'prospectando') p.status = 'negociando';
@@ -801,6 +844,11 @@ document.addEventListener('click', (e) => {
     case 'export': exportCsv(); break;
     case 'backup': download(`backup_painel_${today()}.json`, JSON.stringify({ prospects: S.prospects, goals: S.goals, goal: S.goal, at: new Date().toISOString() }, null, 1), 'application/json'); break;
     case 'restore': restore(); break;
+    case 'emp-new': empDialog(null); break;
+    case 'emp-edit': empDialog((S.team || []).find((x) => x.id === id)); break;
+    case 'emp-toggle': { const e = (S.team || []).find((x) => x.id === id); if (!e) break;
+      if (!e.active) { saveEmp({ id, active: true }, 'Funcionário reativado.'); break; }
+      dialog({ title: 'Desativar funcionário', body: `<p style="color:var(--dim)"><b style="color:var(--text)">${esc(e.name)}</b> deixa de conseguir entrar, e os leads em aberto dele ficam livres para os outros.</p>`, ok: 'Desativar', danger: true, onOk: () => { saveEmp({ id, active: false }, 'Funcionário desativado.'); } }); break; }
     case 'logout': logout(); break;
     case 'filter': S.filter = t.dataset.k; saveUI(); render(); break;
     case 'resp': S.resp = t.dataset.k; saveUI(); render(); break;
@@ -810,7 +858,7 @@ document.addEventListener('click', (e) => {
 document.addEventListener('click', (e) => {
   const w = e.target.closest('a[data-wa]'); if (!w) return;
   const p = S.prospects.find((x) => x.id === w.dataset.wa); if (!p) return;
-  if (locked(p)) { e.preventDefault(); toast(who(claim(p)) + ' já está atendendo este prospecto.', { type: 'err' }); return; }
+  if (locked(p)) { e.preventDefault(); toast('Outra pessoa já está atendendo este prospecto.', { type: 'err' }); return; }
   if (isIntern() && !claim(p)) { take(p); save(); render(); }
 }, true);
 document.addEventListener('change', (e) => {
