@@ -550,7 +550,7 @@ const VIEWS = [
   ['funnel', 'Funil', 'kanban'],
   ['list', 'Prospecção', 'users'],
   ['comm', 'Comissões', 'coin'],
-  ['msgs', 'Mensagens', 'chat']
+  ['msgs', 'Vendas', 'chat']
 ];
 const views = () => isIntern() ? VIEWS : [...VIEWS, ['finance', 'Financeiro', 'chart'], ['insta', 'Instagram', 'insta'], ['team', 'Equipe', 'team']];
 function renderNav() {
@@ -609,7 +609,7 @@ function render() {
     funnel: () => 'Arraste os cartões entre as colunas',
     list: () => `${S.prospects.length} cadastrado${S.prospects.length === 1 ? '' : 's'}`,
     comm: () => 'Comissão por site fechado',
-    msgs: () => 'Textos prontos para o WhatsApp',
+    msgs: () => 'Propostas e mensagens prontas',
     insta: () => '@creativecodex.studio',
     finance: () => 'Faturamento, comissões e lucro',
     team: () => 'Quem trabalha nos seus leads'
@@ -773,7 +773,9 @@ const myName = () => S.role === 'dono' ? 'Breno' : who(S.role);
 const fillTpl = (text, p) => text.replace(/\{nome\}/g, p ? p.name.split(' ')[0] : '[nome]').replace(/\{servico\}/g, p && p.service ? p.service : p ? 'o seu projeto' : '[serviço]').replace(/\{meu_nome\}/g, myName());
 function vMsgs() {
   if (!S.tpl) return '<div class="card empty"><p>Carregando...</p></div>';
-  const head = `<div class="tools"><div class="hint" style="margin:0;flex:1">Use {nome}, {servico} e {meu_nome}: o painel troca pelos dados do lead. Para usar com um lead, abra o prospecto e escolha o modelo.</div>${isIntern() ? '' : `<button class="btn pri" data-act="tpl-new">${ic('plus')}Novo modelo</button>`}</div>`;
+  const names = [...new Set(S.prospects.filter((p) => !locked(p)).sort((a, b) => (isOpen(b) - isOpen(a)) || a.name.localeCompare(b.name)).map((p) => p.name))];
+  const prop = `<div class="card" style="margin-bottom:22px"><h3>${ic('doc')}Gerar proposta</h3><div class="tools" style="margin:0"><input id="propC" list="propL" placeholder="Digite o nome de um prospecto ou de um cliente novo" maxlength="120" style="flex:1;min-width:220px;padding:.7rem .85rem;border-radius:10px;border:1px solid var(--line);background:var(--bg)"><datalist id="propL">${names.map((n) => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn pri" data-act="prop-go">Gerar proposta</button></div><div class="hint" style="margin-top:8px">Escolha o serviço, os extras e o desconto, e o PDF sai pronto.</div></div><h2 class="sec" style="margin-top:0">Mensagens prontas</h2>`;
+  const head = prop + `<div class="tools"><div class="hint" style="margin:0;flex:1">Use {nome}, {servico} e {meu_nome}: o painel troca pelos dados do lead. Para usar com um lead, abra o prospecto e escolha o modelo.</div>${isIntern() ? '' : `<button class="btn pri" data-act="tpl-new">${ic('plus')}Novo modelo</button>`}</div>`;
   return head + (S.tpl.map((m) => `<div class="msg"><h4>${esc(m.title)} <span class="tag" style="margin:0">${esc(m.segment)}</span></h4><p>${esc(m.text)}</p><div class="acts" style="justify-content:flex-start"><button class="btn sm gh" data-act="tpl-copy" data-id="${esc(m.id)}">Copiar</button>${isIntern() ? '' : `<button class="btn sm gh" data-act="tpl-edit" data-id="${esc(m.id)}">${ic('edit')}Editar</button><button class="btn sm gh" data-act="tpl-del" data-id="${esc(m.id)}">${ic('trash')}Excluir</button>`}</div></div>`).join('') || '<div class="card empty"><p>Nenhum modelo.</p></div>');
 }
 async function saveTpl(list, okMsg) {
@@ -1021,7 +1023,7 @@ function openProspect(id) {
   const ov = dialog({ title: p ? 'Editar prospecto' : 'Novo prospecto', ok: 'Salvar', small: false, body: `
     <div class="f"><label for="fName">Nome ou empresa</label><input id="fName" required value="${esc(v('name'))}" placeholder="Ex: Pet Café" maxlength="120"></div>
     <div class="f"><label for="fContact">Contato (WhatsApp ou e-mail)</label><input id="fContact" value="${esc(v('contact'))}" placeholder="(16) 99999-9999" maxlength="120" inputmode="tel"></div>
-    ${p && waLink(p.contact) ? `<div class="quick"><a class="btn sm wa" data-wa="${esc(p.id)}" href="${waLink(p.contact)}" target="_blank" rel="noopener">${ic('wa')}Abrir WhatsApp</a><button type="button" class="btn sm gh" data-contacted>${ic('check')}Registrar contato</button></div><div class="f"><label for="fTpl">Mensagem pronta para o WhatsApp</label><select id="fTpl"><option value="">Escolher modelo</option>${(S.tpl || []).map((m) => `<option value="${esc(m.id)}">${esc(m.title)} (${esc(m.segment)})</option>`).join('')}</select></div>` : ''}${p ? `<div class="quick"><button type="button" class="btn sm gh" data-proposal>${ic('doc')}Gerar proposta em PDF</button></div>` : ''}
+    ${p && waLink(p.contact) ? `<div class="quick"><a class="btn sm wa" data-wa="${esc(p.id)}" href="${waLink(p.contact)}" target="_blank" rel="noopener">${ic('wa')}Abrir WhatsApp</a><button type="button" class="btn sm gh" data-contacted>${ic('check')}Registrar contato</button></div><div class="f"><label for="fTpl">Mensagem pronta para o WhatsApp</label><select id="fTpl"><option value="">Escolher modelo</option>${(S.tpl || []).map((m) => `<option value="${esc(m.id)}">${esc(m.title)} (${esc(m.segment)})</option>`).join('')}</select></div>` : ''}
     <div class="f2"><div class="f"><label for="fService">Serviço</label><input id="fService" list="svcs" value="${esc(v('service'))}" placeholder="Ex: Landing Page" maxlength="120"><datalist id="svcs"><option>Landing Page</option><option>Site Institucional</option><option>Cardápio Digital</option><option>Manutenção de Site</option><option>Design Gráfico</option><option>Cartão ou Convite</option></datalist></div>
     <div class="f"><label for="fValue">Valor (R$)</label><input id="fValue" type="number" min="0" step="0.01" inputmode="decimal" value="${showMoney ? esc(v('value', '')) : ''}" ${showMoney ? '' : 'disabled'} placeholder="0,00"><div class="hint" id="fHint"></div></div></div>
     <div class="f"><label class="ck"><input type="checkbox" id="fRec" ${v('recurring') ? 'checked' : ''}><span>Valor <strong>mensal recorrente</strong> (não avulso)</span></label></div>
@@ -1060,8 +1062,6 @@ function openProspect(id) {
   $('#fQuick', ov).addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if (b) $('#fNext', ov).value = addDays(+b.dataset.d); });
   const tp = $('#fTpl', ov);
   if (tp) tp.onchange = () => { const m = (S.tpl || []).find((x) => x.id === tp.value); $('a[data-wa]', ov).href = waLink(p.contact, m ? fillTpl(m.text, p) : ''); };
-  const pb = $('[data-proposal]', ov);
-  if (pb) pb.onclick = () => { ov._close(false); proposal(p); };
   const cb = $('[data-contacted]', ov);
   if (cb) cb.onclick = () => { ov._close(false); contacted(p.id); };
 }
@@ -1139,6 +1139,9 @@ document.addEventListener('click', (e) => {
     case 'ig-edit': igDialog((S.insta || []).find((x) => x.date === t.dataset.d)); break;
     case 'ig-del': api('POST', { date: t.dataset.d, remove: true }, '?action=insta').then((r) => { S.insta = r.insta; toast('Registro excluído.', { type: 'ok' }); render(); }).catch((e) => toast(e.message, { type: 'err' })); break;
     case 'prices-edit': pricesDialog(); break;
+    case 'prop-go': { const n = ($('#propC') || {}).value.trim(); if (!n) { toast('Digite o nome do cliente.', { type: 'err' }); break; }
+      const p = S.prospects.find((x) => x.name === n && !locked(x)) || S.prospects.find((x) => x.name.toLowerCase() === n.toLowerCase() && !locked(x));
+      proposal(p || { name: n, service: '', value: 0 }); break; }
     case 'pay': payDialog(id); break;
     case 'receipt': receipt(id); break;
     case 'unpay': { const p = S.prospects.find((x) => x.id === id); if (p) { p.commissionPaid = false; p.paidAt = ''; p.paidNote = ''; touch(p, 'paid', 'Pagamento desmarcado'); save(); render(); } break; }
