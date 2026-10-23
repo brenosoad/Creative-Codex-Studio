@@ -665,6 +665,7 @@ function render() {
   if ((S.view === 'team' || S.view === 'finance' || S.view === 'insta') && isIntern()) S.view = 'overview';
   const v = views().find((x) => x[0] === S.view) || VIEWS[0];
   $('#title').textContent = v[1];
+  { const nb = $('[data-act="new"]'); if (nb) nb.hidden = S.view !== 'list'; }
   const sub = {
     overview: () => new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }),
     today: () => { const n = dueList().length; return n ? `${n} contato${n > 1 ? 's' : ''} para fazer` : 'Nenhum contato pendente'; },
