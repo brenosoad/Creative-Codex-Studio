@@ -261,6 +261,49 @@ export default async function handler(req, res) {
       if (current.prospects.length && Date.now() - lastBak > BAK_EVERY) await snapshot(current, emps, 'auto');
     } catch (e) { console.error('manutenção', e); }
 
+    // dados da empresa (contratada nos contratos)
+    if (req.query.action === 'company') {
+      if (req.method === 'POST') {
+        if (role !== 'dono') return res.status(403).json({ error: 'Sem permissão.' });
+        const b = req.body || {};
+        const co = { name: trim(b.name, 120), doc: trim(b.doc, 20), address: trim(b.address, 200), email: trim(b.email, 120), whatsapp: trim(b.whatsapp, 30) };
+        await kv.set('painel_empresa', co);
+        return res.status(200).json({ company: co });
+      }
+      return res.status(200).json({ company: (await kv.get('painel_empresa')) || { name: '', doc: '', address: '', email: '', whatsapp: '(16) 99783-7454' } });
+    }
+
+    // contratos (cria, lista e cancela; a assinatura é feita pelo cliente em /api/contract)
+    if (req.query.action === 'contracts') {
+      let idx = (await kv.get('painel_ct_index')) || [];
+      if (req.method === 'POST') {
+        const b = req.body || {};
+        if (b.cancel) {
+          const e = idx.find((x) => x.id === String(b.cancel));
+          if (!e || e.status !== 'pendente' || (role !== 'dono' && e.by !== role)) return res.status(403).json({ error: 'Não é possível cancelar.' });
+          const c = await kv.get('painel_ct_' + e.id); if (c) { c.status = 'cancelado'; await kv.set('painel_ct_' + e.id, c); }
+          e.status = 'cancelado'; await kv.set('painel_ct_index', idx);
+        } else if (b.create) {
+          const x = b.create, company = (await kv.get('painel_empresa')) || {};
+          if (!company.name || !company.doc || !company.address) return res.status(400).json({ error: 'Preencha os dados da empresa antes (botão Dados da empresa, só o dono).' });
+          const items = (Array.isArray(x.items) ? x.items : []).slice(0, 30).map((i) => ({ t: trim(i.t, 160), v: Math.round((Number(i.v) || 0) * 100) / 100, rec: !!i.rec })).filter((i) => i.t);
+          const clauses = (Array.isArray(x.clauses) ? x.clauses : []).slice(0, 30).map((cl) => ({ h: trim(cl.h, 120), p: (Array.isArray(cl.p) ? cl.p : []).slice(0, 12).map((t) => trim(t, 1800)) })).filter((cl) => cl.h);
+          const cl = x.client || {};
+          const client = { name: trim(cl.name, 120), doc: trim(cl.doc, 20), address: trim(cl.address, 200), email: trim(cl.email, 120), phone: trim(cl.phone, 30) };
+          if (!client.name || !items.length || !clauses.length) return res.status(400).json({ error: 'Dados do contrato incompletos.' });
+          const once = items.filter((i) => !i.rec).reduce((s, i) => s + i.v, 0), monthly = items.filter((i) => i.rec).reduce((s, i) => s + i.v, 0);
+          const id = randomBytes(16).toString('hex');
+          const leadId = trim(x.leadId, 40);
+          const c = { id, createdAt: Date.now(), by: role, leadId, status: 'pendente', contractor: company, client, items, once, monthly, clauses };
+          await kv.set('painel_ct_' + id, c);
+          idx.unshift({ id, client: client.name, total: once || monthly, recurring: !once && monthly > 0, status: 'pendente', createdAt: c.createdAt, by: role, leadId });
+          idx = idx.slice(0, 500); await kv.set('painel_ct_index', idx);
+          return res.status(200).json({ id, contracts: idx.filter((e) => role === 'dono' || e.by === role) });
+        }
+      }
+      return res.status(200).json({ contracts: idx.filter((e) => role === 'dono' || e.by === role) });
+    }
+
     // tabela de preços (todos leem, só o dono edita)
     if (req.query.action === 'prices') {
       if (req.method === 'POST') {

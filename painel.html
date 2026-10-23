@@ -324,7 +324,7 @@ body.intern .money{display:none!important}
 'use strict';
 /* ---------- estado ---------- */
 const API = '/api/data';
-const S = { token: null, role: null, users: {}, team: null, tpl: null, prices: null, insta: null, ig: null, log: [], baks: [], prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
+const S = { token: null, role: null, users: {}, team: null, tpl: null, cts: null, company: null, prices: null, insta: null, ig: null, log: [], baks: [], prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
 const STATUS = { prospectando: 'Prospectando', semresposta: 'Sem resposta', negociando: 'Negociando', fechado: 'Fechado', perdido: 'Perdido' };
 const STCOL = { prospectando: '#A29FB8', semresposta: '#7dd3fc', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
 const who = (id) => id === 'dono' || !id ? 'Dono' : id === '*' ? 'Outra pessoa' : ((S.users[id] && S.users[id].name) || 'Funcionário');
@@ -564,7 +564,7 @@ function renderNav() {
     `<button type="button" data-act="view" data-v="${k}" class="${S.view === k ? 'on' : ''}" ${S.view === k ? 'aria-current="page"' : ''}>${ic(i)}<span>${n}</span>${k === 'today' && due ? `<span class="badge">${due}</span>` : ''}</button>`).join('');
   $('#nav').innerHTML = html(); $('#tabs').innerHTML = html();
 }
-function setView(v) { S.view = v; saveUI(); render(); window.scrollTo(0, 0); if (v === 'team') loadTeam(); if (v === 'insta') loadInsta(); }
+function setView(v) { S.view = v; saveUI(); render(); window.scrollTo(0, 0); if (v === 'team') loadTeam(); if (v === 'insta') loadInsta(); if (v === 'msgs') loadCts(); }
 
 /* ---------- métricas ---------- */
 function metrics() {
@@ -767,14 +767,95 @@ function logLine(l) {
 async function loadTpl() {
   try { S.tpl = (await api('GET', null, '?action=templates')).templates; } catch (e) { S.tpl = S.tpl || []; }
   try { S.prices = (await api('GET', null, '?action=prices')).prices; } catch (e) {}
+  try { S.company = (await api('GET', null, '?action=company')).company; S.cts = (await api('GET', null, '?action=contracts')).contracts; } catch (e) {}
   if (S.view === 'msgs') render();
 }
 const myName = () => S.role === 'dono' ? 'Breno' : who(S.role);
 const fillTpl = (text, p) => text.replace(/\{nome\}/g, p ? p.name.split(' ')[0] : '[nome]').replace(/\{servico\}/g, p && p.service ? p.service : p ? 'o seu projeto' : '[serviço]').replace(/\{meu_nome\}/g, myName());
+const CT_ST = { pendente: ['Aguardando assinatura', 'negociando'], assinado: ['Assinado', 'fechado'], cancelado: ['Cancelado', 'perdido'] };
+const ctUrl = (id) => location.origin + '/assinar/?c=' + id;
+function ctList() {
+  const L = (S.cts || []).filter((c) => c.status !== 'cancelado'), co = S.company || {};
+  const warn = !isIntern() && (!co.name || !co.doc || !co.address) ? `<div class="hint" style="color:var(--amber);margin-bottom:10px">Antes do primeiro contrato, preencha os dados da empresa.</div>` : '';
+  return `<div class="tools" style="margin:0 0 10px"><h2 class="sec" style="margin:0;flex:1">Contratos</h2>${isIntern() ? '' : `<button class="btn gh" data-act="co-edit">${ic('edit')}Dados da empresa</button>`}</div>${warn}` + (L.length ? `<div class="tw" style="margin-bottom:22px"><table><thead><tr><th>Cliente</th><th>Valor</th><th>Situação</th><th></th></tr></thead><tbody>${L.map((c) => `<tr><td class="c-main"><div class="nm">${esc(c.client)}</div><div class="ct">${fdate(new Date(c.createdAt).toISOString())}${!isIntern() && c.by !== 'dono' ? ' | ' + esc(who(c.by)) : ''}</div></td><td data-l="Valor" class="val">${money(c.total)}${c.recurring ? ' /mês' : ''}</td><td data-l="Situação"><span class="st ${CT_ST[c.status][1]}">${CT_ST[c.status][0]}</span></td><td class="c-act"><div class="acts">${c.status === 'pendente' ? `<button class="btn sm gh" data-act="ct-copy" data-id="${c.id}">Copiar link</button><button class="btn sm wa" data-act="ct-wa" data-id="${c.id}">${ic('wa')}WhatsApp</button><button class="btn sm gh" data-act="ct-cancel" data-id="${c.id}">Cancelar</button>` : `<a class="btn sm gh" href="${ctUrl(c.id)}&print=1" target="_blank" rel="noopener">${ic('doc')}PDF</a>`}</div></td></tr>`).join('')}</tbody></table></div>` : '<div class="card empty" style="margin-bottom:22px"><p>Nenhum contrato ainda.</p></div>');
+}
+async function loadCts() { try { S.cts = (await api('GET', null, '?action=contracts')).contracts; } catch (e) {} if (S.view === 'msgs') render(); }
+function coDialog() {
+  const c = S.company || {};
+  dialog({ title: 'Dados da empresa', small: false, body: `<p style="color:var(--dim);margin-bottom:12px;font-size:.88rem">Aparecem como CONTRATADA em todos os contratos.</p>
+    <div class="f"><label for="coN">Nome ou razão social</label><input id="coN" value="${esc(c.name)}" maxlength="120" placeholder="Ex: Breno Soad (Creative Codex Studio)"></div>
+    <div class="f2"><div class="f"><label for="coD">CPF ou CNPJ</label><input id="coD" value="${esc(c.doc)}" maxlength="20"></div><div class="f"><label for="coW">WhatsApp</label><input id="coW" value="${esc(c.whatsapp)}" maxlength="30"></div></div>
+    <div class="f"><label for="coA">Endereço completo</label><input id="coA" value="${esc(c.address)}" maxlength="200" placeholder="Rua, número, bairro, São Carlos, SP, CEP"></div>
+    <div class="f"><label for="coE">E-mail</label><input id="coE" value="${esc(c.email)}" maxlength="120"></div>`, ok: 'Salvar', onOk: async (d) => {
+    try { S.company = (await api('POST', { name: $('#coN', d).value, doc: $('#coD', d).value, address: $('#coA', d).value, email: $('#coE', d).value, whatsapp: $('#coW', d).value }, '?action=company')).company; toast('Dados salvos.', { type: 'ok' }); render(); }
+    catch (e) { if (e.message !== 'sessão') toast(e.message, { type: 'err' }); }
+  } });
+}
+function clauses(co, items, once, monthly, prazo, pagto, svc, inc) {
+  const m = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  return [
+    { h: '1. Do objeto', p: [`O presente contrato tem por objeto a prestação, pela CONTRATADA ao CONTRATANTE, dos serviços descritos na tabela acima${svc ? ' (' + svc + ')' : ''}.`, ...(inc.length ? ['O escopo inclui: ' + inc.join('; ') + '.'] : [])] },
+    { h: '2. Do prazo', p: [`O prazo de entrega é de ${prazo}, contado a partir da assinatura deste contrato, do pagamento da primeira parcela e do recebimento de todo o material necessário (textos, logotipo, fotos e acessos). Atrasos do CONTRATANTE no envio do material prorrogam o prazo na mesma medida.`] },
+    { h: '3. Do preço e do pagamento', p: [`Pelos serviços, o CONTRATANTE pagará${once || !monthly ? ' ' + m(once) + ', na seguinte forma: ' + pagto : ''}${monthly ? (once || !monthly ? ', além de ' : ' ') + 'a mensalidade de ' + m(monthly) + ', paga todo mês no mesmo dia do primeiro pagamento' : ''}.`, 'O atraso no pagamento sujeita o CONTRATANTE a multa de 2% e juros de 1% ao mês, e permite à CONTRATADA suspender a entrega e a publicação até a regularização.'] },
+    { h: '4. Das revisões', p: ['Estão incluídas até 2 rodadas de ajustes sobre o material entregue, dentro do escopo contratado. Alterações fora do escopo ou novas funcionalidades serão orçadas à parte.'] },
+    { h: '5. Das obrigações da CONTRATADA', p: ['Executar os serviços com qualidade técnica e dentro do prazo, manter sigilo sobre as informações do CONTRATANTE e prestar suporte pelo WhatsApp durante a execução.'] },
+    { h: '6. Das obrigações do CONTRATANTE', p: ['Fornecer o material e as informações necessários, responder às aprovações em até 3 dias úteis e responsabilizar-se pela legalidade e pelos direitos autorais dos conteúdos que fornecer.'] },
+    { h: '7. Da propriedade intelectual', p: ['Com o pagamento integral, os direitos de uso do site e das artes desenvolvidos passam ao CONTRATANTE. A CONTRATADA poderá exibir o trabalho em seu portfólio, salvo oposição por escrito do CONTRATANTE. Ferramentas, códigos e bibliotecas próprios ou de terceiros permanecem com seus titulares.'] },
+    { h: '8. Do domínio e da hospedagem', p: ['Domínio e hospedagem incluídos no escopo são contratados pelo período informado. As renovações posteriores são de responsabilidade do CONTRATANTE, salvo contratação de manutenção.'] },
+    { h: '9. Da proteção de dados', p: ['As partes tratarão os dados pessoais envolvidos somente para a execução deste contrato, conforme a Lei 13.709/2018 (LGPD).'] },
+    { h: '10. Da rescisão', p: ['Qualquer das partes pode rescindir este contrato com aviso prévio de 7 dias. Se o CONTRATANTE rescindir após o início dos trabalhos, pagará proporcionalmente ao que já foi executado, sem devolução do valor correspondente. O descumprimento grave autoriza a rescisão imediata.'] },
+    { h: '11. Da assinatura eletrônica', p: ['As partes concordam em assinar este contrato por meio eletrônico, reconhecendo sua validade e autenticidade nos termos da MP 2.200-2/2001 e da Lei 14.063/2020. A assinatura é registrada com nome, CPF ou CNPJ, data, hora, endereço IP e código de verificação do documento.'] },
+    { h: '12. Do foro', p: ['Fica eleito o foro da comarca de São Carlos, SP, para resolver qualquer dúvida deste contrato, com renúncia a qualquer outro.'] }
+  ];
+}
+function contractDialog(p) {
+  const P = S.prices || { services: [], extras: [] };
+  const words = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z]+/).filter((w) => w.length > 3 && !['para', 'site', 'loja'].includes(w));
+  const pw = words(p.service), guess = P.services.findIndex((x) => words(x.name).some((w) => pw.includes(w)));
+  const ov = dialog({ title: 'Gerar contrato', small: false, body: `
+    <div class="f"><label for="kN">Cliente (nome ou razão social)</label><input id="kN" value="${esc(p.name)}" maxlength="120"></div>
+    <div class="f2"><div class="f"><label for="kD">CPF ou CNPJ</label><input id="kD" maxlength="20" inputmode="numeric"></div><div class="f"><label for="kP">WhatsApp do cliente</label><input id="kP" value="${esc(p.contact || '')}" maxlength="30"></div></div>
+    <div class="f"><label for="kA">Endereço do cliente</label><input id="kA" maxlength="200" placeholder="Rua, número, cidade, UF"></div>
+    <div class="f"><label for="kE">E-mail do cliente (opcional)</label><input id="kE" maxlength="120"></div>
+    <div class="f"><label for="kS">Serviço</label><select id="kS"><option value="-1">Personalizado (digitar os itens)</option>${P.services.map((x, i) => `<option value="${i}" ${i === guess ? 'selected' : ''}>${esc(x.name)} (${money(x.price)}${x.recurring ? '/mês' : ''})</option>`).join('')}</select></div>
+    ${P.extras.length ? `<div class="f"><label>Extras</label><div id="kX" style="display:grid;gap:6px">${P.extras.map((x, i) => `<label class="ck"><input type="checkbox" data-ex="${i}"><span>${esc(x.name)} <b>${money(x.price)}</b></span></label>`).join('')}</div></div>` : ''}
+    <div class="f"><label for="kC">Desconto (R$)</label><input id="kC" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div>
+    <div class="f"><label for="kI">Itens (um por linha: descrição | valor; no fim "| mensal" para cobrança mensal)</label><textarea id="kI" style="min-height:96px"></textarea></div>
+    <div class="f2"><div class="f"><label for="kZ">Prazo de entrega</label><input id="kZ" value="7 dias úteis" maxlength="60"></div><div class="f"><label for="kF">Forma de pagamento</label><input id="kF" value="50% na assinatura e 50% na entrega" maxlength="120"></div></div>`, ok: 'Criar contrato e link', onOk: (d) => {
+    const co = S.company || {};
+    if (!co.name || !co.doc || !co.address) { toast(isIntern() ? 'O dono precisa preencher os dados da empresa antes.' : 'Preencha os dados da empresa primeiro.', { type: 'err' }); return false; }
+    const parse = (v) => { const raw = String(v || ''), neg = /^\s*-/.test(raw), r = raw.replace(/[^\d.,]/g, ''); return (neg ? -1 : 1) * (parseFloat(r.includes(',') ? r.replace(/\./g, '').replace(',', '.') : r) || 0); };
+    const items = $('#kI', d).value.split('\n').map((l) => l.split('|')).filter((a) => a[0].trim()).map((a) => ({ t: a[0].trim(), v: parse(a[1]), rec: /mensal/i.test(a[2] || '') }));
+    if (!items.length) { toast('Adicione ao menos um item.', { type: 'err' }); return false; }
+    if (!$('#kN', d).value.trim()) return false;
+    const once = items.filter((x) => !x.rec).reduce((s, x) => s + x.v, 0), monthly = items.filter((x) => x.rec).reduce((s, x) => s + x.v, 0);
+    const sv = P.services[+$('#kS', d).value];
+    const body = { create: { leadId: p.id || '', client: { name: $('#kN', d).value.trim(), doc: $('#kD', d).value.trim(), address: $('#kA', d).value.trim(), email: $('#kE', d).value.trim(), phone: $('#kP', d).value.trim() }, items: items.map((x) => ({ t: x.t, v: x.v, rec: x.rec })), clauses: clauses(co, items, once, monthly, $('#kZ', d).value.trim() || '7 dias úteis', $('#kF', d).value.trim() || 'a combinar', sv ? sv.name : '', sv ? sv.includes : []) } };
+    api('POST', body, '?action=contracts').then((r) => { S.cts = r.contracts; render(); ctShare(r.id, body.create.client); }).catch((e) => { if (e.message !== 'sessão') toast(e.message, { type: 'err' }); });
+  } });
+  const build = () => {
+    const sv = P.services[+$('#kS', ov).value], lines = [];
+    if (sv) { lines.push(`${sv.name} | ${sv.price}${sv.recurring ? ' | mensal' : ''}`); if (sv.deadline && !sv.recurring) $('#kZ', ov).value = sv.deadline; }
+    else if (p.value) lines.push(`${p.service || 'Serviço'} | ${p.value}`);
+    ov.querySelectorAll('[data-ex]:checked').forEach((c) => { const x = P.extras[+c.dataset.ex]; lines.push(`${x.name} | ${x.price}`); });
+    const dc = parseFloat($('#kC', ov).value) || 0; if (dc > 0) lines.push(`Desconto | -${dc}`);
+    $('#kI', ov).value = lines.join('\n');
+  };
+  ov.addEventListener('change', (e) => { if (e.target.id === 'kS' || e.target.closest('#kX')) build(); });
+  $('#kC', ov).addEventListener('input', build);
+  build();
+}
+function ctShare(id, client) {
+  const url = ctUrl(id), first = (client.name || '').split(' ')[0], msg = `Oi, ${first}! Segue o link do contrato para você ler e assinar pelo celular: ${url}`;
+  const wa = waLink(client.phone, msg);
+  const ov = dialog({ title: 'Contrato criado', body: `<p style="color:var(--dim);margin-bottom:12px">Mande este link para o cliente. Quando ele assinar, o lead vira <b style="color:var(--text)">Fechado</b> automaticamente.</p><div class="f"><input id="shU" readonly value="${esc(url)}" onfocus="this.select()"></div><div class="quick"><button type="button" class="btn sm gh" id="shC">Copiar link</button>${wa ? `<a class="btn sm wa" href="${wa}" target="_blank" rel="noopener">${ic('wa')}Enviar no WhatsApp</a>` : ''}<a class="btn sm gh" href="${url}" target="_blank" rel="noopener">Abrir</a></div>`, ok: 'Fechar' });
+  $('[data-x]', ov).style.display = 'none';
+  $('#shC', ov).onclick = () => navigator.clipboard.writeText(url).then(() => toast('Link copiado.', { type: 'ok' }));
+}
 function vMsgs() {
   if (!S.tpl) return '<div class="card empty"><p>Carregando...</p></div>';
   const names = [...new Set(S.prospects.filter((p) => !locked(p)).sort((a, b) => (isOpen(b) - isOpen(a)) || a.name.localeCompare(b.name)).map((p) => p.name))];
-  const prop = `<div class="card" style="margin-bottom:22px"><h3>${ic('doc')}Gerar proposta</h3><div class="tools" style="margin:0"><input id="propC" list="propL" placeholder="Digite o nome de um prospecto ou de um cliente novo" maxlength="120" style="flex:1;min-width:220px;padding:.7rem .85rem;border-radius:10px;border:1px solid var(--line);background:var(--bg)"><datalist id="propL">${names.map((n) => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn pri" data-act="prop-go">Gerar proposta</button></div><div class="hint" style="margin-top:8px">Escolha o serviço, os extras e o desconto, e o PDF sai pronto.</div></div><h2 class="sec" style="margin-top:0">Mensagens prontas</h2>`;
+  const prop = `<div class="card" style="margin-bottom:22px"><h3>${ic('doc')}Gerar proposta</h3><div class="tools" style="margin:0"><input id="propC" list="propL" placeholder="Digite o nome de um prospecto ou de um cliente novo" maxlength="120" style="flex:1;min-width:220px;padding:.7rem .85rem;border-radius:10px;border:1px solid var(--line);background:var(--bg)"><datalist id="propL">${names.map((n) => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn pri" data-act="prop-go">Gerar proposta</button><button class="btn gh" data-act="ct-go">Gerar contrato</button></div><div class="hint" style="margin-top:8px">Depois que o cliente aceitar a proposta, gere o contrato: o cliente recebe um link, lê e assina no celular.</div></div>${ctList()}<h2 class="sec" style="margin-top:0">Mensagens prontas</h2>`;
   const head = prop + `<div class="tools"><div class="hint" style="margin:0;flex:1">Use {nome}, {servico} e {meu_nome}: o painel troca pelos dados do lead. Para usar com um lead, abra o prospecto e escolha o modelo.</div>${isIntern() ? '' : `<button class="btn pri" data-act="tpl-new">${ic('plus')}Novo modelo</button>`}</div>`;
   return head + (S.tpl.map((m) => `<div class="msg"><h4>${esc(m.title)} <span class="tag" style="margin:0">${esc(m.segment)}</span></h4><p>${esc(m.text)}</p><div class="acts" style="justify-content:flex-start"><button class="btn sm gh" data-act="tpl-copy" data-id="${esc(m.id)}">Copiar</button>${isIntern() ? '' : `<button class="btn sm gh" data-act="tpl-edit" data-id="${esc(m.id)}">${ic('edit')}Editar</button><button class="btn sm gh" data-act="tpl-del" data-id="${esc(m.id)}">${ic('trash')}Excluir</button>`}</div></div>`).join('') || '<div class="card empty"><p>Nenhum modelo.</p></div>');
 }
@@ -1159,6 +1240,13 @@ document.addEventListener('click', (e) => {
     case 'prop-go': { const n = ($('#propC') || {}).value.trim(); if (!n) { toast('Digite o nome do cliente.', { type: 'err' }); break; }
       const p = S.prospects.find((x) => x.name === n && !locked(x)) || S.prospects.find((x) => x.name.toLowerCase() === n.toLowerCase() && !locked(x));
       proposal(p || { name: n, service: '', value: 0 }); break; }
+    case 'ct-go': { const n = ($('#propC') || {}).value.trim(); if (!n) { toast('Digite o nome do cliente.', { type: 'err' }); break; }
+      const p = S.prospects.find((x) => x.name === n && !locked(x)) || S.prospects.find((x) => x.name.toLowerCase() === n.toLowerCase() && !locked(x));
+      contractDialog(p || { name: n, service: '', value: 0 }); break; }
+    case 'co-edit': coDialog(); break;
+    case 'ct-copy': navigator.clipboard.writeText(ctUrl(id)).then(() => toast('Link copiado.', { type: 'ok' })); break;
+    case 'ct-wa': { const c = (S.cts || []).find((x) => x.id === id), p = S.prospects.find((x) => x.id === c.leadId); ctShare(id, { name: c.client, phone: p && p.contact }); break; }
+    case 'ct-cancel': dialog({ title: 'Cancelar contrato', body: '<p style="color:var(--dim)">O link deixa de funcionar. Essa ação não pode ser desfeita.</p>', ok: 'Cancelar contrato', danger: true, onOk: () => { api('POST', { cancel: id }, '?action=contracts').then((r) => { S.cts = r.contracts; toast('Contrato cancelado.', { type: 'ok' }); render(); }).catch((e) => toast(e.message, { type: 'err' })); } }); break;
     case 'pay': payDialog(id); break;
     case 'receipt': receipt(id); break;
     case 'unpay': { const p = S.prospects.find((x) => x.id === id); if (p) { p.commissionPaid = false; p.paidAt = ''; p.paidNote = ''; touch(p, 'paid', 'Pagamento desmarcado'); save(); render(); } break; }

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Assinatura de contrato | Creative Codex</title>
+<link rel="icon" href="../img/logo.png?v=2" type="image/png">
+<style>
+:root{--bg:#0D0B1A;--panel:#17142B;--line:#2A2640;--text:#F4F3F8;--dim:#A29FB8;--brand:#8B7CFF;--brand-d:#4B32D9;--green:#34d399;--red:#f87171}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;min-height:100vh}
+.top{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.top img{width:34px;height:34px;border-radius:50%}.top b{font-size:1.05rem}.top span{color:var(--brand)}.top small{margin-left:auto;color:var(--dim);font-size:.82rem}
+main{max-width:820px;margin:0 auto;padding:24px 16px 120px}
+.hello{margin-bottom:18px}.hello h1{font-size:1.5rem;letter-spacing:-.02em;margin-bottom:4px}.hello p{color:var(--dim)}
+.paper{background:#fff;color:#1b1830;border-radius:12px;padding:clamp(20px,5vw,44px);font-size:.95rem}
+.paper h2.t{text-align:center;font-size:1.15rem;letter-spacing:.01em;margin-bottom:18px}
+.paper h3{font-size:.95rem;margin:20px 0 6px}.paper p{margin-bottom:8px;text-align:justify}
+.parties{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}.party{background:#f4f2fc;border-radius:8px;padding:12px 14px;font-size:.88rem}.party b{display:block;font-size:.72rem;color:#5b5873;margin-bottom:2px}
+table{width:100%;border-collapse:collapse;margin:8px 0}th{text-align:left;font-size:.78rem;color:#5b5873;border-bottom:1px solid #cfcbe0;padding:6px}td{padding:8px 6px;border-bottom:1px solid #e8e5f2}.r{text-align:right;white-space:nowrap}
+.tot td{font-weight:800;border-bottom:0}
+.sigs{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:30px}.sg{border-top:1px solid #1b1830;padding-top:8px;font-size:.85rem;text-align:center;min-height:70px}.sg i{display:block;font-family:Georgia,serif;font-size:1.15rem;color:#4B32D9;margin-bottom:2px}
+.ev{margin-top:26px;border:1px solid #cfcbe0;border-radius:8px;padding:12px 14px;font-size:.78rem;color:#3d3a52;word-break:break-all}.ev b{color:#1b1830}
+.sign{position:sticky;bottom:0;margin:18px -16px 0;background:rgba(13,11,26,.97);border-top:1px solid var(--line);padding:14px 16px calc(14px + env(safe-area-inset-bottom))}
+.sign .in{max-width:820px;margin:0 auto;display:grid;gap:10px}
+.row{display:grid;grid-template-columns:1.4fr 1fr;gap:10px}
+input[type=text]{width:100%;padding:.8rem .9rem;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:inherit}
+input:focus{border-color:var(--brand);outline:0}
+label.ck{display:flex;gap:10px;align-items:flex-start;color:var(--dim);font-size:.88rem;cursor:pointer}label.ck input{margin-top:5px;accent-color:var(--brand-d);width:18px;height:18px}
+.btn{padding:.9rem 1.2rem;border-radius:10px;border:0;background:var(--brand-d);color:#fff;font-weight:700;font-size:1rem;font-family:inherit;cursor:pointer}.btn:disabled{opacity:.6}
+.btn.gh{background:var(--panel);border:1px solid var(--line)}
+.err{color:var(--red);font-size:.88rem;min-height:1.2em}
+.ok{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35);color:var(--green);border-radius:12px;padding:14px 16px;margin-bottom:18px}
+.msg{text-align:center;padding:80px 16px;color:var(--dim)}
+@media (max-width:600px){.parties,.sigs,.row{grid-template-columns:1fr}.paper p{text-align:left}}
+@media print{body{background:#fff}.top,.hello,.sign,.ok,.noprint{display:none!important}main{padding:0;max-width:none}.paper{border-radius:0;padding:0}}
+</style>
+</head>
+<body>
+<div class="top"><img src="../img/logo.png" alt=""><b>Creative <span>Codex</span></b><small>Assinatura eletrônica</small></div>
+<main id="app"><div class="msg">Carregando contrato...</div></main>
+<script>
+const $ = (s) => document.querySelector(s);
+const id = new URLSearchParams(location.search).get('c') || '';
+const money = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const when = (t) => new Date(t).toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Sao_Paulo' });
+const fmtDoc = (d) => { d = String(d).replace(/\D/g, ''); return d.length <= 11 ? d.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, (m, a, b, c, e) => a + '.' + b + '.' + c + (e ? '-' + e : '')) : d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, '$1.$2.$3/$4-$5'); };
+function el(tag, props, ...kids) { const e = document.createElement(tag); if (props) for (const [k, v] of Object.entries(props)) { if (k === 'class') e.className = v; else if (k === 'text') e.textContent = v; else e.setAttribute(k, v); } kids.flat().forEach((k) => e.append(k)); return e; }
+const party = (t, p) => el('div', { class: 'party' }, el('b', { text: t }), el('span', { text: [p.name, p.doc ? 'CPF/CNPJ ' + p.doc : '', p.address, p.email, p.phone || p.whatsapp].filter(Boolean).join(' | ') }));
+
+function paper(c) {
+  const s = c.signature, P = el('div', { class: 'paper' });
+  P.append(el('h2', { class: 't', text: 'CONTRATO DE PRESTAÇÃO DE SERVIÇOS' }), el('div', { class: 'parties' }, party('CONTRATADA', c.contractor), party('CONTRATANTE', c.client)));
+  const tb = el('table'), th = el('thead', null, el('tr', null, el('th', { text: 'Serviço' }), el('th', { class: 'r', text: 'Valor' })));
+  const body = el('tbody');
+  c.items.forEach((i) => body.append(el('tr', null, el('td', { text: i.t }), el('td', { class: 'r', text: (i.v < 0 ? '- ' + money(-i.v) : money(i.v)) + (i.rec ? ' /mês' : '') }))));
+  if (c.once || !c.monthly) body.append(el('tr', { class: 'tot' }, el('td', { text: c.monthly ? 'Total à vista' : 'Total' }), el('td', { class: 'r', text: money(c.once) })));
+  if (c.monthly) body.append(el('tr', { class: 'tot' }, el('td', { text: 'Mensalidade' }), el('td', { class: 'r', text: money(c.monthly) + ' /mês' })));
+  tb.append(th, body); P.append(tb);
+  c.clauses.forEach((cl) => { P.append(el('h3', { text: cl.h })); cl.p.forEach((t) => P.append(el('p', { text: t }))); });
+  P.append(el('p', { text: 'Contrato gerado em ' + when(c.createdAt) + '.' }));
+  const left = el('div', { class: 'sg' }, el('i', { text: c.contractor.name }), 'Assinado eletronicamente', el('br'), 'CONTRATADA');
+  const right = el('div', { class: 'sg' }, s ? el('i', { text: s.name }) : el('span', { text: '' }), s ? 'Assinado eletronicamente em ' + when(s.at) : 'Aguardando assinatura', el('br'), 'CONTRATANTE');
+  P.append(el('div', { class: 'sigs' }, left, right));
+  if (s) P.append(el('div', { class: 'ev' }, el('b', { text: 'Registro da assinatura eletrônica' }), el('br'), 'Assinante: ' + s.name + ' | CPF/CNPJ ' + fmtDoc(s.doc), el('br'), 'Data e hora: ' + when(s.at) + ' (horário de Brasília)', el('br'), 'Endereço IP: ' + s.ip, el('br'), 'Código do documento: ' + c.id, el('br'), 'Impressão digital (SHA-256): ' + s.hash));
+  return P;
+}
+
+function render(c) {
+  const app = $('#app'); app.textContent = '';
+  const signed = c.status === 'assinado';
+  app.append(el('div', { class: 'hello' }, el('h1', { text: signed ? 'Contrato assinado' : 'Seu contrato está pronto' }), el('p', { text: signed ? 'Obrigado! Uma cópia ficou registrada. Você pode salvar em PDF abaixo.' : 'Leia com calma. Para assinar, preencha seus dados no final da página.' })));
+  if (signed) app.append(el('div', { class: 'ok noprint', text: 'Assinatura registrada em ' + when(c.signature.at) + '.' }));
+  app.append(paper(c));
+  if (signed) { const b = el('button', { class: 'btn gh noprint', type: 'button', style: 'margin-top:16px', text: 'Salvar em PDF / imprimir' }); b.onclick = () => print(); app.append(b); if (new URLSearchParams(location.search).get('print')) setTimeout(() => print(), 600); return; }
+  const f = el('form', { class: 'sign' }), inn = el('div', { class: 'in' });
+  const name = el('input', { type: 'text', placeholder: 'Nome completo', autocomplete: 'name', required: '', maxlength: '120' }), doc = el('input', { type: 'text', placeholder: 'CPF ou CNPJ', inputmode: 'numeric', required: '', maxlength: '18' });
+  doc.addEventListener('input', () => { doc.value = fmtDoc(doc.value); });
+  const ck = el('input', { type: 'checkbox' }), err = el('div', { class: 'err', role: 'alert' }), btn = el('button', { class: 'btn', type: 'submit', text: 'Assinar contrato' });
+  inn.append(el('div', { class: 'row' }, name, doc), el('label', { class: 'ck' }, ck, el('span', { text: 'Li e concordo com todos os termos deste contrato. Reconheço esta assinatura eletrônica como válida (Lei 14.063/2020 e MP 2.200-2/2001).' })), err, btn);
+  f.append(inn); app.append(f);
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault(); err.textContent = ''; btn.disabled = true; btn.textContent = 'Assinando...';
+    try {
+      const r = await fetch('/api/contract?id=' + id, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.value, doc: doc.value, accept: ck.checked }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Erro ao assinar.');
+      render(j); scrollTo(0, 0);
+    } catch (x) { err.textContent = x.message; btn.disabled = false; btn.textContent = 'Assinar contrato'; }
+  });
+}
+(async () => {
+  try { const r = await fetch('/api/contract?id=' + encodeURIComponent(id)), j = await r.json(); if (!r.ok) throw new Error(j.error); render(j); }
+  catch (e) { $('#app').innerHTML = ''; $('#app').append(el('div', { class: 'msg', text: e.message || 'Contrato não encontrado.' })); }
+})();
+</script>
+</body>
+</html>
