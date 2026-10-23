@@ -245,7 +245,9 @@ body.intern .money{display:none!important}
   .tabs .badge{position:absolute;top:2px;left:calc(50% + 8px);font:700 .62rem var(--mono);background:var(--red);color:#1a0b0b;border-radius:99px;padding:0 .35rem}
   .g2{grid-template-columns:1fr}
   .f2{grid-template-columns:1fr}
-  .top .btn.pri{position:fixed;right:16px;bottom:82px;z-index:35;border-radius:99px;padding:.9rem 1.2rem;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+  .top .btn.pri{position:fixed;right:14px;bottom:78px;z-index:35;border-radius:50%;width:54px;height:54px;padding:0;font-size:0;gap:0;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+  .top .btn.pri svg{width:24px;height:24px}
+  .tools .hint{flex-basis:100%}
   /* tabela vira cartões */
   table,thead,tbody,tr,td{display:block}
   thead{display:none}
@@ -317,7 +319,7 @@ body.intern .money{display:none!important}
 <main class="main" id="main" hidden>
   <div class="top">
     <div><h1 id="title"></h1><p id="subtitle"></p></div>
-    <div class="topact"><button class="ib help" data-act="tour" aria-label="Tutorial" title="Tutorial">?</button><button class="btn pri" data-act="new"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><use href="#i-plus"/></svg>Novo prospecto</button></div>
+    <div class="topact"><button class="ib help" data-act="tour" aria-label="Tutorial" title="Tutorial">?</button><button class="btn pri" data-act="new" aria-label="Novo prospecto"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><use href="#i-plus"/></svg>Novo prospecto</button></div>
   </div>
   <div id="view"></div>
 </main>
@@ -1334,7 +1336,7 @@ document.addEventListener('change', (e) => {
 let qT;
 document.addEventListener('input', (e) => { if (e.target.id === 'q') { S.q = e.target.value; clearTimeout(qT); qT = setTimeout(render, 120); } });
 document.addEventListener('visibilitychange', () => { if (!document.hidden && S.token && !saving && !S.deleted.length && !document.querySelector('.ov')) load(true); });
-setInterval(() => { if (S.token && !document.hidden && !saving && !document.querySelector('.ov')) load(true); }, 90000);
+setInterval(() => { if (S.token && !document.hidden && !saving && !document.querySelector('.ov') && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) load(true); }, 90000);
 
 boot();
 </script>
