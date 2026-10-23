@@ -230,6 +230,25 @@ export default async function handler(req, res) {
       return res.status(200).json({ templates: (await kv.get(TPL_KEY)) || MODELOS });
     }
 
+    // números do Instagram (só o dono, lançados à mão)
+    if (req.query.action === 'insta') {
+      if (role !== 'dono') return res.status(403).json({ error: 'Sem permissão.' });
+      let list = (await kv.get('painel_insta')) || [];
+      if (req.method === 'POST') {
+        const b = req.body || {};
+        const date = /^\d{4}-\d{2}-\d{2}$/.test(b.date) ? b.date : '';
+        if (!date) return res.status(400).json({ error: 'Data inválida.' });
+        list = list.filter((x) => x.date !== date);
+        if (!b.remove) {
+          const n = (v) => Math.max(0, Math.round(Number(v) || 0));
+          list.push({ date, followers: n(b.followers), following: n(b.following), posts: n(b.posts), reach: n(b.reach), interactions: n(b.interactions), note: trim(b.note, 200) });
+        }
+        list = list.sort((x, y) => x.date.localeCompare(y.date)).slice(-400);
+        await kv.set('painel_insta', list);
+      }
+      return res.status(200).json({ insta: list });
+    }
+
     // atividade e backups (só o dono)
     if (req.query.action === 'log' || req.query.action === 'backups') {
       if (role !== 'dono') return res.status(403).json({ error: 'Sem permissão.' });

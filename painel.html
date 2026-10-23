@@ -273,6 +273,7 @@ body.intern .money{display:none!important}
   <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.5-1.5-3-1.5-1.8 0-3 .9-3 2.1 0 3 6 1.4 6 4.4 0 1.2-1.2 2-3 2-1.5 0-2.6-.6-3-1.6M12 6v2m0 8v2"/></symbol>
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
   <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></symbol>
+  <symbol id="i-insta" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></symbol>
   <symbol id="i-dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
@@ -323,7 +324,7 @@ body.intern .money{display:none!important}
 'use strict';
 /* ---------- estado ---------- */
 const API = '/api/data';
-const S = { token: null, role: null, users: {}, team: null, tpl: null, log: [], baks: [], prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
+const S = { token: null, role: null, users: {}, team: null, tpl: null, insta: null, log: [], baks: [], prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
 const STATUS = { prospectando: 'Prospectando', semresposta: 'Sem resposta', negociando: 'Negociando', fechado: 'Fechado', perdido: 'Perdido' };
 const STCOL = { prospectando: '#A29FB8', semresposta: '#7dd3fc', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
 const who = (id) => id === 'dono' || !id ? 'Dono' : id === '*' ? 'Outra pessoa' : ((S.users[id] && S.users[id].name) || 'Funcionário');
@@ -448,6 +449,40 @@ function showLogin() {
   $('#login').hidden = false; $('#side').hidden = $('#main').hidden = $('#tabs').hidden = true;
   setTimeout(() => $('#pw').focus(), 50);
 }
+/* ---------- instagram (só o dono) ---------- */
+async function loadInsta() {
+  try { S.insta = (await api('GET', null, '?action=insta')).insta; } catch (e) { if (e.message !== 'sessão') toast(e.message, { type: 'err' }); S.insta = S.insta || []; }
+  if (S.view === 'insta') render();
+}
+function vInsta() {
+  const L = S.insta;
+  const head = `<div class="tools"><div class="hint" style="margin:0;flex:1">O Instagram não libera os números para o painel. Anote aqui de tempos em tempos (por exemplo, toda semana) e acompanhe a evolução.</div><a class="btn gh" href="https://www.instagram.com/creativecodex.studio/" target="_blank" rel="noopener">Abrir perfil</a><button class="btn pri" data-act="ig-new">${ic('plus')}Registrar números</button></div>`;
+  if (!L) return head + '<div class="card empty"><p>Carregando...</p></div>';
+  if (!L.length) return head + `<div class="card empty">${ic('insta')}<p>Nenhum registro ainda. Clique em Registrar números.</p></div>`;
+  const last = L[L.length - 1], prev = L[L.length - 2];
+  const d = (k) => prev ? last[k] - prev[k] : null;
+  const dl = (v) => v === null ? 'primeiro registro' : (v > 0 ? '+' : '') + v.toLocaleString('pt-BR') + ' desde ' + fdate(prev.date);
+  const eng = last.reach ? (last.interactions / last.reach * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%' : '-';
+  const card = (l, v, sub, cls = '') => `<div class="card kpi"><div class="lbl">${l}</div><div class="big ${cls}">${v}</div><div class="sub">${sub}</div></div>`;
+  const pts = L.slice(-12), max = Math.max(1, ...pts.map((x) => x.followers)), min = Math.min(...pts.map((x) => x.followers));
+  const span = Math.max(1, max - min * 0.9);
+  const chart = `<div class="chart">${pts.map((x, i) => `<div class="col ${i === pts.length - 1 ? 'cur' : ''}"><b>${x.followers.toLocaleString('pt-BR')}</b><span style="height:${Math.max(4, Math.round((x.followers - min * 0.9) / span * 100))}%" title="${fdate(x.date)}: ${x.followers}"></span><em>${fdate(x.date).slice(0, 5)}</em></div>`).join('')}</div>`;
+  return head + `<div class="grid g4" style="margin-bottom:14px">${card('Seguidores', last.followers.toLocaleString('pt-BR'), dl(d('followers')), d('followers') > 0 ? 'pos' : '')}${card('Publicações', last.posts.toLocaleString('pt-BR'), dl(d('posts')))}${card('Alcance', last.reach.toLocaleString('pt-BR'), dl(d('reach')))}${card('Engajamento', eng, last.interactions.toLocaleString('pt-BR') + ' interações')}</div>
+  <div class="card"><h3>Seguidores ao longo do tempo</h3>${chart}</div>
+  <h2 class="sec">Registros</h2><div class="tw"><table><thead><tr><th>Data</th><th>Seguidores</th><th>Seguindo</th><th>Publicações</th><th>Alcance</th><th>Interações</th><th></th></tr></thead><tbody>${L.slice().reverse().map((x) => `<tr><td class="c-main"><div class="nm">${fdate(x.date)}</div>${x.note ? `<div class="ct">${esc(x.note)}</div>` : ''}</td><td data-l="Seguidores">${x.followers.toLocaleString('pt-BR')}</td><td data-l="Seguindo">${x.following.toLocaleString('pt-BR')}</td><td data-l="Publicações">${x.posts}</td><td data-l="Alcance">${x.reach.toLocaleString('pt-BR')}</td><td data-l="Interações">${x.interactions.toLocaleString('pt-BR')}</td><td class="c-act"><div class="acts"><button class="btn sm gh" data-act="ig-edit" data-d="${x.date}">${ic('edit')}Editar</button><button class="btn sm gh" data-act="ig-del" data-d="${x.date}">${ic('trash')}</button></div></td></tr>`).join('')}</tbody></table></div>`;
+}
+function igDialog(x) {
+  const last = (S.insta || []).slice(-1)[0] || {}, v = (k) => x ? x[k] : (last[k] ?? '');
+  dialog({ title: x ? 'Editar registro' : 'Registrar números', small: false, body: `<div class="f"><label for="iD">Data</label><input id="iD" type="date" value="${x ? x.date : today()}"></div>
+    <div class="f2"><div class="f"><label for="iF">Seguidores</label><input id="iF" type="number" min="0" required value="${v('followers')}"></div><div class="f"><label for="iG">Seguindo</label><input id="iG" type="number" min="0" value="${v('following')}"></div></div>
+    <div class="f2"><div class="f"><label for="iP">Publicações</label><input id="iP" type="number" min="0" value="${v('posts')}"></div><div class="f"><label for="iR">Alcance (últimos 30 dias)</label><input id="iR" type="number" min="0" value="${x ? x.reach : ''}"></div></div>
+    <div class="f"><label for="iI">Interações (curtidas, comentários, salvamentos, 30 dias)</label><input id="iI" type="number" min="0" value="${x ? x.interactions : ''}"></div>
+    <div class="f"><label for="iN">Observação</label><input id="iN" maxlength="200" value="${esc(x ? x.note : '')}" placeholder="Ex: reel viralizou"></div>`, ok: 'Salvar', onOk: async (d) => {
+    const g = (id) => $(id, d).value;
+    try { S.insta = (await api('POST', { date: g('#iD'), followers: g('#iF'), following: g('#iG'), posts: g('#iP'), reach: g('#iR'), interactions: g('#iI'), note: g('#iN') }, '?action=insta')).insta; toast('Registro salvo.', { type: 'ok' }); render(); }
+    catch (e) { if (e.message !== 'sessão') toast(e.message, { type: 'err' }); }
+  } });
+}
 function welcome(name) {
   if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
   const el = document.createElement('div');
@@ -465,8 +500,9 @@ function enter() {
   document.body.classList.toggle('intern', isIntern());
   $('#who').textContent = isIntern() ? who(S.role) + '' : 'Acesso completo';
   try { const f = JSON.parse(sessionStorage.getItem('painel_ui') || '{}'); Object.assign(S, { filter: f.filter || 'todos', resp: f.resp || 'todos', view: f.view || 'overview' }); } catch {}
-  load().then(() => { if (S.welcome && isIntern()) welcome(who(S.role).split(' ')[0]); S.welcome = false; }); loadTpl();
+  load().then(() => { if (S.welcome) welcome(isIntern() ? who(S.role).split(' ')[0] : 'Breno'); S.welcome = false; }); loadTpl();
   if (S.view === 'team' && !isIntern()) loadTeam();
+  if (S.view === 'insta' && !isIntern()) loadInsta();
 }
 function logout(expired) {
   sessionStorage.removeItem('painel_token'); sessionStorage.removeItem('painel_role');
@@ -501,7 +537,7 @@ const VIEWS = [
   ['comm', 'Comissões', 'coin'],
   ['msgs', 'Mensagens', 'chat']
 ];
-const views = () => isIntern() ? VIEWS : [...VIEWS, ['finance', 'Financeiro', 'chart'], ['team', 'Equipe', 'team']];
+const views = () => isIntern() ? VIEWS : [...VIEWS, ['finance', 'Financeiro', 'chart'], ['insta', 'Instagram', 'insta'], ['team', 'Equipe', 'team']];
 function renderNav() {
   const due = dueList().length;
   const nv = views().length;
@@ -513,7 +549,7 @@ function renderNav() {
     `<button type="button" data-act="view" data-v="${k}" class="${S.view === k ? 'on' : ''}" ${S.view === k ? 'aria-current="page"' : ''}>${ic(i)}<span>${n}</span>${k === 'today' && due ? `<span class="badge">${due}</span>` : ''}</button>`).join('');
   $('#nav').innerHTML = html(); $('#tabs').innerHTML = html();
 }
-function setView(v) { S.view = v; saveUI(); render(); window.scrollTo(0, 0); if (v === 'team') loadTeam(); }
+function setView(v) { S.view = v; saveUI(); render(); window.scrollTo(0, 0); if (v === 'team') loadTeam(); if (v === 'insta') loadInsta(); }
 
 /* ---------- métricas ---------- */
 function metrics() {
@@ -549,7 +585,7 @@ function chartHtml(m, field) {
 function render() {
   if (!S.token) return;
   renderNav();
-  if ((S.view === 'team' || S.view === 'finance') && isIntern()) S.view = 'overview';
+  if ((S.view === 'team' || S.view === 'finance' || S.view === 'insta') && isIntern()) S.view = 'overview';
   const v = views().find((x) => x[0] === S.view) || VIEWS[0];
   $('#title').textContent = v[1];
   const sub = {
@@ -559,13 +595,14 @@ function render() {
     list: () => `${S.prospects.length} cadastrado${S.prospects.length === 1 ? '' : 's'}`,
     comm: () => 'Comissão por site fechado',
     msgs: () => 'Textos prontos para o WhatsApp',
+    insta: () => '@creativecodex.studio',
     finance: () => 'Faturamento, comissões e lucro',
     team: () => 'Quem trabalha nos seus leads'
   };
   $('#subtitle').textContent = sub[S.view]();
   const el = $('#view');
   const focus = document.activeElement && document.activeElement.id === 'q' ? document.activeElement.selectionStart : null;
-  el.innerHTML = ({ overview: vOverview, today: vToday, funnel: vFunnel, list: vList, comm: vComm, finance: vFinance, team: vTeam, msgs: vMsgs }[S.view])();
+  el.innerHTML = ({ overview: vOverview, today: vToday, funnel: vFunnel, list: vList, comm: vComm, finance: vFinance, team: vTeam, msgs: vMsgs, insta: vInsta }[S.view])();
   if (S.view === 'funnel') bindDnD();
   if (focus !== null) { const q = $('#q'); if (q) { q.focus(); q.setSelectionRange(focus, focus); } }
 }
@@ -1040,6 +1077,9 @@ document.addEventListener('click', (e) => {
     case 'emp-toggle': { const e = (S.team || []).find((x) => x.id === id); if (!e) break;
       if (!e.active) { saveEmp({ id, active: true }, 'Funcionário reativado.'); break; }
       dialog({ title: 'Desativar funcionário', body: `<p style="color:var(--dim)"><b style="color:var(--text)">${esc(e.name)}</b> deixa de conseguir entrar, e os leads em aberto dele ficam livres para os outros.</p>`, ok: 'Desativar', danger: true, onOk: () => { saveEmp({ id, active: false }, 'Funcionário desativado.'); } }); break; }
+    case 'ig-new': igDialog(null); break;
+    case 'ig-edit': igDialog((S.insta || []).find((x) => x.date === t.dataset.d)); break;
+    case 'ig-del': api('POST', { date: t.dataset.d, remove: true }, '?action=insta').then((r) => { S.insta = r.insta; toast('Registro excluído.', { type: 'ok' }); render(); }).catch((e) => toast(e.message, { type: 'err' })); break;
     case 'pay': payDialog(id); break;
     case 'receipt': receipt(id); break;
     case 'unpay': { const p = S.prospects.find((x) => x.id === id); if (p) { p.commissionPaid = false; p.paidAt = ''; p.paidNote = ''; touch(p, 'paid', 'Pagamento desmarcado'); save(); render(); } break; }
