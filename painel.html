@@ -1222,6 +1222,7 @@ function openProspect(id) {
     const el = $('#fHint', ov), x = parseFloat($('#fValue', ov).value) || 0;
     el.className = 'hint' + (x >= 300 && x < 1500 ? ' ok' : ''); el.textContent = !x ? '' : x < 300 ? 'Abaixo do mínimo de comissão.' : x >= 1500 ? 'Comissão: a combinar.' : 'Comissão estimada: ' + money(commission(x));
   };
+  if (p) { const m = $(".mact", ov); const d = document.createElement("button"); d.type = "button"; d.className = "btn gh"; d.style.cssText = "color:var(--red);margin-right:auto"; d.textContent = "Excluir"; d.onclick = () => { ov._close(true); deleteProspect(p.id); }; m.prepend(d); }
   $('#fValue', ov).addEventListener('input', hint); hint();
   $('#fStatus', ov).addEventListener('change', (e) => { $('#fLostW', ov).hidden = e.target.value !== 'perdido'; });
   $('#fQuick', ov).addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if (b) $('#fNext', ov).value = addDays(+b.dataset.d); });
