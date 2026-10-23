@@ -324,7 +324,7 @@ body.intern .money{display:none!important}
 'use strict';
 /* ---------- estado ---------- */
 const API = '/api/data';
-const S = { token: null, role: null, users: {}, team: null, tpl: null, insta: null, log: [], baks: [], prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
+const S = { token: null, role: null, users: {}, team: null, tpl: null, insta: null, ig: null, log: [], baks: [], prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
 const STATUS = { prospectando: 'Prospectando', semresposta: 'Sem resposta', negociando: 'Negociando', fechado: 'Fechado', perdido: 'Perdido' };
 const STCOL = { prospectando: '#A29FB8', semresposta: '#7dd3fc', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
 const who = (id) => id === 'dono' || !id ? 'Dono' : id === '*' ? 'Outra pessoa' : ((S.users[id] && S.users[id].name) || 'Funcionário');
@@ -451,12 +451,16 @@ function showLogin() {
 }
 /* ---------- instagram (só o dono) ---------- */
 async function loadInsta() {
-  try { S.insta = (await api('GET', null, '?action=insta')).insta; } catch (e) { if (e.message !== 'sessão') toast(e.message, { type: 'err' }); S.insta = S.insta || []; }
+  try { const r = await api('GET', null, '?action=insta&sync=1'); S.insta = r.insta; S.ig = { connected: r.connected, username: r.username, error: r.igError }; } catch (e) { if (e.message !== 'sessão') toast(e.message, { type: 'err' }); S.insta = S.insta || []; }
   if (S.view === 'insta') render();
 }
 function vInsta() {
   const L = S.insta;
-  const head = `<div class="tools"><div class="hint" style="margin:0;flex:1">O Instagram não libera os números para o painel. Anote aqui de tempos em tempos (por exemplo, toda semana) e acompanhe a evolução.</div><a class="btn gh" href="https://www.instagram.com/creativecodex.studio/" target="_blank" rel="noopener">Abrir perfil</a><button class="btn pri" data-act="ig-new">${ic('plus')}Registrar números</button></div>`;
+  const g = S.ig || {};
+  const conn = g.connected
+    ? `<div class="hint" style="margin:0;flex:1">Conectado como <b style="color:var(--text)">@${esc(g.username)}</b>. Os números atualizam sozinhos uma vez por dia.${g.error ? ` <span style="color:var(--red)">Falha na última atualização: ${esc(g.error)}</span>` : ''}</div><button class="btn gh" data-act="ig-sync">Atualizar agora</button><button class="btn gh" data-act="ig-off">Desconectar</button>`
+    : `<div class="hint" style="margin:0;flex:1">Conecte o Instagram para os números virem sozinhos, ou lance à mão.</div><button class="btn pri" data-act="ig-connect">Conectar Instagram</button>`;
+  const head = `<div class="tools">${conn}<a class="btn gh" href="https://www.instagram.com/creativecodex.studio/" target="_blank" rel="noopener">Abrir perfil</a><button class="btn gh" data-act="ig-new">${ic('plus')}Registrar à mão</button></div>`;
   if (!L) return head + '<div class="card empty"><p>Carregando...</p></div>';
   if (!L.length) return head + `<div class="card empty">${ic('insta')}<p>Nenhum registro ainda. Clique em Registrar números.</p></div>`;
   const last = L[L.length - 1], prev = L[L.length - 2];
@@ -470,6 +474,17 @@ function vInsta() {
   return head + `<div class="grid g4" style="margin-bottom:14px">${card('Seguidores', last.followers.toLocaleString('pt-BR'), dl(d('followers')), d('followers') > 0 ? 'pos' : '')}${card('Publicações', last.posts.toLocaleString('pt-BR'), dl(d('posts')))}${card('Alcance', last.reach.toLocaleString('pt-BR'), dl(d('reach')))}${card('Engajamento', eng, last.interactions.toLocaleString('pt-BR') + ' interações')}</div>
   <div class="card"><h3>Seguidores ao longo do tempo</h3>${chart}</div>
   <h2 class="sec">Registros</h2><div class="tw"><table><thead><tr><th>Data</th><th>Seguidores</th><th>Seguindo</th><th>Publicações</th><th>Alcance</th><th>Interações</th><th></th></tr></thead><tbody>${L.slice().reverse().map((x) => `<tr><td class="c-main"><div class="nm">${fdate(x.date)}</div>${x.note ? `<div class="ct">${esc(x.note)}</div>` : ''}</td><td data-l="Seguidores">${x.followers.toLocaleString('pt-BR')}</td><td data-l="Seguindo">${x.following.toLocaleString('pt-BR')}</td><td data-l="Publicações">${x.posts}</td><td data-l="Alcance">${x.reach.toLocaleString('pt-BR')}</td><td data-l="Interações">${x.interactions.toLocaleString('pt-BR')}</td><td class="c-act"><div class="acts"><button class="btn sm gh" data-act="ig-edit" data-d="${x.date}">${ic('edit')}Editar</button><button class="btn sm gh" data-act="ig-del" data-d="${x.date}">${ic('trash')}</button></div></td></tr>`).join('')}</tbody></table></div>`;
+}
+function igConnect() {
+  dialog({ title: 'Conectar Instagram', small: false, body: `<ol style="color:var(--dim);font-size:.88rem;line-height:1.7;padding-left:18px;margin-bottom:14px">
+    <li>O perfil precisa ser <b style="color:var(--text)">profissional</b> (empresa ou criador).</li>
+    <li>Entre em <b style="color:var(--text)">developers.facebook.com</b>, crie um app do tipo Empresa e adicione o produto <b style="color:var(--text)">Instagram</b>.</li>
+    <li>Em "Configuração da API com login do Instagram", adicione a sua conta e clique em <b style="color:var(--text)">Gerar token</b>.</li>
+    <li>Cole o token abaixo.</li></ol>
+    <div class="f"><label for="igT">Token de acesso</label><input id="igT" autocomplete="off" required placeholder="IGAA..."><div class="hint">O token fica guardado só no servidor e nunca volta para a tela. Renova sozinho.</div></div>`, ok: 'Conectar', onOk: async (d) => {
+    try { const r = await api('POST', { token: $('#igT', d).value }, '?action=insta_connect'); S.ig = { connected: r.connected, username: r.username }; S.insta = r.insta; toast('Instagram conectado.', { type: 'ok' }); render(); }
+    catch (e) { if (e.message !== 'sessão') toast(e.message, { type: 'err' }); }
+  } });
 }
 function igDialog(x) {
   const last = (S.insta || []).slice(-1)[0] || {}, v = (k) => x ? x[k] : (last[k] ?? '');
@@ -1078,6 +1093,9 @@ document.addEventListener('click', (e) => {
       if (!e.active) { saveEmp({ id, active: true }, 'Funcionário reativado.'); break; }
       dialog({ title: 'Desativar funcionário', body: `<p style="color:var(--dim)"><b style="color:var(--text)">${esc(e.name)}</b> deixa de conseguir entrar, e os leads em aberto dele ficam livres para os outros.</p>`, ok: 'Desativar', danger: true, onOk: () => { saveEmp({ id, active: false }, 'Funcionário desativado.'); } }); break; }
     case 'ig-new': igDialog(null); break;
+    case 'ig-connect': igConnect(); break;
+    case 'ig-sync': api('GET', null, '?action=insta&sync=force').then((r) => { S.insta = r.insta; S.ig = { connected: r.connected, username: r.username, error: r.igError }; toast(r.igError ? 'Falhou: ' + r.igError : 'Números atualizados.', { type: r.igError ? 'err' : 'ok' }); render(); }).catch((e) => toast(e.message, { type: 'err' })); break;
+    case 'ig-off': api('POST', { disconnect: true }, '?action=insta_connect').then(() => { S.ig = { connected: false }; toast('Instagram desconectado.', { type: 'ok' }); render(); }).catch((e) => toast(e.message, { type: 'err' })); break;
     case 'ig-edit': igDialog((S.insta || []).find((x) => x.date === t.dataset.d)); break;
     case 'ig-del': api('POST', { date: t.dataset.d, remove: true }, '?action=insta').then((r) => { S.insta = r.insta; toast('Registro excluído.', { type: 'ok' }); render(); }).catch((e) => toast(e.message, { type: 'err' })); break;
     case 'pay': payDialog(id); break;

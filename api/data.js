@@ -183,6 +183,36 @@ async function snapshot(cur, emps, kind) {
   await kv.set(BAK_AT, at);
 }
 
+const IG_TOKEN = 'painel_insta_token';
+async function igGet(path, params, token) {
+  const url = 'https://graph.instagram.com/' + path + '?' + new URLSearchParams({ ...params, access_token: token });
+  const r = await fetch(url), j = await r.json().catch(() => ({}));
+  if (!r.ok || j.error) throw new Error((j.error && j.error.message) || 'erro ' + r.status);
+  return j;
+}
+// busca os números atuais e grava o registro de hoje (no máximo 1 vez por dia, a menos que force)
+async function igSync(force) {
+  let c = await kv.get(IG_TOKEN);
+  if (!c) return;
+  const today = new Date(Date.now() - 3 * 3600000).toISOString().slice(0, 10);
+  let list = (await kv.get('painel_insta')) || [];
+  if (!force && c.synced === today) return;
+  if (Date.now() - c.at > 30 * 86400000) { // renova o token (vale 60 dias)
+    try { const r = await igGet('refresh_access_token', { grant_type: 'ig_refresh_token' }, c.token); c = { ...c, token: r.access_token || c.token, at: Date.now() }; } catch (e) { console.error('ig refresh', e.message); }
+  }
+  const p = await igGet('me', { fields: 'followers_count,follows_count,media_count' }, c.token);
+  let reach = 0, interactions = 0;
+  try {
+    const until = Math.floor(Date.now() / 1000), since = until - 29 * 86400;
+    const ins = await igGet('me/insights', { metric: 'reach,total_interactions', metric_type: 'total_value', period: 'day', since, until }, c.token);
+    for (const m of ins.data || []) { const v = m.total_value && m.total_value.value; if (m.name === 'reach') reach = v || 0; if (m.name === 'total_interactions') interactions = v || 0; }
+  } catch (e) { const last = list[list.length - 1]; if (last) { reach = last.reach; interactions = last.interactions; } console.error('ig insights', e.message); }
+  list = list.filter((x) => x.date !== today);
+  list.push({ date: today, followers: p.followers_count || 0, following: p.follows_count || 0, posts: p.media_count || 0, reach, interactions, note: 'Automático' });
+  await kv.set('painel_insta', list.sort((x, y) => x.date.localeCompare(y.date)).slice(-400));
+  await kv.set(IG_TOKEN, { ...c, synced: today });
+}
+
 const trim = (v, n) => String(v ?? '').trim().slice(0, n);
 
 export default async function handler(req, res) {
@@ -230,10 +260,30 @@ export default async function handler(req, res) {
       return res.status(200).json({ templates: (await kv.get(TPL_KEY)) || MODELOS });
     }
 
+    // conexão automática com o Instagram (token guardado só no servidor)
+    if (req.query.action === 'insta_connect') {
+      if (role !== 'dono') return res.status(403).json({ error: 'Sem permissão.' });
+      if (req.method === 'POST') {
+        const b = req.body || {};
+        if (b.disconnect) { await kv.del(IG_TOKEN); return res.status(200).json({ connected: false }); }
+        const token = trim(b.token, 600).replace(/\s/g, '');
+        if (token.length < 30) return res.status(400).json({ error: 'Cole o token completo.' });
+        try {
+          const me = await igGet('me', { fields: 'user_id,username' }, token);
+          await kv.set(IG_TOKEN, { token, id: String(me.user_id || me.id), username: me.username, at: Date.now() });
+          await igSync(true);
+        } catch (e) { return res.status(400).json({ error: 'O Instagram recusou o token: ' + e.message }); }
+      }
+      const c = await kv.get(IG_TOKEN);
+      return res.status(200).json({ connected: !!c, username: c ? c.username : '', insta: (await kv.get('painel_insta')) || [] });
+    }
+
     // números do Instagram (só o dono, lançados à mão)
     if (req.query.action === 'insta') {
       if (role !== 'dono') return res.status(403).json({ error: 'Sem permissão.' });
       let list = (await kv.get('painel_insta')) || [];
+      let ig = await kv.get(IG_TOKEN), igError = '';
+      if (ig && req.query.sync) { try { await igSync(req.query.sync === 'force'); list = (await kv.get('painel_insta')) || []; } catch (e) { igError = e.message; } }
       if (req.method === 'POST') {
         const b = req.body || {};
         const date = /^\d{4}-\d{2}-\d{2}$/.test(b.date) ? b.date : '';
@@ -246,7 +296,7 @@ export default async function handler(req, res) {
         list = list.sort((x, y) => x.date.localeCompare(y.date)).slice(-400);
         await kv.set('painel_insta', list);
       }
-      return res.status(200).json({ insta: list });
+      return res.status(200).json({ insta: list, connected: !!ig, username: ig ? ig.username : '', igError });
     }
 
     // atividade e backups (só o dono)
