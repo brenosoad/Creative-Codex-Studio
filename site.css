@@ -399,3 +399,17 @@ html.js .hero-foot[data-r].in{transform:translateX(-50%)}
   .cf-i{padding:1.2rem}
 }
 @media (max-width:360px){.lang{display:none}.hl{font-size:2rem}}
+/* celular: títulos centralizados, parágrafos justificados */
+@media (max-width:760px){
+  .hero-copy,.sec-head,.proc-head,.faq-head,.about-copy,.contact-head{text-align:center}
+  .hero-copy .eyebrow,.sec-head .eyebrow,.proc-head .eyebrow,.faq-head .eyebrow{justify-content:center}
+  .hero-copy .sub,.sec-head .sub,.hero-copy p,.proc-head p,.faq-head p{margin-inline:auto}
+  .hero-cta,.hero-chips{justify-content:center}
+  .sec p,.hero-copy p,.acc-p p{text-align:justify;text-justify:inter-word;hyphens:auto;-webkit-hyphens:auto}
+  .sec-head p,.hero-copy p,.proc-head p,.faq-head p,.sec-head .sub{text-align:center;hyphens:manual}
+  .foot-grid,.foot-brand,.foot-bot{text-align:center;align-items:center}
+  .foot-grid ul{padding:0;list-style:none}
+}
+@media (max-width:760px){
+  .about-grid h2,.about-grid h3,.about-grid .eyebrow,.svc h3,.svc-in h3,.pc h3,.contact-grid h2,.contact-grid h3,.contact-grid .eyebrow{text-align:center;justify-content:center}
+}
