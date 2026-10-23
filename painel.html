@@ -433,7 +433,7 @@ function enter() {
   document.body.classList.toggle('intern', isIntern());
   $('#who').textContent = isIntern() ? who(S.role) + '' : 'Acesso completo';
   try { const f = JSON.parse(sessionStorage.getItem('painel_ui') || '{}'); Object.assign(S, { filter: f.filter || 'todos', resp: f.resp || 'todos', view: f.view || 'overview' }); } catch {}
-  load(); loadTpl();
+  load().then(() => { if (S.welcome && isIntern()) { toast('Bem-vindo, ' + who(S.role).split(' ')[0] + '!', { type: 'ok', ms: 4000 }); } S.welcome = false; }); loadTpl();
   if (S.view === 'team' && !isIntern()) loadTeam();
 }
 function logout(expired) {
@@ -454,7 +454,7 @@ $('#loginForm').addEventListener('submit', async (e) => {
     const d = await api('POST', { password: $('#pw').value }, '?action=login');
     S.token = d.token; S.role = d.role;
     sessionStorage.setItem('painel_token', d.token); sessionStorage.setItem('painel_role', d.role);
-    $('#pw').value = ''; enter();
+    $('#pw').value = ''; S.welcome = true; enter();
   } catch (err) { $('#loginErr').textContent = err.message; $('#pw').select(); }
   b.disabled = false;
 });
