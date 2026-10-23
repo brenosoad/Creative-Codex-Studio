@@ -167,7 +167,7 @@ select.st{padding-right:.7rem;cursor:pointer}
 .f textarea{resize:vertical;min-height:70px}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .hint{font-size:.78rem;margin-top:5px;color:var(--dim)}.hint.ok{color:var(--green)}
-.f label.ck,label.ck{font:500 .88rem var(--sans);margin:0}
+.f label.ck,label.ck{font:500 .88rem var(--sans);margin:0;display:flex;gap:10px;align-items:flex-start}
 .ck{display:flex;gap:10px;align-items:flex-start;font-size:.88rem;color:var(--dim);cursor:pointer}
 .ck input{width:auto;margin-top:3px;accent-color:var(--brand)}
 .ck strong{color:var(--text)}
@@ -261,6 +261,14 @@ body.intern .money{display:none!important}
   .kb{grid-template-columns:repeat(5,82vw);scroll-snap-type:x mandatory}
   .kc{scroll-snap-align:start}
   .fr{grid-template-columns:90px 1fr 30px}
+  input,select,textarea{font-size:16px!important}
+  .ib{width:40px;height:40px}
+  .ck input{width:20px;height:20px;margin-top:1px;flex:0 0 20px}
+  .ck{padding:4px 0;font-size:.92rem}
+  .ov{padding:10px;align-items:flex-end}
+  .modal{padding:20px 18px calc(18px + env(safe-area-inset-bottom));max-height:calc(100dvh - 20px);border-radius:16px 16px 12px 12px}
+  .modal .row,.modal .acts{flex-wrap:wrap}
+  .modal .btn{min-height:42px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -768,7 +776,7 @@ function filtered() {
 function vList() {
   const l = filtered(), cnt = (k) => k === 'todos' ? S.prospects.filter((p) => p.status !== 'perdido').length : S.prospects.filter((p) => p.status === k).length;
   const th = (k, t) => `<th class="s ${S.sort === k ? 'on' : ''}" data-act="sort" data-k="${k}">${t}${S.sort === k ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th>`;
-  return `<div class="tools"><div class="search">${ic('search')}<input id="q" type="search" placeholder="Buscar por nome, serviço ou contato ( / )" value="${esc(S.q)}" aria-label="Buscar"></div>
+  return `<div class="tools"><div class="search">${ic('search')}<input id="q" type="search" placeholder="Buscar lead ( / )" value="${esc(S.q)}" aria-label="Buscar"></div>
     ${!isIntern() ? `<button class="btn gh" data-act="export">${ic('dl')}CSV</button><button class="btn gh" data-act="backup">${ic('dl')}Backup</button><button class="btn gh" data-act="restore">${ic('ul')}Restaurar</button>` : `<button class="btn gh" data-act="export">${ic('dl')}CSV</button>`}</div>
   <div class="chips" role="group" aria-label="Status">${['todos', ...Object.keys(STATUS)].map((k) => `<button class="chip ${S.filter === k ? 'on' : ''}" data-act="filter" data-k="${k}">${k === 'todos' ? 'Todos' : STATUS[k]}<b>${cnt(k)}</b></button>`).join('')}</div>
   ${(() => { const o = isIntern() ? [['todos', 'Todos os leads'], ['livres', 'Só livres'], ['meus', 'Só meus']] : [['todos', 'Todos os responsáveis'], ['dono', 'Do dono'], ...staff().map(([k, n]) => [k, 'De ' + n])]; return `<div class="tools" style="margin-bottom:12px"><select data-act="resp-sel" aria-label="Filtrar por responsável" style="width:auto;padding:.5rem .8rem;border-radius:10px;border:1px solid var(--line);background:var(--panel)">${o.map(([k, t]) => `<option value="${k}" ${S.resp === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`; })()}
@@ -907,7 +915,7 @@ function ctShare(id, client) {
 function vMsgs() {
   if (!S.tpl) return '<div class="card empty"><p>Carregando...</p></div>';
   const names = [...new Set(S.prospects.filter((p) => !locked(p)).sort((a, b) => (isOpen(b) - isOpen(a)) || a.name.localeCompare(b.name)).map((p) => p.name))];
-  const prop = `<div class="card" style="margin-bottom:22px"><h3>${ic('doc')}Gerar proposta</h3><div class="tools" style="margin:0"><input id="propC" list="propL" placeholder="Digite o nome de um prospecto ou de um cliente novo" maxlength="120" style="flex:1;min-width:220px;padding:.7rem .85rem;border-radius:10px;border:1px solid var(--line);background:var(--bg)"><datalist id="propL">${names.map((n) => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn pri" data-act="prop-go">Gerar proposta</button><button class="btn gh" data-act="ct-go">Gerar contrato</button></div><div class="hint" style="margin-top:8px">Depois que o cliente aceitar a proposta, gere o contrato: o cliente recebe um link, lê e assina no celular.</div></div>${ctList()}`;
+  const prop = `<div class="card" style="margin-bottom:22px"><h3>${ic('doc')}Gerar proposta</h3><div class="tools" style="margin:0"><input id="propC" list="propL" placeholder="Nome do cliente" maxlength="120" style="flex:1;min-width:220px;padding:.7rem .85rem;border-radius:10px;border:1px solid var(--line);background:var(--bg)"><datalist id="propL">${names.map((n) => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn pri" data-act="prop-go">Gerar proposta</button><button class="btn gh" data-act="ct-go">Gerar contrato</button></div><div class="hint" style="margin-top:8px">Depois que o cliente aceitar a proposta, gere o contrato: o cliente recebe um link, lê e assina no celular.</div></div>${ctList()}`;
   const head = `<div class="tools"><div class="hint" style="margin:0;flex:1">Use {nome}, {servico} e {meu_nome}: o painel troca pelos dados do lead. Para usar com um lead, abra o prospecto e escolha o modelo.</div>${isIntern() ? '' : `<button class="btn pri" data-act="tpl-new">${ic('plus')}Novo modelo</button>`}</div>`;
   const chips = subTabs('msgs', [['prop', 'Propostas e contratos'], ['msg', 'Mensagens prontas']]);
   if (S.sub.msgs === 'prop') return chips + prop;
