@@ -61,6 +61,8 @@ function readToken(req) {
 }
 
 const STATUS = ['prospectando', 'semresposta', 'negociando', 'fechado', 'perdido'];
+// Quem assumiu o contato com o prospecto (só uma pessoa por vez). Prospectos antigos de estagiário/Diogo contam como assumidos por quem os criou.
+const claimOf = (p) => (p && (p.claimedBy || (p.responsavel && p.responsavel !== 'dono' ? p.responsavel : ''))) || '';
 const str = (v, n) => String(v ?? '').slice(0, n);
 
 function clean(p, role) {
@@ -83,6 +85,7 @@ function clean(p, role) {
     notes: str(p.notes, 2000),
     lostReason: str(p.lostReason, 200),
     commissionPaid: !!p.commissionPaid,
+    claimedBy: ROLES.includes(p.claimedBy) && p.claimedBy !== 'dono' ? p.claimedBy : '',
     responsavel: role !== 'dono' ? role : (ROLES.includes(p.responsavel) ? p.responsavel : 'dono'),
     history,
     updatedAt: Number(p.updatedAt) || Date.now()
@@ -94,7 +97,9 @@ function view(data, role) {
   // sem acesso a valores de outros e sem meta; operadores veem notas e histórico de todos, estagiário só dos próprios
   const op = OPERADORES.includes(role);
   const prospects = (data.prospects || []).map((p) =>
-    p.responsavel === role ? p : { ...p, value: null, ...(op ? {} : { notes: '', history: [] }) }
+    p.responsavel === role && claimOf(p) === role ? p
+      : claimOf(p) && claimOf(p) !== role ? { ...p, value: null, contact: '', notes: '', history: [], nextContact: '' } // assumido por outra pessoa
+      : { ...p, value: null, ...(op ? {} : { notes: '', history: [] }) }
   );
   return { prospects, goal: null, goals: null };
 }
@@ -134,6 +139,7 @@ export default async function handler(req, res) {
       const incoming = Array.isArray(body.prospects) ? body.prospects : [];
       const deleted = new Set(Array.isArray(body.deleted) ? body.deleted.map(String) : []);
       const byId = new Map(current.prospects.map((p) => [p.id, p]));
+      const conflicts = [];
 
       for (const raw of incoming.slice(0, MAX_PROSPECTS)) {
         const p = clean(raw, role);
@@ -142,11 +148,14 @@ export default async function handler(req, res) {
         if (role !== 'dono') {
           const op = OPERADORES.includes(role);
           if (old && old.responsavel !== role && !op) continue; // não mexe nos de outros
+          if (old && claimOf(old) && claimOf(old) !== role) { conflicts.push(p.id); continue; } // outra pessoa já assumiu
+          p.claimedBy = role; // quem mexe primeiro assume o prospecto
           p.commissionPaid = old ? old.commissionPaid : false;
           if (old && old.responsavel !== role) { // operador em prospecto de outro: só dados de trabalho
             p.value = old.value; p.recurring = old.recurring; p.responsavel = old.responsavel;
           }
         }
+        if (role === 'dono' && old && !raw.hasOwnProperty('claimedBy')) p.claimedBy = old.claimedBy || '';
         if (old && old.updatedAt > p.updatedAt) continue; // versão mais nova já salva
         if (old && role !== 'dono' && old.value != null && p.value == null) p.value = old.value;
         byId.set(p.id, p);
@@ -168,7 +177,7 @@ export default async function handler(req, res) {
         }
       }
       await kv.set(KEY, next);
-      return res.status(200).json({ ok: true, ...view(next, role) });
+      return res.status(200).json({ ok: true, conflicts, ...view(next, role) });
     }
 
     res.setHeader('Allow', ['GET', 'POST']);

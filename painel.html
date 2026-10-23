@@ -180,6 +180,7 @@ select.st{padding-right:.7rem;cursor:pointer}
 .quick{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 14px}
 
 /* toast + login */
+.kcard.lk{opacity:.55;cursor:default}
 .pwb{position:relative}.pwb input{width:100%;padding-right:48px}
 .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:40px;height:40px;display:grid;place-items:center;background:none;border:0;border-radius:8px;color:var(--dim,#A29FB8);cursor:pointer}
 .eye:hover,.eye:focus-visible{color:#F4F3F8}.eye .sl{display:none}.eye[aria-pressed=true] .sl{display:block}
@@ -293,6 +294,10 @@ const STATUS = { prospectando: 'Prospectando', semresposta: 'Sem resposta', nego
 const STCOL = { prospectando: '#A29FB8', semresposta: '#7dd3fc', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
 const USERS = { dono: 'Dono', estagiario: 'Fábio', diogo: 'Diogo' };
 const who = (id) => USERS[id] || 'Dono';
+const claim = (p) => p.claimedBy || (p.responsavel && p.responsavel !== 'dono' ? p.responsavel : '');
+const locked = (p) => isIntern() && claim(p) && claim(p) !== S.role;
+function take(p) { if (isIntern() && !claim(p)) { p.claimedBy = S.role; touch(p, 'claim', 'Assumido por ' + who(S.role)); } }
+const badge = (p) => claim(p) ? `<span class="tag">${claim(p) === S.role ? 'Seu' : 'Em atendimento: ' + esc(who(claim(p)))}</span>` : (isIntern() ? '<span class="tag">Livre</span>' : '');
 const $ = (s, r = document) => r.querySelector(s);
 const ic = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -331,7 +336,7 @@ function nextInfo(p) {
   return { t: fdate(p.nextContact), c: '', d: diff };
 }
 const isOpen = (p) => p.status === 'prospectando' || p.status === 'semresposta' || p.status === 'negociando';
-const dueList = () => S.prospects.filter((p) => isOpen(p) && p.nextContact && p.nextContact <= today()).sort((a, b) => a.nextContact.localeCompare(b.nextContact));
+const dueList = () => S.prospects.filter((p) => !locked(p) && isOpen(p) && p.nextContact && p.nextContact <= today()).sort((a, b) => a.nextContact.localeCompare(b.nextContact));
 
 /* ---------- toast ---------- */
 function toast(msg, o = {}) {
@@ -378,6 +383,7 @@ async function flush() {
   try {
     const d = await api('POST', { prospects: S.prospects, deleted: sent, goal: S.goal, goals: S.goals });
     S.deleted = S.deleted.filter((id) => !sent.includes(id));
+    if (d.conflicts && d.conflicts.length) toast('Outra pessoa já assumiu este prospecto. A lista foi atualizada.', { type: 'err', ms: 6000 });
     if (!again && !S.deleted.length) applyServer(d);
     setSync('', 'Salvo');
   } catch (e) {
@@ -544,12 +550,12 @@ function vOverview() {
 
 function vToday() {
   const due = dueList();
-  const none = S.prospects.filter((p) => isOpen(p) && !p.nextContact);
+  const none = S.prospects.filter((p) => !locked(p) && isOpen(p) && !p.nextContact);
   const card = (p) => {
     const n = nextInfo(p), wa = waLink(p.contact, `Olá, ${p.name.split(' ')[0]}! Tudo bem?`);
-    return `<div class="item ${n.c}"><div class="info"><div class="nm">${esc(p.name)} <span class="st ${p.status}" style="margin-left:6px">${STATUS[p.status]}</span></div><div class="ct">${esc(p.service || 'Sem serviço')}${p.contact ? ' | ' + esc(p.contact) : ''}${p.notes && !isIntern() || (p.notes && p.responsavel === 'estagiario') ? '' : ''}</div></div>
+    return `<div class="item ${n.c}"><div class="info"><div class="nm">${esc(p.name)} <span class="st ${p.status}" style="margin-left:6px">${STATUS[p.status]}</span></div><div class="ct">${esc(p.service || 'Sem serviço')}${p.contact ? ' | ' + esc(p.contact) : ''}</div></div>
       <span class="nc ${n.c}">${n.t}</span>
-      <div class="acts">${wa ? `<a class="btn sm wa" href="${wa}" target="_blank" rel="noopener">${ic('wa')}WhatsApp</a>` : ''}<button class="btn sm gh" data-act="contacted" data-id="${esc(p.id)}">${ic('check')}Contatei</button><button class="ib" data-act="edit" data-id="${esc(p.id)}" aria-label="Editar">${ic('edit')}</button></div></div>`;
+      <div class="acts">${wa ? `<a class="btn sm wa" data-wa="${esc(p.id)}" href="${wa}" target="_blank" rel="noopener">${ic('wa')}WhatsApp</a>` : ''}<button class="btn sm gh" data-act="contacted" data-id="${esc(p.id)}">${ic('check')}Contatei</button><button class="ib" data-act="edit" data-id="${esc(p.id)}" aria-label="Editar">${ic('edit')}</button></div></div>`;
   };
   return `${due.length ? `<div class="todo">${due.map(card).join('')}</div>` : `<div class="card empty">${ic('check')}<p>Tudo em dia. Nenhum contato atrasado ou marcado para hoje.</p></div>`}
   ${none.length ? `<h2 class="sec">Sem data de próximo contato</h2><div class="todo">${none.map(card).join('')}</div>` : ''}`;
@@ -560,7 +566,7 @@ function vFunnel() {
     const list = S.prospects.filter((p) => p.status === k).sort((a, b) => new Date(b.date) - new Date(a.date));
     const tot = list.reduce((s, p) => s + num(p.value), 0);
     return `<div class="kc" data-status="${k}"><h4><i class="dot" style="background:${STCOL[k]}"></i>${STATUS[k]}<span class="n">${list.length}</span></h4>${!isIntern() ? `<div class="sumv" style="padding:0 4px 10px">${money(tot)}</div>` : ''}
-      ${list.map((p) => { const n = nextInfo(p); return `<div class="kcard" draggable="true" data-id="${esc(p.id)}" data-act="edit"><div class="nm">${esc(p.name)}</div><div class="ct">${esc(p.service || '')}</div><div class="meta"><span class="val money">${p.value == null ? '' : money(p.value)}</span>${isOpen(p) ? `<span class="nc ${n.c}">${n.t}</span>` : ''}</div></div>`; }).join('') || '<div class="ct" style="padding:8px 4px">Vazio</div>'}</div>`;
+      ${list.map((p) => { const n = nextInfo(p); return `<div class="kcard ${locked(p) ? 'lk' : ''}" ${locked(p) ? '' : 'draggable="true" data-act="edit"'} data-id="${esc(p.id)}"><div class="nm">${esc(p.name)}</div>${isIntern() ? `<div class="ct">${badge(p)}</div>` : ''}<div class="ct">${esc(p.service || '')}</div><div class="meta"><span class="val money">${p.value == null ? '' : money(p.value)}</span>${isOpen(p) ? `<span class="nc ${n.c}">${n.t}</span>` : ''}</div></div>`; }).join('') || '<div class="ct" style="padding:8px 4px">Vazio</div>'}</div>`;
   }).join('');
   return `<div class="kb">${cols}</div>`;
 }
@@ -581,7 +587,9 @@ function filtered() {
   let l = S.prospects.slice();
   if (S.filter === 'todos') l = l.filter((p) => p.status !== 'perdido');
   else l = l.filter((p) => p.status === S.filter);
-  if (S.resp !== 'todos') l = l.filter((p) => p.responsavel === S.resp);
+  if (S.resp === 'livres') l = l.filter((p) => !claim(p));
+  else if (S.resp === 'meus') l = l.filter((p) => claim(p) === S.role);
+  else if (S.resp !== 'todos') l = l.filter((p) => p.responsavel === S.resp);
   const q = S.q.trim().toLowerCase();
   if (q) l = l.filter((p) => (p.name + ' ' + (p.service || '') + ' ' + (p.contact || '')).toLowerCase().includes(q));
   const k = S.sort, d = S.dir === 'asc' ? 1 : -1;
@@ -601,16 +609,17 @@ function vList() {
   return `<div class="tools"><div class="search">${ic('search')}<input id="q" type="search" placeholder="Buscar por nome, serviço ou contato ( / )" value="${esc(S.q)}" aria-label="Buscar"></div>
     ${!isIntern() ? `<button class="btn gh" data-act="export">${ic('dl')}CSV</button><button class="btn gh" data-act="backup">${ic('dl')}Backup</button><button class="btn gh" data-act="restore">${ic('ul')}Restaurar</button>` : `<button class="btn gh" data-act="export">${ic('dl')}CSV</button>`}</div>
   <div class="chips" role="group" aria-label="Status">${['todos', ...Object.keys(STATUS)].map((k) => `<button class="chip ${S.filter === k ? 'on' : ''}" data-act="filter" data-k="${k}">${k === 'todos' ? 'Todos' : STATUS[k]}<b>${cnt(k)}</b></button>`).join('')}</div>
+  ${isIntern() ? `<div class="chips" role="group" aria-label="Atendimento">${[['todos', 'Todos'], ['livres', 'Livres'], ['meus', 'Meus']].map(([k, t]) => `<button class="chip ${S.resp === k ? 'on' : ''}" data-act="resp" data-k="${k}">${t}</button>`).join('')}</div>` : ''}
   ${!isIntern() ? `<div class="chips" role="group" aria-label="Responsável">${[['todos', 'Todos os responsáveis'], ['dono', 'Do dono'], ['estagiario', 'Do Fábio'], ['diogo', 'Do Diogo']].map(([k, t]) => `<button class="chip ${S.resp === k ? 'on' : ''}" data-act="resp" data-k="${k}">${t}</button>`).join('')}</div>` : ''}
   <div class="tw">${l.length ? `<table><thead><tr>${th('name', 'Cliente')}<th>Serviço</th><th class="money s ${S.sort === 'value' ? 'on' : ''}" data-act="sort" data-k="value">Valor${S.sort === 'value' ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th><th>Status</th>${th('date', 'Cadastro')}${th('next', 'Próximo contato')}<th></th></tr></thead>
   <tbody>${l.map((p) => { const n = nextInfo(p), wa = waLink(p.contact); return `<tr>
-    <td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}${!isIntern() && p.responsavel !== 'dono' ? `<div class="ct">${esc(who(p.responsavel))}</div>` : ''}</td>
+    <td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}${!isIntern() && p.responsavel !== 'dono' ? `<div class="ct">${esc(who(p.responsavel))}</div>` : ''}${isIntern() ? `<div class="ct">${badge(p)}</div>` : (claim(p) ? `<div class="ct">${badge(p)}</div>` : '')}</td>
     <td data-l="Serviço">${esc(p.service || '-')}</td>
     <td class="val money" data-l="Valor">${p.value == null ? '' : money(p.value)}${p.recurring ? '<span class="tag">/mês</span>' : ''}</td>
-    <td><select class="st ${p.status}" data-act="status" data-id="${esc(p.id)}" aria-label="Status de ${esc(p.name)}">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
+    <td><select class="st ${p.status}" data-act="status" ${locked(p) ? 'disabled' : ''} data-id="${esc(p.id)}" aria-label="Status de ${esc(p.name)}">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
     <td class="nc" data-l="Cadastro">${fdate(p.date)}</td>
     <td data-l="Próximo"><span class="nc ${isOpen(p) ? n.c : ''}">${isOpen(p) ? n.t : '-'}</span></td>
-    <td class="c-act"><div class="acts">${wa ? `<a class="ib" href="${wa}" target="_blank" rel="noopener" aria-label="WhatsApp">${ic('wa')}</a>` : ''}<button class="ib" data-act="edit" data-id="${esc(p.id)}" aria-label="Editar">${ic('edit')}</button><button class="ib del" data-act="del" data-id="${esc(p.id)}" aria-label="Excluir">${ic('trash')}</button></div></td></tr>`; }).join('')}</tbody></table>`
+    <td class="c-act"><div class="acts">${locked(p) ? '' : `${wa ? `<a class="ib" data-wa="${esc(p.id)}" href="${wa}" target="_blank" rel="noopener" aria-label="WhatsApp">${ic('wa')}</a>` : ''}<button class="ib" data-act="edit" data-id="${esc(p.id)}" aria-label="Editar">${ic('edit')}</button><button class="ib del" data-act="del" data-id="${esc(p.id)}" aria-label="Excluir">${ic('trash')}</button>`}</div></td></tr>`; }).join('')}</tbody></table>`
     : `<div class="empty">${ic('users')}<p>${S.prospects.length ? 'Nada encontrado com esses filtros.' : 'Nenhum prospecto ainda. Clique em "Novo prospecto".'}</p></div>`}</div>`;
 }
 
@@ -639,11 +648,13 @@ function touch(p, histType, text) {
 function setStatus(id, status, reason) {
   const p = S.prospects.find((x) => x.id === id);
   if (!p || p.status === status) return;
+  if (locked(p)) { toast(who(claim(p)) + ' já está atendendo este prospecto.', { type: 'err' }); render(); return; }
   if (status === 'perdido' && reason === undefined) {
     dialog({ title: 'Motivo da perda', body: `<div class="f"><label for="dReason">Por que não fechou? (opcional)</label><input id="dReason" placeholder="Ex: achou caro, sumiu, escolheu outro"></div>`, ok: 'Marcar como perdido',
       onOk: (d) => setStatus(id, status, $('#dReason', d).value.trim()), onCancel: () => render() });
     return;
   }
+  take(p);
   const old = p.status;
   p.status = status;
   if (status === 'fechado') { p.closedAt = new Date().toISOString(); p.nextContact = ''; }
@@ -682,12 +693,13 @@ document.addEventListener('keydown', (e) => {
 
 function openProspect(id) {
   const p = id ? S.prospects.find((x) => x.id === id) : null;
+  if (p && locked(p)) { toast('Em atendimento por ' + who(claim(p)) + '. Só ele pode mexer neste prospecto.', { type: 'err' }); return; }
   const v = (k, d = '') => p ? (p[k] ?? d) : d;
   const showMoney = !isIntern() || !p || p.responsavel === S.role;
   const ov = dialog({ title: p ? 'Editar prospecto' : 'Novo prospecto', ok: 'Salvar', small: false, body: `
     <div class="f"><label for="fName">Nome ou empresa</label><input id="fName" required value="${esc(v('name'))}" placeholder="Ex: Pet Café" maxlength="120"></div>
     <div class="f"><label for="fContact">Contato (WhatsApp ou e-mail)</label><input id="fContact" value="${esc(v('contact'))}" placeholder="(16) 99999-9999" maxlength="120" inputmode="tel"></div>
-    ${p && waLink(p.contact) ? `<div class="quick"><a class="btn sm wa" href="${waLink(p.contact)}" target="_blank" rel="noopener">${ic('wa')}Abrir WhatsApp</a><button type="button" class="btn sm gh" data-contacted>${ic('check')}Registrar contato</button></div>` : ''}
+    ${p && waLink(p.contact) ? `<div class="quick"><a class="btn sm wa" data-wa="${esc(p.id)}" href="${waLink(p.contact)}" target="_blank" rel="noopener">${ic('wa')}Abrir WhatsApp</a><button type="button" class="btn sm gh" data-contacted>${ic('check')}Registrar contato</button></div>` : ''}
     <div class="f2"><div class="f"><label for="fService">Serviço</label><input id="fService" list="svcs" value="${esc(v('service'))}" placeholder="Ex: Landing Page" maxlength="120"><datalist id="svcs"><option>Landing Page</option><option>Site Institucional</option><option>Cardápio Digital</option><option>Manutenção de Site</option><option>Design Gráfico</option><option>Cartão ou Convite</option></datalist></div>
     <div class="f"><label for="fValue">Valor (R$)</label><input id="fValue" type="number" min="0" step="0.01" inputmode="decimal" value="${showMoney ? esc(v('value', '')) : ''}" ${showMoney ? '' : 'disabled'} placeholder="0,00"><div class="hint" id="fHint"></div></div></div>
     <div class="f"><label class="ck"><input type="checkbox" id="fRec" ${v('recurring') ? 'checked' : ''}><span>Valor <strong>mensal recorrente</strong> (não avulso)</span></label></div>
@@ -695,6 +707,7 @@ function openProspect(id) {
     <div class="f"><label for="fNext">Próximo contato</label><input id="fNext" type="date" value="${esc(v('nextContact'))}"></div></div>
     <div class="quick" id="fQuick"><button type="button" class="btn sm gh" data-d="1">Amanhã</button><button type="button" class="btn sm gh" data-d="3">+3 dias</button><button type="button" class="btn sm gh" data-d="7">+7 dias</button></div>
     <div class="f" id="fLostW" ${v('status') === 'perdido' ? '' : 'hidden'}><label for="fLost">Motivo da perda</label><input id="fLost" value="${esc(v('lostReason'))}" maxlength="200"></div>
+    ${!isIntern() ? `<div class="f"><label for="fClaim">Quem está atendendo</label><select id="fClaim"><option value="" ${!claim(p || {}) ? 'selected' : ''}>Livre (qualquer um pode assumir)</option><option value="estagiario" ${claim(p || {}) === 'estagiario' ? 'selected' : ''}>Fábio</option><option value="diogo" ${claim(p || {}) === 'diogo' ? 'selected' : ''}>Diogo</option></select></div>` : ''}
     <div class="f"><label for="fNotes">Notas</label><textarea id="fNotes" maxlength="2000" placeholder="Detalhes da conversa, próximos passos...">${esc(v('notes'))}</textarea></div>
     ${p && (p.history || []).length ? `<div class="hist"><h5>Histórico</h5>${p.history.slice().reverse().slice(0, 8).map((h) => `<div class="hi"><time>${fdate(h.at)}</time><span>${esc(h.text)}</span></div>`).join('')}</div>` : ''}`,
     onOk: (d) => {
@@ -702,7 +715,9 @@ function openProspect(id) {
       const val = $('#fValue', d).disabled ? null : (parseFloat($('#fValue', d).value) || 0);
       const status = $('#fStatus', d).value;
       let item = p;
-      if (!item) { item = { id: uid(), date: new Date().toISOString(), status: 'prospectando', responsavel: isIntern() ? S.role : 'dono', history: [], closedAt: null }; S.prospects.push(item); touch(item, 'new', 'Cadastrado'); }
+      if (!item) { item = { id: uid(), date: new Date().toISOString(), status: 'prospectando', responsavel: isIntern() ? S.role : 'dono', claimedBy: isIntern() ? S.role : '', history: [], closedAt: null }; S.prospects.push(item); touch(item, 'new', 'Cadastrado'); }
+      take(item);
+      if (!isIntern()) item.claimedBy = $('#fClaim', d).value;
       const prev = item.status;
       Object.assign(item, { name, contact: $('#fContact', d).value.trim(), service: $('#fService', d).value.trim(), recurring: $('#fRec', d).checked, nextContact: $('#fNext', d).value, notes: $('#fNotes', d).value.trim() });
       if (val !== null) item.value = val; else if (item.value === undefined) item.value = null;
@@ -727,7 +742,9 @@ function openProspect(id) {
 
 function contacted(id) {
   const p = S.prospects.find((x) => x.id === id); if (!p) return;
+  if (locked(p)) { toast(who(claim(p)) + ' já está atendendo este prospecto.', { type: 'err' }); return; }
   dialog({ title: 'Registrar contato', body: `<div class="f"><label for="cNote">O que foi combinado? (opcional)</label><input id="cNote" placeholder="Ex: enviou orçamento"></div><div class="f"><label for="cNext">Próximo contato</label><input id="cNext" type="date" value="${addDays(3)}"></div><div class="quick"><button type="button" class="btn sm gh" data-d="1">Amanhã</button><button type="button" class="btn sm gh" data-d="3">+3 dias</button><button type="button" class="btn sm gh" data-d="7">+7 dias</button></div>`, ok: 'Registrar', onOk: (d) => {
+    take(p);
     p.nextContact = $('#cNext', d).value; if (p.status === 'prospectando') p.status = 'negociando';
     touch(p, 'contact', 'Contato feito' + ($('#cNote', d).value.trim() ? ': ' + $('#cNote', d).value.trim() : ''));
     save(); render(); toast('Contato registrado.', { type: 'ok' });
@@ -790,6 +807,12 @@ document.addEventListener('click', (e) => {
     case 'sort': { const k = t.dataset.k; if (S.sort === k) S.dir = S.dir === 'asc' ? 'desc' : 'asc'; else { S.sort = k; S.dir = k === 'name' ? 'asc' : 'desc'; } render(); break; }
   }
 });
+document.addEventListener('click', (e) => {
+  const w = e.target.closest('a[data-wa]'); if (!w) return;
+  const p = S.prospects.find((x) => x.id === w.dataset.wa); if (!p) return;
+  if (locked(p)) { e.preventDefault(); toast(who(claim(p)) + ' já está atendendo este prospecto.', { type: 'err' }); return; }
+  if (isIntern() && !claim(p)) { take(p); save(); render(); }
+}, true);
 document.addEventListener('change', (e) => {
   const t = e.target.closest('[data-act]'); if (!t) return;
   if (t.dataset.act === 'status') setStatus(t.dataset.id, t.value);
