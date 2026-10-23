@@ -324,7 +324,7 @@ body.intern .money{display:none!important}
 'use strict';
 /* ---------- estado ---------- */
 const API = '/api/data';
-const S = { token: null, role: null, users: {}, team: null, tpl: null, insta: null, ig: null, log: [], baks: [], prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
+const S = { token: null, role: null, users: {}, team: null, tpl: null, prices: null, insta: null, ig: null, log: [], baks: [], prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
 const STATUS = { prospectando: 'Prospectando', semresposta: 'Sem resposta', negociando: 'Negociando', fechado: 'Fechado', perdido: 'Perdido' };
 const STCOL = { prospectando: '#A29FB8', semresposta: '#7dd3fc', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
 const who = (id) => id === 'dono' || !id ? 'Dono' : id === '*' ? 'Outra pessoa' : ((S.users[id] && S.users[id].name) || 'Funcionário');
@@ -766,6 +766,7 @@ function logLine(l) {
 /* ---------- mensagens prontas ---------- */
 async function loadTpl() {
   try { S.tpl = (await api('GET', null, '?action=templates')).templates; } catch (e) { S.tpl = S.tpl || []; }
+  try { S.prices = (await api('GET', null, '?action=prices')).prices; } catch (e) {}
   if (S.view === 'msgs') render();
 }
 const myName = () => S.role === 'dono' ? 'Breno' : who(S.role);
@@ -807,22 +808,44 @@ function printDoc(title, body) {
 const docHead = (right) => `<div class="hd"><div class="brand">Creative <span>Codex</span></div><div class="meta">${right}<br>creativecodex.com.br | (16) 99783-7454</div></div>`;
 
 function proposal(p) {
-  const base = p.value ? `${p.service || 'Serviço'} | ${p.value}` : (p.service ? p.service + ' | ' : '');
-  dialog({ title: 'Gerar proposta', small: false, body: `
+  const P = S.prices || { services: [], extras: [] };
+  const words = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z]+/).filter((w) => w.length > 3 && !['para', 'site', 'loja'].includes(w));
+  const pw = words(p.service);
+  const guess = P.services.findIndex((x) => words(x.name).some((w) => pw.includes(w)));
+  const optS = `<option value="-1">Personalizado (digitar os itens)</option>` + P.services.map((x, i) => `<option value="${i}" ${i === guess ? 'selected' : ''}>${esc(x.name)} (${money(x.price)}${x.recurring ? '/mês' : ''})</option>`).join('');
+  const ov = dialog({ title: 'Gerar proposta', small: false, body: `
     <div class="f"><label for="pC">Cliente</label><input id="pC" value="${esc(p.name)}" maxlength="120"></div>
-    <div class="f"><label for="pI">Itens (um por linha: descrição | valor)</label><textarea id="pI" style="min-height:96px" placeholder="Site institucional | 900&#10;Hospedagem por 1 ano | 200">${esc(base)}</textarea></div>
+    <div class="f"><label for="pS">Serviço</label><select id="pS">${optS}</select></div>
+    ${P.extras.length ? `<div class="f"><label>Extras</label><div id="pX" style="display:grid;gap:6px">${P.extras.map((x, i) => `<label class="ck"><input type="checkbox" data-ex="${i}"><span>${esc(x.name)} <b>${money(x.price)}</b></span></label>`).join('')}</div></div>` : ''}
+    <div class="f"><label for="pD">Desconto (R$)</label><input id="pD" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div>
+    <div class="f"><label for="pI">Itens (um por linha: descrição | valor). Pode editar à vontade.</label><textarea id="pI" style="min-height:96px"></textarea></div>
     <div class="f2"><div class="f"><label for="pP">Prazo de entrega</label><input id="pP" value="7 dias úteis" maxlength="60"></div><div class="f"><label for="pV">Validade (dias)</label><input id="pV" type="number" min="1" value="7"></div></div>
     <div class="f"><label for="pF">Forma de pagamento</label><input id="pF" value="50% na aprovação e 50% na entrega" maxlength="120"></div>
     <div class="f"><label for="pO">Observações</label><textarea id="pO" maxlength="600" placeholder="Opcional"></textarea></div>`, ok: 'Gerar PDF', onOk: (d) => {
-    const items = $('#pI', d).value.split('\n').map((l) => l.split('|')).filter((a) => a[0].trim()).map((a) => ({ t: a[0].trim(), v: (() => { const r = String(a[1] || '').replace(/[^\d.,]/g, ''); return parseFloat(r.includes(',') ? r.replace(/\./g, '').replace(',', '.') : r) || 0; })() }));
+    const parse = (v) => { const raw = String(v || ''), neg = /^\s*-/.test(raw), r = raw.replace(/[^\d.,]/g, ''); return (neg ? -1 : 1) * (parseFloat(r.includes(',') ? r.replace(/\./g, '').replace(',', '.') : r) || 0); };
+    const items = $('#pI', d).value.split('\n').map((l) => l.split('|')).filter((a) => a[0].trim()).map((a) => ({ t: a[0].trim(), v: parse(a[1]), rec: /mensal/i.test(a[2] || '') }));
     if (!items.length) { toast('Adicione ao menos um item.', { type: 'err' }); return false; }
-    const total = items.reduce((s, x) => s + x.v, 0), val = new Date(); val.setDate(val.getDate() + (+$('#pV', d).value || 7));
+    const once = items.filter((x) => !x.rec).reduce((s, x) => s + x.v, 0), monthly = items.filter((x) => x.rec).reduce((s, x) => s + x.v, 0);
+    const val = new Date(); val.setDate(val.getDate() + (+$('#pV', d).value || 7));
+    const sv = P.services[+$('#pS', d).value], inc = sv ? sv.includes : [];
     const opt = (t, k) => k ? `<h2>${t}</h2><p>${esc(k)}</p>` : '';
     printDoc('Proposta ' + $('#pC', d).value, docHead(`Proposta comercial<br>${fdate(new Date().toISOString())}`) + `<h1>Proposta para ${esc($('#pC', d).value)}</h1><p class="sub">Preparada por ${esc(myName())}, da Creative Codex.</p>
-      <h2>O que está incluso</h2><table><thead><tr><th>Descrição</th><th class="r">Valor</th></tr></thead><tbody>${items.map((x) => `<tr><td>${esc(x.t)}</td><td class="r">${x.v ? money(x.v) : 'Incluso'}</td></tr>`).join('')}<tr class="tot"><td>Total</td><td class="r">${money(total)}</td></tr></tbody></table>
+      <h2>Investimento</h2><table><thead><tr><th>Descrição</th><th class="r">Valor</th></tr></thead><tbody>${items.map((x) => `<tr><td>${esc(x.t)}</td><td class="r">${x.v < 0 ? '- ' + money(-x.v) : x.v ? money(x.v) + (x.rec ? ' /mês' : '') : 'Incluso'}</td></tr>`).join('')}${once || !monthly ? `<tr class="tot"><td>${monthly ? 'Total à vista' : 'Total'}</td><td class="r">${money(once)}</td></tr>` : ''}${monthly ? `<tr class="tot"><td>Mensalidade</td><td class="r">${money(monthly)} /mês</td></tr>` : ''}</tbody></table>
+      ${inc.length ? `<h2>O que está incluso</h2><ul style="margin:0;padding-left:18px">${inc.map((t) => `<li style="margin:3px 0">${esc(t)}</li>`).join('')}</ul>` : ''}
       <h2>Condições</h2><div class="g"><div class="box"><b>Prazo de entrega</b>${esc($('#pP', d).value)}</div><div class="box"><b>Pagamento</b>${esc($('#pF', d).value)}</div><div class="box"><b>Validade da proposta</b>${fdate(val.toISOString())}</div></div>${opt('Observações', $('#pO', d).value.trim())}
       <div class="sig"><div>Creative Codex</div><div>${esc($('#pC', d).value)}</div></div><div class="ft">Obrigado pela confiança. Qualquer ajuste é só chamar no WhatsApp.</div>`);
   } });
+  const build = () => {
+    const sv = P.services[+$('#pS', ov).value], lines = [];
+    if (sv) { lines.push(`${sv.name} | ${sv.price}${sv.recurring ? ' | mensal' : ''}`); if (sv.deadline && !sv.recurring) $('#pP', ov).value = sv.deadline; }
+    else if (p.value) lines.push(`${p.service || 'Serviço'} | ${p.value}`);
+    ov.querySelectorAll('[data-ex]:checked').forEach((c) => { const x = P.extras[+c.dataset.ex]; lines.push(`${x.name} | ${x.price}`); });
+    const dc = parseFloat($('#pD', ov).value) || 0; if (dc > 0) lines.push(`Desconto | -${dc}`);
+    $('#pI', ov).value = lines.join('\n');
+  };
+  ov.addEventListener('change', (e) => { if (e.target.id === 'pS' || e.target.closest('#pX')) build(); });
+  $('#pD', ov).addEventListener('input', build);
+  build();
 }
 
 function receipt(id) {
@@ -874,6 +897,22 @@ async function saveEmp(body, okMsg) {
 }
 
 /* ---------- financeiro (só o dono) ---------- */
+function priceTable() {
+  const P = S.prices; if (!P) return '';
+  return `<div class="tools" style="margin-top:26px"><h2 class="sec" style="margin:0;flex:1">Tabela de preços das propostas</h2><button class="btn gh" data-act="prices-edit">${ic('edit')}Editar</button></div>
+  <div class="tw"><table><thead><tr><th>Serviço</th><th>Valor</th><th>Prazo</th></tr></thead><tbody>${P.services.map((x) => `<tr><td class="c-main"><div class="nm">${esc(x.name)}</div></td><td data-l="Valor" class="val">${money(x.price)}${x.recurring ? ' /mês' : ''}</td><td data-l="Prazo">${esc(x.deadline)}</td></tr>`).join('')}${P.extras.map((x) => `<tr><td class="c-main"><div class="nm" style="font-weight:500">Extra: ${esc(x.name)}</div></td><td data-l="Valor" class="val">${money(x.price)}</td><td></td></tr>`).join('')}</tbody></table></div>`;
+}
+function pricesDialog() {
+  const P = S.prices;
+  dialog({ title: 'Tabela de preços', small: false, body: `<div class="f"><label for="prS">Serviços (um por linha: nome | valor | prazo | o que inclui, separado por ponto e vírgula; escreva "mensal" no fim para cobrar por mês)</label><textarea id="prS" style="min-height:220px;font-size:.82rem">${esc(P.services.map((x) => [x.name, x.price, x.deadline, x.includes.join('; ') + (x.recurring ? ' | mensal' : '')].join(' | ')).join('\n'))}</textarea></div>
+    <div class="f"><label for="prE">Extras (um por linha: nome | valor)</label><textarea id="prE" style="min-height:110px;font-size:.82rem">${esc(P.extras.map((x) => x.name + ' | ' + x.price).join('\n'))}</textarea></div>`, ok: 'Salvar tabela', onOk: async (d) => {
+    const num_ = (v) => { const r = String(v || '').replace(/[^\d.,]/g, ''); return parseFloat(r.includes(',') ? r.replace(/\./g, '').replace(',', '.') : r) || 0; };
+    const services = $('#prS', d).value.split('\n').map((l) => l.split('|').map((x) => x.trim())).filter((a) => a[0]).map((a) => { const rec = /^mensal$/i.test(a[4] || ''); return { name: a[0], price: num_(a[1]), deadline: a[2] || '', recurring: rec, includes: (a[3] || '').split(';').map((t) => t.trim()).filter(Boolean) }; });
+    const extras = $('#prE', d).value.split('\n').map((l) => l.split('|').map((x) => x.trim())).filter((a) => a[0]).map((a) => ({ name: a[0], price: num_(a[1]) }));
+    try { S.prices = (await api('POST', { services, extras }, '?action=prices')).prices; toast('Tabela salva.', { type: 'ok' }); render(); }
+    catch (e) { if (e.message !== 'sessão') toast(e.message, { type: 'err' }); }
+  } });
+}
 function vFinance() {
   const m = metrics();
   const pay = m.won.filter((p) => p.responsavel !== 'dono');
@@ -901,6 +940,7 @@ function vFinance() {
   </div>
   <h2 class="sec">Por funcionário</h2>
   ${people.length ? `<div class="tw"><table><thead><tr><th>Nome</th><th>Vendas</th><th>Faturamento</th><th>Comissão</th><th>Paga</th><th>A pagar</th></tr></thead><tbody>${people.map((x) => `<tr><td class="c-main"><div class="nm">${esc(who(x.id))}</div></td><td data-l="Vendas">${x.n}</td><td data-l="Faturamento" class="money">${money(x.rev)}</td><td data-l="Comissão" class="money">${money(x.tot)}${x.comb ? ` <span class="tag">+${x.comb} a combinar</span>` : ''}</td><td data-l="Paga" class="money">${money(x.paid)}</td><td data-l="A pagar" class="money"><b>${money(x.tot - x.paid)}</b></td></tr>`).join('')}</tbody></table></div><div class="hint" style="margin:8px 2px 0">Para marcar uma comissão como paga, use a aba Comissões.</div>` : '<div class="card empty"><p>Nenhuma venda de funcionário fechada ainda.</p></div>'}
+  ${priceTable()}
   <h2 class="sec">Por mês</h2>
   <div class="tw"><table><thead><tr><th>Mês</th><th>Vendas</th><th>Faturamento</th><th>Comissões</th><th>Líquido</th></tr></thead><tbody>${ms.map((x) => `<tr><td class="c-main"><div class="nm">${esc(x.label)}</div></td><td data-l="Vendas">${x.n}</td><td data-l="Faturamento" class="money">${money(x.rev)}</td><td data-l="Comissões" class="money">${money(x.c)}</td><td data-l="Líquido" class="money"><b>${money(x.net)}</b></td></tr>`).join('')}</tbody></table></div>`;
 }
@@ -1098,6 +1138,7 @@ document.addEventListener('click', (e) => {
     case 'ig-off': api('POST', { disconnect: true }, '?action=insta_connect').then(() => { S.ig = { connected: false }; toast('Instagram desconectado.', { type: 'ok' }); render(); }).catch((e) => toast(e.message, { type: 'err' })); break;
     case 'ig-edit': igDialog((S.insta || []).find((x) => x.date === t.dataset.d)); break;
     case 'ig-del': api('POST', { date: t.dataset.d, remove: true }, '?action=insta').then((r) => { S.insta = r.insta; toast('Registro excluído.', { type: 'ok' }); render(); }).catch((e) => toast(e.message, { type: 'err' })); break;
+    case 'prices-edit': pricesDialog(); break;
     case 'pay': payDialog(id); break;
     case 'receipt': receipt(id); break;
     case 'unpay': { const p = S.prospects.find((x) => x.id === id); if (p) { p.commissionPaid = false; p.paidAt = ''; p.paidNote = ''; touch(p, 'paid', 'Pagamento desmarcado'); save(); render(); } break; }

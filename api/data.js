@@ -213,6 +213,20 @@ async function igSync(force) {
   await kv.set(IG_TOKEN, { ...c, synced: today });
 }
 
+const PRICE_KEY = 'painel_precos';
+const PRECOS = {
+  services: [
+    { name: 'Landing Page', price: 600, deadline: '5 dias úteis', recurring: false, includes: ['1 página responsiva (celular e computador)', 'Botão e link direto para o WhatsApp', 'Formulário de contato', 'SEO básico para aparecer no Google', 'Publicação no ar'] },
+    { name: 'Site Institucional', price: 1200, deadline: '10 dias úteis', recurring: false, includes: ['Até 5 páginas (início, sobre, serviços, galeria, contato)', 'Design personalizado e responsivo', 'Botão do WhatsApp e redes sociais', 'SEO básico e mapa do Google', 'Publicação no ar'] },
+    { name: 'Cardápio Digital', price: 500, deadline: '7 dias úteis', recurring: false, includes: ['Cardápio online com fotos e categorias', 'QR Code para as mesas', 'Pedidos direto no WhatsApp, sem taxa', 'Atualização fácil dos preços'] },
+    { name: 'Loja Virtual', price: 2500, deadline: '20 dias úteis', recurring: false, includes: ['Catálogo de produtos', 'Carrinho e pagamento online', 'Painel para gerenciar pedidos', 'Design responsivo', 'Treinamento de uso'] },
+    { name: 'Manutenção mensal do site', price: 150, deadline: 'Mensal', recurring: true, includes: ['Atualizações de textos e imagens', 'Monitoramento e backups', 'Suporte pelo WhatsApp'] },
+    { name: 'Pacote de artes para redes sociais', price: 250, deadline: '5 dias úteis', recurring: false, includes: ['8 artes para feed ou stories', 'Identidade visual do cliente', 'Arquivos prontos para postar'] },
+    { name: 'Identidade visual (logo)', price: 400, deadline: '7 dias úteis', recurring: false, includes: ['Criação do logotipo', '2 propostas e 2 ajustes', 'Arquivos em PNG e vetor'] }
+  ].map((x, i) => ({ id: 's' + i, ...x })),
+  extras: [['Domínio .com.br (1 ano)', 60], ['Hospedagem (1 ano)', 240], ['Textos profissionais', 150], ['Página extra', 150], ['Integração com Google Meu Negócio', 120], ['Entrega urgente (metade do prazo)', 200]].map(([name, price], i) => ({ id: 'e' + i, name, price }))
+};
+
 const trim = (v, n) => String(v ?? '').trim().slice(0, n);
 
 export default async function handler(req, res) {
@@ -246,6 +260,20 @@ export default async function handler(req, res) {
       const lastBak = Number(await kv.get(BAK_AT)) || 0;
       if (current.prospects.length && Date.now() - lastBak > BAK_EVERY) await snapshot(current, emps, 'auto');
     } catch (e) { console.error('manutenção', e); }
+
+    // tabela de preços (todos leem, só o dono edita)
+    if (req.query.action === 'prices') {
+      if (req.method === 'POST') {
+        if (role !== 'dono') return res.status(403).json({ error: 'Sem permissão.' });
+        const b = req.body || {}, n = (v) => Math.max(0, Math.round((Number(v) || 0) * 100) / 100);
+        const services = (Array.isArray(b.services) ? b.services : []).slice(0, 30).map((x, i) => ({ id: 's' + i, name: trim(x.name, 80), price: n(x.price), deadline: trim(x.deadline, 40), recurring: !!x.recurring, includes: (Array.isArray(x.includes) ? x.includes : []).slice(0, 12).map((t) => trim(t, 120)).filter(Boolean) })).filter((x) => x.name);
+        const extras = (Array.isArray(b.extras) ? b.extras : []).slice(0, 30).map((x, i) => ({ id: 'e' + i, name: trim(x.name, 80), price: n(x.price) })).filter((x) => x.name);
+        if (!services.length) return res.status(400).json({ error: 'Informe ao menos um serviço.' });
+        await kv.set(PRICE_KEY, { services, extras });
+        return res.status(200).json({ prices: { services, extras } });
+      }
+      return res.status(200).json({ prices: (await kv.get(PRICE_KEY)) || PRECOS });
+    }
 
     // modelos de mensagem (todos leem, só o dono edita)
     if (req.query.action === 'templates') {
