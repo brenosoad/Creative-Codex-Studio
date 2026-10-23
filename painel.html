@@ -199,6 +199,7 @@ select.st{padding-right:.7rem;cursor:pointer}
 .lb .er{color:var(--red);font-size:.85rem;margin-top:12px;min-height:1.2em}
 
 body.intern .money{display:none!important}
+.navgrp{font:500 .68rem var(--mono);color:var(--dim);padding:14px 12px 4px;opacity:.8}
 .wel{position:fixed;inset:0;z-index:200;display:grid;place-items:center;overflow:hidden;cursor:pointer}
 .wh{position:absolute;left:0;right:0;height:50.5%;background:var(--bg);transition:transform 1s cubic-bezier(.76,0,.24,1)}
 .wt{top:0}.wb{bottom:0}
@@ -274,6 +275,7 @@ body.intern .money{display:none!important}
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
   <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></symbol>
   <symbol id="i-insta" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></symbol>
   <symbol id="i-dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
@@ -324,7 +326,7 @@ body.intern .money{display:none!important}
 'use strict';
 /* ---------- estado ---------- */
 const API = '/api/data';
-const S = { token: null, role: null, users: {}, team: null, tpl: null, cts: null, company: null, prices: null, insta: null, ig: null, log: [], baks: [], prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
+const S = { token: null, role: null, users: {}, team: null, sub: { msgs: 'prop', team: 'staff', finance: 'resumo' }, tpl: null, cts: null, company: null, prices: null, insta: null, ig: null, log: [], baks: [], prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
 const STATUS = { prospectando: 'Prospectando', semresposta: 'Sem resposta', negociando: 'Negociando', fechado: 'Fechado', perdido: 'Perdido' };
 const STCOL = { prospectando: '#A29FB8', semresposta: '#7dd3fc', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
 const who = (id) => id === 'dono' || !id ? 'Dono' : id === '*' ? 'Outra pessoa' : ((S.users[id] && S.users[id].name) || 'Funcionário');
@@ -553,16 +555,24 @@ const VIEWS = [
   ['msgs', 'Vendas', 'chat']
 ];
 const views = () => isIntern() ? VIEWS : [...VIEWS, ['finance', 'Financeiro', 'chart'], ['insta', 'Instagram', 'insta'], ['team', 'Equipe', 'team']];
+const subTabs = (v, list) => `<div class="chips" role="group">${list.map(([k, t]) => `<button class="chip ${S.sub[v] === k ? 'on' : ''}" data-act="sub" data-v="${v}" data-k="${k}">${t}</button>`).join('')}</div>`;
+const MAIN_TABS = ['overview', 'today', 'list', 'msgs'];
 function renderNav() {
   const due = dueList().length;
-  const nv = views().length;
-  $('#tabs').classList.toggle('six', nv > 5 && nv < 7);
-  $('#tabs').classList.toggle('many', nv > 6);
-  $('#tabs').style.gridTemplateColumns = nv > 6 ? '' : `repeat(${nv},1fr)`;
+  const all = views(), mob = all.length > 6;
+  $('#tabs').classList.toggle('six', !mob && all.length > 5);
+  const bar = mob ? all.filter((v) => MAIN_TABS.includes(v[0])) : all;
+  $('#tabs').style.gridTemplateColumns = `repeat(${mob ? bar.length + 1 : bar.length},1fr)`;
   $('#who').textContent = isIntern() ? who(S.role) : 'Acesso completo';
-  const html = (tab) => views().map(([k, n, i]) =>
-    `<button type="button" data-act="view" data-v="${k}" class="${S.view === k ? 'on' : ''}" ${S.view === k ? 'aria-current="page"' : ''}>${ic(i)}<span>${n}</span>${k === 'today' && due ? `<span class="badge">${due}</span>` : ''}</button>`).join('');
-  $('#nav').innerHTML = html(); $('#tabs').innerHTML = html();
+  const btn = ([k, n, i]) => `<button type="button" data-act="view" data-v="${k}" class="${S.view === k ? 'on' : ''}" ${S.view === k ? 'aria-current="page"' : ''}>${ic(i)}<span>${n}</span>${k === 'today' && due ? `<span class="badge">${due}</span>` : ''}</button>`;
+  const side = all.map((v) => (v[0] === 'finance' ? '<div class="navgrp">Gestão</div>' : '') + btn(v)).join('');
+  const more = mob ? `<button type="button" data-act="more" class="${MAIN_TABS.includes(S.view) ? '' : 'on'}">${ic('menu')}<span>Mais</span></button>` : '';
+  $('#nav').innerHTML = side; $('#tabs').innerHTML = bar.map(btn).join('') + more;
+}
+function moreSheet() {
+  const rest = views().filter((v) => !MAIN_TABS.includes(v[0]));
+  const ov = dialog({ title: 'Mais', body: `<div style="display:grid;gap:8px">${rest.map(([k, n, i]) => `<button type="button" class="btn gh" data-mv="${k}" style="justify-content:flex-start">${ic(i)}${n}</button>`).join('')}</div>`, ok: 'Fechar' });
+  ov.querySelectorAll('[data-mv]').forEach((b) => { b.onclick = () => { ov._close(false); setView(b.dataset.mv); }; });
 }
 function setView(v) { S.view = v; saveUI(); render(); window.scrollTo(0, 0); if (v === 'team') loadTeam(); if (v === 'insta') loadInsta(); if (v === 'msgs') loadCts(); }
 
@@ -746,14 +756,15 @@ function vTeam() {
   const t = S.team;
   const head = `<div class="tools"><div class="hint" style="margin:0;flex:1">Cada pessoa entra com a própria senha. Quem pega um lead primeiro fica com ele, e os outros não veem o nome.</div><button class="btn pri" data-act="emp-new">${ic('plus')}Novo funcionário</button></div>`;
   if (!t) return head + '<div class="card empty"><p>Carregando...</p></div>';
-  return head + `<div class="tw"><table><thead><tr><th>Nome</th><th>Status</th><th>Leads atendendo</th><th>Fechados</th><th></th></tr></thead><tbody>${t.map((e) => `<tr>
+  const staffH = head + `<div class="tw"><table><thead><tr><th>Nome</th><th>Status</th><th>Leads atendendo</th><th>Fechados</th><th></th></tr></thead><tbody>${t.map((e) => `<tr>
     <td class="c-main"><div class="nm">${esc(e.name)}</div></td>
     <td data-l="Status"><span class="tag" style="margin:0;${e.active ? '' : 'color:var(--dim);background:rgba(255,255,255,.06)'}">${e.active ? 'Ativo' : 'Inativo'}</span></td>
     <td data-l="Leads">${e.leads}</td><td data-l="Fechados">${e.closed}</td>
     <td class="c-act"><div class="acts"><button class="btn sm gh" data-act="emp-edit" data-id="${esc(e.id)}">${ic('edit')}Editar</button><button class="btn sm gh" data-act="emp-toggle" data-id="${esc(e.id)}">${e.active ? 'Desativar' : 'Reativar'}</button></div></td></tr>`).join('')}</tbody></table></div>`
-    + `<h2 class="sec">Atividade recente</h2>${S.log.length ? `<div class="card">${S.log.slice(0, 40).map(logLine).join('')}</div>` : '<div class="card empty"><p>Nada registrado ainda.</p></div>'}`
-    + `<h2 class="sec">Backups</h2><div class="tools"><div class="hint" style="margin:0;flex:1">Backup automático todo dia, guarda os últimos 14.</div><button class="btn gh" data-act="bak-new">${ic('dl')}Fazer backup agora</button></div>`
+  ;const logH = `${S.log.length ? `<div class="card">${S.log.slice(0, 40).map(logLine).join('')}</div>` : '<div class="card empty"><p>Nada registrado ainda.</p></div>'}`
+  ;const bakH = `<div class="tools"><div class="hint" style="margin:0;flex:1">Backup automático todo dia, guarda os últimos 14.</div><button class="btn gh" data-act="bak-new">${ic('dl')}Fazer backup agora</button></div>`
     + (S.baks.length ? `<div class="tw"><table><thead><tr><th>Data</th><th>Tipo</th><th>Leads</th><th></th></tr></thead><tbody>${S.baks.map((b) => `<tr><td class="c-main"><div class="nm">${new Date(b.at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</div></td><td data-l="Tipo">${esc(b.kind)}</td><td data-l="Leads">${b.count}</td><td class="c-act"><div class="acts"><button class="btn sm gh" data-act="bak-dl" data-id="${esc(b.id)}">${ic('dl')}Baixar</button><button class="btn sm gh" data-act="bak-restore" data-id="${esc(b.id)}">Restaurar</button></div></td></tr>`).join('')}</tbody></table></div>` : '<div class="card empty"><p>Nenhum backup ainda.</p></div>');
+  return subTabs('team', [['staff', 'Funcionários'], ['log', 'Atividade'], ['bak', 'Backups']]) + ({ staff: staffH, log: logH, bak: bakH }[S.sub.team]);
 }
 function logLine(l) {
   const by = l.by === 'sistema' ? 'Sistema' : who(l.by), nm = `<b>${esc(l.name || '')}</b>`;
@@ -855,9 +866,11 @@ function ctShare(id, client) {
 function vMsgs() {
   if (!S.tpl) return '<div class="card empty"><p>Carregando...</p></div>';
   const names = [...new Set(S.prospects.filter((p) => !locked(p)).sort((a, b) => (isOpen(b) - isOpen(a)) || a.name.localeCompare(b.name)).map((p) => p.name))];
-  const prop = `<div class="card" style="margin-bottom:22px"><h3>${ic('doc')}Gerar proposta</h3><div class="tools" style="margin:0"><input id="propC" list="propL" placeholder="Digite o nome de um prospecto ou de um cliente novo" maxlength="120" style="flex:1;min-width:220px;padding:.7rem .85rem;border-radius:10px;border:1px solid var(--line);background:var(--bg)"><datalist id="propL">${names.map((n) => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn pri" data-act="prop-go">Gerar proposta</button><button class="btn gh" data-act="ct-go">Gerar contrato</button></div><div class="hint" style="margin-top:8px">Depois que o cliente aceitar a proposta, gere o contrato: o cliente recebe um link, lê e assina no celular.</div></div>${ctList()}<h2 class="sec" style="margin-top:0">Mensagens prontas</h2>`;
-  const head = prop + `<div class="tools"><div class="hint" style="margin:0;flex:1">Use {nome}, {servico} e {meu_nome}: o painel troca pelos dados do lead. Para usar com um lead, abra o prospecto e escolha o modelo.</div>${isIntern() ? '' : `<button class="btn pri" data-act="tpl-new">${ic('plus')}Novo modelo</button>`}</div>`;
-  return head + (S.tpl.map((m) => `<div class="msg"><h4>${esc(m.title)} <span class="tag" style="margin:0">${esc(m.segment)}</span></h4><p>${esc(m.text)}</p><div class="acts" style="justify-content:flex-start"><button class="btn sm gh" data-act="tpl-copy" data-id="${esc(m.id)}">Copiar</button>${isIntern() ? '' : `<button class="btn sm gh" data-act="tpl-edit" data-id="${esc(m.id)}">${ic('edit')}Editar</button><button class="btn sm gh" data-act="tpl-del" data-id="${esc(m.id)}">${ic('trash')}Excluir</button>`}</div></div>`).join('') || '<div class="card empty"><p>Nenhum modelo.</p></div>');
+  const prop = `<div class="card" style="margin-bottom:22px"><h3>${ic('doc')}Gerar proposta</h3><div class="tools" style="margin:0"><input id="propC" list="propL" placeholder="Digite o nome de um prospecto ou de um cliente novo" maxlength="120" style="flex:1;min-width:220px;padding:.7rem .85rem;border-radius:10px;border:1px solid var(--line);background:var(--bg)"><datalist id="propL">${names.map((n) => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn pri" data-act="prop-go">Gerar proposta</button><button class="btn gh" data-act="ct-go">Gerar contrato</button></div><div class="hint" style="margin-top:8px">Depois que o cliente aceitar a proposta, gere o contrato: o cliente recebe um link, lê e assina no celular.</div></div>${ctList()}`;
+  const head = `<div class="tools"><div class="hint" style="margin:0;flex:1">Use {nome}, {servico} e {meu_nome}: o painel troca pelos dados do lead. Para usar com um lead, abra o prospecto e escolha o modelo.</div>${isIntern() ? '' : `<button class="btn pri" data-act="tpl-new">${ic('plus')}Novo modelo</button>`}</div>`;
+  const chips = subTabs('msgs', [['prop', 'Propostas e contratos'], ['msg', 'Mensagens prontas']]);
+  if (S.sub.msgs === 'prop') return chips + prop;
+  return chips + head + (S.tpl.map((m) => `<div class="msg"><h4>${esc(m.title)} <span class="tag" style="margin:0">${esc(m.segment)}</span></h4><p>${esc(m.text)}</p><div class="acts" style="justify-content:flex-start"><button class="btn sm gh" data-act="tpl-copy" data-id="${esc(m.id)}">Copiar</button>${isIntern() ? '' : `<button class="btn sm gh" data-act="tpl-edit" data-id="${esc(m.id)}">${ic('edit')}Editar</button><button class="btn sm gh" data-act="tpl-del" data-id="${esc(m.id)}">${ic('trash')}Excluir</button>`}</div></div>`).join('') || '<div class="card empty"><p>Nenhum modelo.</p></div>');
 }
 async function saveTpl(list, okMsg) {
   try { S.tpl = (await api('POST', { templates: list }, '?action=templates')).templates; toast(okMsg, { type: 'ok' }); render(); }
@@ -1032,7 +1045,9 @@ function vFinance() {
     return { label: d.toLocaleDateString('pt-BR', { month: 'long' }).replace(/^./, (c) => c.toUpperCase()) + ' de ' + d.getFullYear(), n: l.length, rev, c, net: rev - c };
   });
   const k = (lbl, big, sub, cls = '') => `<div class="card kpi"><div class="lbl">${lbl}</div><div class="big ${cls}">${big}</div><div class="sub">${sub}</div></div>`;
-  return `<div class="grid g4" style="margin-bottom:14px">
+  const chips = subTabs('finance', [['resumo', 'Resumo'], ['preco', 'Tabela de preços']]);
+  if (S.sub.finance === 'preco') return chips + priceTable();
+  return chips + `<div class="grid g4" style="margin-bottom:14px">
     ${k('Faturamento total', money(m.wonVal), `${m.won.length} venda${m.won.length === 1 ? '' : 's'} fechada${m.won.length === 1 ? '' : 's'}`, 'pos')}
     ${k('Neste mês', money(m.monthVal), `${m.wonMonth.length} fechada${m.wonMonth.length === 1 ? '' : 's'}`)}
     ${k('Comissões a pagar', money(dueC), combinar ? `+ ${combinar} a combinar` : 'em aberto', 'warn')}
@@ -1040,7 +1055,6 @@ function vFinance() {
   </div>
   <h2 class="sec">Por funcionário</h2>
   ${people.length ? `<div class="tw"><table><thead><tr><th>Nome</th><th>Vendas</th><th>Faturamento</th><th>Comissão</th><th>Paga</th><th>A pagar</th></tr></thead><tbody>${people.map((x) => `<tr><td class="c-main"><div class="nm">${esc(who(x.id))}</div></td><td data-l="Vendas">${x.n}</td><td data-l="Faturamento" class="money">${money(x.rev)}</td><td data-l="Comissão" class="money">${money(x.tot)}${x.comb ? ` <span class="tag">+${x.comb} a combinar</span>` : ''}</td><td data-l="Paga" class="money">${money(x.paid)}</td><td data-l="A pagar" class="money"><b>${money(x.tot - x.paid)}</b></td></tr>`).join('')}</tbody></table></div><div class="hint" style="margin:8px 2px 0">Para marcar uma comissão como paga, use a aba Comissões.</div>` : '<div class="card empty"><p>Nenhuma venda de funcionário fechada ainda.</p></div>'}
-  ${priceTable()}
   <h2 class="sec">Por mês</h2>
   <div class="tw"><table><thead><tr><th>Mês</th><th>Vendas</th><th>Faturamento</th><th>Comissões</th><th>Líquido</th></tr></thead><tbody>${ms.map((x) => `<tr><td class="c-main"><div class="nm">${esc(x.label)}</div></td><td data-l="Vendas">${x.n}</td><td data-l="Faturamento" class="money">${money(x.rev)}</td><td data-l="Comissões" class="money">${money(x.c)}</td><td data-l="Líquido" class="money"><b>${money(x.net)}</b></td></tr>`).join('')}</tbody></table></div>`;
 }
@@ -1247,6 +1261,8 @@ document.addEventListener('click', (e) => {
     case 'ct-copy': navigator.clipboard.writeText(ctUrl(id)).then(() => toast('Link copiado.', { type: 'ok' })); break;
     case 'ct-wa': { const c = (S.cts || []).find((x) => x.id === id), p = S.prospects.find((x) => x.id === c.leadId); ctShare(id, { name: c.client, phone: p && p.contact }); break; }
     case 'ct-cancel': dialog({ title: 'Cancelar contrato', body: '<p style="color:var(--dim)">O link deixa de funcionar. Essa ação não pode ser desfeita.</p>', ok: 'Cancelar contrato', danger: true, onOk: () => { api('POST', { cancel: id }, '?action=contracts').then((r) => { S.cts = r.contracts; toast('Contrato cancelado.', { type: 'ok' }); render(); }).catch((e) => toast(e.message, { type: 'err' })); } }); break;
+    case 'more': moreSheet(); break;
+    case 'sub': S.sub[t.dataset.v] = t.dataset.k; render(); break;
     case 'pay': payDialog(id); break;
     case 'receipt': receipt(id); break;
     case 'unpay': { const p = S.prospects.find((x) => x.id === id); if (p) { p.commissionPaid = false; p.paidAt = ''; p.paidNote = ''; touch(p, 'paid', 'Pagamento desmarcado'); save(); render(); } break; }
