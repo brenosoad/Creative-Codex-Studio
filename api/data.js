@@ -106,6 +106,8 @@ function clean(p, role, ids = ['dono']) {
     notes: str(p.notes, 2000),
     lostReason: str(p.lostReason, 200),
     commissionPaid: !!p.commissionPaid,
+    paidAt: p.paidAt ? str(p.paidAt, 30) : '',
+    paidNote: str(p.paidNote, 200),
     claimedBy: ids.includes(p.claimedBy) && p.claimedBy !== 'dono' ? p.claimedBy : '',
     responsavel: role !== 'dono' ? role : (ids.includes(p.responsavel) ? p.responsavel : 'dono'),
     history,
@@ -137,6 +139,50 @@ async function loginLimit(req) {
   return n <= 8;
 }
 
+const TPL_KEY = 'painel_modelos', LOG_KEY = 'painel_log', BAK_KEY = 'painel_backups', BAK_AT = 'painel_backup_at';
+const RELEASE_MS = 7 * 86400000, BAK_EVERY = 86400000, BAK_KEEP = 14;
+const OPEN = ['prospectando', 'semresposta', 'negociando'];
+
+const MODELOS = [
+  ['Primeiro contato', 'Geral', 'Oi, {nome}! Tudo bem? Aqui é {meu_nome}, da Creative Codex, de São Carlos, SP. A gente cria sites e artes para negócios como o seu. Posso te mandar uma ideia rápida de como ficaria o seu?'],
+  ['Primeiro contato', 'Academia', 'Oi, {nome}! Tudo bem? Aqui é {meu_nome}, da Creative Codex. A gente faz site e landing page para academias, com planos, horários e botão direto para matrícula no WhatsApp. Posso te mostrar um exemplo?'],
+  ['Primeiro contato', 'Restaurante', 'Oi, {nome}! Tudo bem? Aqui é {meu_nome}, da Creative Codex. A gente faz cardápio digital com QR Code e pedidos pelo WhatsApp, sem taxa por pedido. Posso te mostrar como fica?'],
+  ['Primeiro contato', 'Igreja', 'Oi, {nome}! Paz do Senhor! Aqui é {meu_nome}, da Creative Codex. A gente cria sites para igrejas, com programação dos cultos, avisos, eventos e área de contribuição. Posso te mostrar um exemplo?'],
+  ['Acompanhamento', 'Geral', 'Oi, {nome}! Passando para saber se você chegou a ver minha mensagem sobre {servico}. Se fizer sentido, te mando uma proposta sem compromisso.'],
+  ['Envio de proposta', 'Geral', '{nome}, segue a proposta de {servico}. Qualquer dúvida é só me chamar, e posso ajustar o que for preciso.'],
+  ['Após o fechamento', 'Geral', 'Fechado, {nome}! Para começar, vou precisar do logo, das cores e dos textos do seu negócio. Posso te mandar a lista do que preciso?']
+].map(([title, segment, text], i) => ({ id: 'm' + (i + 1), title, segment, text }));
+
+async function logPush(entries) {
+  if (!entries.length) return;
+  const old = (await kv.get(LOG_KEY)) || [];
+  await kv.set(LOG_KEY, [...entries.slice().reverse(), ...old].slice(0, 500));
+}
+
+// lead assumido e parado por 7 dias volta para a fila livre
+function autoRelease(cur, entries) {
+  const now = Date.now(), t = new Date().toISOString().slice(0, 10);
+  let n = 0;
+  for (const p of cur.prospects) {
+    const c = claimOf(p);
+    if (!c || !OPEN.includes(p.status) || now - (p.updatedAt || 0) < RELEASE_MS || (p.nextContact && p.nextContact >= t)) continue;
+    entries.push({ at: now, by: 'sistema', lead: p.id, name: p.name, type: 'release', text: 'Liberado por falta de atividade (7 dias)', who: c });
+    p.claimedBy = ''; if (p.responsavel === c) p.responsavel = 'dono'; p.updatedAt = now; n++;
+  }
+  return n;
+}
+
+async function snapshot(cur, emps, kind) {
+  const at = Date.now(), id = String(at);
+  const data = { at, prospects: cur.prospects, goal: cur.goal || 0, goals: cur.goals || {}, employees: emps.map((e) => ({ id: e.id, name: e.name, active: e.active })) };
+  await kv.set('painel_bak_' + id, data);
+  const idx = (await kv.get(BAK_KEY)) || [];
+  idx.unshift({ id, at, kind, count: cur.prospects.length });
+  for (const old of idx.splice(BAK_KEEP)) await kv.del('painel_bak_' + old.id);
+  await kv.set(BAK_KEY, idx);
+  await kv.set(BAK_AT, at);
+}
+
 const trim = (v, n) => String(v ?? '').trim().slice(0, n);
 
 export default async function handler(req, res) {
@@ -163,6 +209,52 @@ export default async function handler(req, res) {
     current.prospects = current.prospects || [];
     current.goals = current.goals || {};
     try { await applySeed(current); } catch (e) { console.error('seed', e); }
+
+    const logs = [];
+    try {
+      if (autoRelease(current, logs)) { await kv.set(KEY, current); await logPush(logs.splice(0)); }
+      const lastBak = Number(await kv.get(BAK_AT)) || 0;
+      if (current.prospects.length && Date.now() - lastBak > BAK_EVERY) await snapshot(current, emps, 'auto');
+    } catch (e) { console.error('manutenção', e); }
+
+    // modelos de mensagem (todos leem, só o dono edita)
+    if (req.query.action === 'templates') {
+      if (req.method === 'POST') {
+        if (role !== 'dono') return res.status(403).json({ error: 'Sem permissão.' });
+        const list = (Array.isArray((req.body || {}).templates) ? req.body.templates : []).slice(0, 40)
+          .map((m) => ({ id: trim(m.id, 20) || 'm' + randomBytes(3).toString('hex'), title: trim(m.title, 60), segment: trim(m.segment, 30) || 'Geral', text: trim(m.text, 1200) }))
+          .filter((m) => m.title && m.text);
+        await kv.set(TPL_KEY, list);
+        return res.status(200).json({ templates: list });
+      }
+      return res.status(200).json({ templates: (await kv.get(TPL_KEY)) || MODELOS });
+    }
+
+    // atividade e backups (só o dono)
+    if (req.query.action === 'log' || req.query.action === 'backups') {
+      if (role !== 'dono') return res.status(403).json({ error: 'Sem permissão.' });
+      if (req.query.action === 'log') return res.status(200).json({ log: ((await kv.get(LOG_KEY)) || []).slice(0, 200) });
+      if (req.method === 'GET' && req.query.id) {
+        const d = await kv.get('painel_bak_' + String(req.query.id).replace(/\D/g, ''));
+        return d ? res.status(200).json(d) : res.status(404).json({ error: 'Backup não encontrado.' });
+      }
+      if (req.method === 'POST') {
+        const b = req.body || {};
+        if (b.restore) {
+          const d = await kv.get('painel_bak_' + String(b.restore).replace(/\D/g, ''));
+          if (!d || !Array.isArray(d.prospects)) return res.status(404).json({ error: 'Backup não encontrado.' });
+          await snapshot(current, emps, 'antes de restaurar');
+          const now = Date.now();
+          current.prospects = d.prospects.map((p) => ({ ...p, updatedAt: now }));
+          current.goal = d.goal || 0; current.goals = d.goals || {};
+          await kv.set(KEY, current);
+          await logPush([{ at: now, by: 'dono', lead: '', name: '', type: 'restore', text: 'Backup restaurado (' + d.prospects.length + ' leads)' }]);
+          return res.status(200).json({ ok: true });
+        }
+        await snapshot(current, emps, 'manual');
+      }
+      return res.status(200).json({ backups: (await kv.get(BAK_KEY)) || [] });
+    }
 
     // cadastro de funcionários (só o dono)
     if (req.query.action === 'employees') {
@@ -219,6 +311,7 @@ export default async function handler(req, res) {
           if (old && claimOf(old) && claimOf(old) !== role) { conflicts.push(p.id); continue; } // outra pessoa já assumiu
           p.claimedBy = role; // quem mexe primeiro assume o prospecto
           p.commissionPaid = old ? old.commissionPaid : false;
+          p.paidAt = old ? old.paidAt || '' : ''; p.paidNote = old ? old.paidNote || '' : '';
           if (old && old.responsavel === 'dono' && !claimOf(old)) {
             p.responsavel = role; // lead livre do dono: quem assume passa a ser o responsável e recebe a comissão
             p.value = p.value != null ? p.value : (old.value || 0);
@@ -229,12 +322,19 @@ export default async function handler(req, res) {
         if (role === 'dono' && old && !Object.prototype.hasOwnProperty.call(raw, 'claimedBy')) p.claimedBy = old.claimedBy || '';
         if (old && old.updatedAt > p.updatedAt) continue; // versão mais nova já salva
         if (old && role !== 'dono' && old.value != null && p.value == null) p.value = old.value;
+        if (!old) logs.push({ at: Date.now(), by: role, lead: p.id, name: p.name, type: 'new', text: 'Lead cadastrado' });
+        else {
+          if (!claimOf(old) && claimOf(p)) logs.push({ at: Date.now(), by: role, lead: p.id, name: p.name, type: 'claim', text: 'Assumiu o lead', who: claimOf(p) });
+          if (old.status !== p.status) logs.push({ at: Date.now(), by: role, lead: p.id, name: p.name, type: 'status', text: old.status + ' > ' + p.status });
+          if (!old.commissionPaid && p.commissionPaid) logs.push({ at: Date.now(), by: role, lead: p.id, name: p.name, type: 'paid', text: 'Comissão paga' });
+        }
         byId.set(p.id, p);
       }
       for (const id of deleted) {
         const old = byId.get(id);
         if (!old) continue;
         if (role !== 'dono' && old.responsavel !== role) continue;
+        logs.push({ at: Date.now(), by: role, lead: id, name: old.name, type: 'delete', text: 'Lead excluído' });
         byId.delete(id);
       }
 
@@ -248,6 +348,7 @@ export default async function handler(req, res) {
         }
       }
       await kv.set(KEY, next);
+      try { await logPush(logs); } catch (e) { console.error('log', e); }
       return res.status(200).json({ ok: true, conflicts, ...view(next, role, emps) });
     }
 

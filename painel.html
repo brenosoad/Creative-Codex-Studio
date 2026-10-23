@@ -199,6 +199,12 @@ select.st{padding-right:.7rem;cursor:pointer}
 .lb .er{color:var(--red);font-size:.85rem;margin-top:12px;min-height:1.2em}
 
 body.intern .money{display:none!important}
+.msg{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:12px}
+.msg h4{font-size:.95rem;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.msg p{white-space:pre-wrap;color:var(--dim);font-size:.9rem;line-height:1.55;margin-bottom:12px}
+.logl{display:flex;gap:12px;font-size:.86rem;padding:8px 0;border-bottom:1px solid var(--line);color:var(--dim)}
+.logl time{font:500 .72rem var(--mono);min-width:92px;padding-top:2px}
+.logl b{color:var(--text);font-weight:600}
 
 /* mobile */
 .tabs{display:none}
@@ -208,6 +214,8 @@ body.intern .money{display:none!important}
   .tabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--line);z-index:30;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
   .tabs button{background:none;border:0;color:var(--dim);display:grid;justify-items:center;gap:3px;padding:6px 0;font-size:.68rem;font-weight:700;position:relative}
   .tabs button svg{width:22px;height:22px}
+  .tabs.many{display:flex;overflow-x:auto;scrollbar-width:none}
+  .tabs.many button{flex:0 0 66px;font-size:.6rem;padding:6px 0}
   .tabs.six button{font-size:.56rem;letter-spacing:-.03em;padding:6px 0}
   .tabs.six button svg{width:20px;height:20px}
   .tabs button.on{color:var(--brand)}
@@ -243,6 +251,8 @@ body.intern .money{display:none!important}
   <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></symbol>
   <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 20v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 20v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
   <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.5-1.5-3-1.5-1.8 0-3 .9-3 2.1 0 3 6 1.4 6 4.4 0 1.2-1.2 2-3 2-1.5 0-2.6-.6-3-1.6M12 6v2m0 8v2"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></symbol>
   <symbol id="i-dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
@@ -293,7 +303,7 @@ body.intern .money{display:none!important}
 'use strict';
 /* ---------- estado ---------- */
 const API = '/api/data';
-const S = { token: null, role: null, users: {}, team: null, prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
+const S = { token: null, role: null, users: {}, team: null, tpl: null, log: [], baks: [], prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
 const STATUS = { prospectando: 'Prospectando', semresposta: 'Sem resposta', negociando: 'Negociando', fechado: 'Fechado', perdido: 'Perdido' };
 const STCOL = { prospectando: '#A29FB8', semresposta: '#7dd3fc', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
 const who = (id) => id === 'dono' || !id ? 'Dono' : id === '*' ? 'Outra pessoa' : ((S.users[id] && S.users[id].name) || 'Funcionário');
@@ -423,7 +433,7 @@ function enter() {
   document.body.classList.toggle('intern', isIntern());
   $('#who').textContent = isIntern() ? who(S.role) + '' : 'Acesso completo';
   try { const f = JSON.parse(sessionStorage.getItem('painel_ui') || '{}'); Object.assign(S, { filter: f.filter || 'todos', resp: f.resp || 'todos', view: f.view || 'overview' }); } catch {}
-  load();
+  load(); loadTpl();
   if (S.view === 'team' && !isIntern()) loadTeam();
 }
 function logout(expired) {
@@ -456,13 +466,16 @@ const VIEWS = [
   ['today', 'Hoje', 'bell'],
   ['funnel', 'Funil', 'kanban'],
   ['list', 'Prospecção', 'users'],
-  ['comm', 'Comissões', 'coin']
+  ['comm', 'Comissões', 'coin'],
+  ['msgs', 'Mensagens', 'chat']
 ];
 const views = () => isIntern() ? VIEWS : [...VIEWS, ['finance', 'Financeiro', 'chart'], ['team', 'Equipe', 'team']];
 function renderNav() {
   const due = dueList().length;
-  $('#tabs').classList.toggle('six', views().length > 5);
-  $('#tabs').style.gridTemplateColumns = `repeat(${views().length},1fr)`;
+  const nv = views().length;
+  $('#tabs').classList.toggle('six', nv > 5 && nv < 7);
+  $('#tabs').classList.toggle('many', nv > 6);
+  $('#tabs').style.gridTemplateColumns = nv > 6 ? '' : `repeat(${nv},1fr)`;
   $('#who').textContent = isIntern() ? who(S.role) : 'Acesso completo';
   const html = (tab) => views().map(([k, n, i]) =>
     `<button type="button" data-act="view" data-v="${k}" class="${S.view === k ? 'on' : ''}" ${S.view === k ? 'aria-current="page"' : ''}>${ic(i)}<span>${n}</span>${k === 'today' && due ? `<span class="badge">${due}</span>` : ''}</button>`).join('');
@@ -513,13 +526,14 @@ function render() {
     funnel: () => 'Arraste os cartões entre as colunas',
     list: () => `${S.prospects.length} cadastrado${S.prospects.length === 1 ? '' : 's'}`,
     comm: () => 'Comissão por site fechado',
+    msgs: () => 'Textos prontos para o WhatsApp',
     finance: () => 'Faturamento, comissões e lucro',
     team: () => 'Quem trabalha nos seus leads'
   };
   $('#subtitle').textContent = sub[S.view]();
   const el = $('#view');
   const focus = document.activeElement && document.activeElement.id === 'q' ? document.activeElement.selectionStart : null;
-  el.innerHTML = ({ overview: vOverview, today: vToday, funnel: vFunnel, list: vList, comm: vComm, finance: vFinance, team: vTeam }[S.view])();
+  el.innerHTML = ({ overview: vOverview, today: vToday, funnel: vFunnel, list: vList, comm: vComm, finance: vFinance, team: vTeam, msgs: vMsgs }[S.view])();
   if (S.view === 'funnel') bindDnD();
   if (focus !== null) { const q = $('#q'); if (q) { q.focus(); q.setSelectionRange(focus, focus); } }
 }
@@ -638,7 +652,10 @@ function vList() {
 
 /* ---------- equipe (só o dono) ---------- */
 async function loadTeam() {
-  try { const d = await api('GET', null, '?action=employees'); S.team = d.employees; }
+  try {
+    const [d, l, b] = await Promise.all([api('GET', null, '?action=employees'), api('GET', null, '?action=log'), api('GET', null, '?action=backups')]);
+    S.team = d.employees; S.log = l.log || []; S.baks = b.backups || [];
+  }
   catch (e) { if (e.message !== 'sessão') toast('Não consegui carregar a equipe: ' + e.message, { type: 'err' }); S.team = S.team || []; }
   if (S.view === 'team') render();
 }
@@ -650,7 +667,111 @@ function vTeam() {
     <td class="c-main"><div class="nm">${esc(e.name)}</div></td>
     <td data-l="Status"><span class="tag" style="margin:0;${e.active ? '' : 'color:var(--dim);background:rgba(255,255,255,.06)'}">${e.active ? 'Ativo' : 'Inativo'}</span></td>
     <td data-l="Leads">${e.leads}</td><td data-l="Fechados">${e.closed}</td>
-    <td class="c-act"><div class="acts"><button class="btn sm gh" data-act="emp-edit" data-id="${esc(e.id)}">${ic('edit')}Editar</button><button class="btn sm gh" data-act="emp-toggle" data-id="${esc(e.id)}">${e.active ? 'Desativar' : 'Reativar'}</button></div></td></tr>`).join('')}</tbody></table></div>`;
+    <td class="c-act"><div class="acts"><button class="btn sm gh" data-act="emp-edit" data-id="${esc(e.id)}">${ic('edit')}Editar</button><button class="btn sm gh" data-act="emp-toggle" data-id="${esc(e.id)}">${e.active ? 'Desativar' : 'Reativar'}</button></div></td></tr>`).join('')}</tbody></table></div>`
+    + `<h2 class="sec">Atividade recente</h2>${S.log.length ? `<div class="card">${S.log.slice(0, 40).map(logLine).join('')}</div>` : '<div class="card empty"><p>Nada registrado ainda.</p></div>'}`
+    + `<h2 class="sec">Backups</h2><div class="tools"><div class="hint" style="margin:0;flex:1">Backup automático todo dia, guarda os últimos 14.</div><button class="btn gh" data-act="bak-new">${ic('dl')}Fazer backup agora</button></div>`
+    + (S.baks.length ? `<div class="tw"><table><thead><tr><th>Data</th><th>Tipo</th><th>Leads</th><th></th></tr></thead><tbody>${S.baks.map((b) => `<tr><td class="c-main"><div class="nm">${new Date(b.at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</div></td><td data-l="Tipo">${esc(b.kind)}</td><td data-l="Leads">${b.count}</td><td class="c-act"><div class="acts"><button class="btn sm gh" data-act="bak-dl" data-id="${esc(b.id)}">${ic('dl')}Baixar</button><button class="btn sm gh" data-act="bak-restore" data-id="${esc(b.id)}">Restaurar</button></div></td></tr>`).join('')}</tbody></table></div>` : '<div class="card empty"><p>Nenhum backup ainda.</p></div>');
+}
+function logLine(l) {
+  const by = l.by === 'sistema' ? 'Sistema' : who(l.by), nm = `<b>${esc(l.name || '')}</b>`;
+  const st = (x) => STATUS[x] || x;
+  const t = { new: `${esc(by)} cadastrou ${nm}`, claim: `${esc(by)} assumiu ${nm}`, delete: `${esc(by)} excluiu ${nm}`, paid: `${esc(by)} registrou pagamento de comissão: ${nm}`, release: `${nm} voltou para a fila (parado há 7 dias, era de ${esc(who(l.who))})`, restore: esc(l.text || 'Backup restaurado'),
+    status: `${esc(by)} moveu ${nm}: ${(l.text || '').split(' > ').map(st).join(' para ')}` }[l.type] || esc(l.text || '');
+  return `<div class="logl"><time>${new Date(l.at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</time><span>${t}</span></div>`;
+}
+
+/* ---------- mensagens prontas ---------- */
+async function loadTpl() {
+  try { S.tpl = (await api('GET', null, '?action=templates')).templates; } catch (e) { S.tpl = S.tpl || []; }
+  if (S.view === 'msgs') render();
+}
+const myName = () => S.role === 'dono' ? 'Breno' : who(S.role);
+const fillTpl = (text, p) => text.replace(/\{nome\}/g, p ? p.name.split(' ')[0] : '[nome]').replace(/\{servico\}/g, p && p.service ? p.service : p ? 'o seu projeto' : '[serviço]').replace(/\{meu_nome\}/g, myName());
+function vMsgs() {
+  if (!S.tpl) return '<div class="card empty"><p>Carregando...</p></div>';
+  const head = `<div class="tools"><div class="hint" style="margin:0;flex:1">Use {nome}, {servico} e {meu_nome}: o painel troca pelos dados do lead. Para usar com um lead, abra o prospecto e escolha o modelo.</div>${isIntern() ? '' : `<button class="btn pri" data-act="tpl-new">${ic('plus')}Novo modelo</button>`}</div>`;
+  return head + (S.tpl.map((m) => `<div class="msg"><h4>${esc(m.title)} <span class="tag" style="margin:0">${esc(m.segment)}</span></h4><p>${esc(m.text)}</p><div class="acts" style="justify-content:flex-start"><button class="btn sm gh" data-act="tpl-copy" data-id="${esc(m.id)}">Copiar</button>${isIntern() ? '' : `<button class="btn sm gh" data-act="tpl-edit" data-id="${esc(m.id)}">${ic('edit')}Editar</button><button class="btn sm gh" data-act="tpl-del" data-id="${esc(m.id)}">${ic('trash')}Excluir</button>`}</div></div>`).join('') || '<div class="card empty"><p>Nenhum modelo.</p></div>');
+}
+async function saveTpl(list, okMsg) {
+  try { S.tpl = (await api('POST', { templates: list }, '?action=templates')).templates; toast(okMsg, { type: 'ok' }); render(); }
+  catch (e) { if (e.message !== 'sessão') toast(e.message, { type: 'err' }); }
+}
+function tplDialog(m) {
+  dialog({ title: m ? 'Editar modelo' : 'Novo modelo', small: false, body: `<div class="f2"><div class="f"><label for="tT">Título</label><input id="tT" required maxlength="60" value="${esc(m ? m.title : '')}" placeholder="Ex: Primeiro contato"></div><div class="f"><label for="tS">Segmento</label><input id="tS" list="tsg" maxlength="30" value="${esc(m ? m.segment : 'Geral')}"><datalist id="tsg"><option>Geral</option><option>Academia</option><option>Restaurante</option><option>Igreja</option></datalist></div></div><div class="f"><label for="tX">Texto</label><textarea id="tX" required maxlength="1200" style="min-height:140px">${esc(m ? m.text : '')}</textarea></div>`, ok: 'Salvar', onOk: (d) => {
+    const n = { id: m ? m.id : 'm' + uid(), title: $('#tT', d).value.trim(), segment: $('#tS', d).value.trim() || 'Geral', text: $('#tX', d).value.trim() };
+    if (!n.title || !n.text) return false;
+    saveTpl(m ? S.tpl.map((x) => x.id === m.id ? n : x) : [...S.tpl, n], 'Modelo salvo.');
+  } });
+}
+
+/* ---------- impressão (PDF) ---------- */
+function printDoc(title, body) {
+  const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(title)}</title><style>
+  @page{size:A4;margin:18mm}*{box-sizing:border-box}body{font:14px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1b1830;margin:0}
+  .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #6D4DFF;padding-bottom:14px;margin-bottom:26px}
+  .brand{font-size:22px;font-weight:800;letter-spacing:-.02em}.brand span{color:#6D4DFF}.meta{text-align:right;font-size:12px;color:#5b5873}
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}h2{font-size:12px;color:#6D4DFF;margin:26px 0 8px;font-weight:700}
+  .sub{color:#5b5873;margin:0 0 22px}table{width:100%;border-collapse:collapse}th{text-align:left;font-size:11px;color:#5b5873;border-bottom:1px solid #cfcbe0;padding:8px 6px}
+  td{padding:10px 6px;border-bottom:1px solid #e8e5f2;vertical-align:top}td.r,th.r{text-align:right;white-space:nowrap}
+  .tot td{border-bottom:0;font-weight:800;font-size:16px;padding-top:14px}.box{background:#f4f2fc;border-radius:8px;padding:12px 14px;margin:6px 0}
+  .box b{display:block;font-size:11px;color:#5b5873;font-weight:600}.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sig{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-top:70px}.sig div{border-top:1px solid #1b1830;padding-top:6px;font-size:12px;text-align:center}
+  .ft{margin-top:40px;font-size:11px;color:#7a7794;border-top:1px solid #e8e5f2;padding-top:10px}</style></head><body>${body}<script>onload=()=>setTimeout(()=>print(),400)<\/script></body></html>`;
+  const w = window.open('', '_blank');
+  if (!w) { download(title.replace(/[^\w]+/g, '_') + '.html', html, 'text/html'); toast('Libere pop-ups para abrir direto. Baixei o arquivo: abra e salve como PDF.', { type: 'err' }); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+}
+const docHead = (right) => `<div class="hd"><div class="brand">Creative <span>Codex</span></div><div class="meta">${right}<br>creativecodex.com.br | (16) 99783-7454</div></div>`;
+
+function proposal(p) {
+  const base = p.value ? `${p.service || 'Serviço'} | ${p.value}` : (p.service ? p.service + ' | ' : '');
+  dialog({ title: 'Gerar proposta', small: false, body: `
+    <div class="f"><label for="pC">Cliente</label><input id="pC" value="${esc(p.name)}" maxlength="120"></div>
+    <div class="f"><label for="pI">Itens (um por linha: descrição | valor)</label><textarea id="pI" style="min-height:96px" placeholder="Site institucional | 900&#10;Hospedagem por 1 ano | 200">${esc(base)}</textarea></div>
+    <div class="f2"><div class="f"><label for="pP">Prazo de entrega</label><input id="pP" value="7 dias úteis" maxlength="60"></div><div class="f"><label for="pV">Validade (dias)</label><input id="pV" type="number" min="1" value="7"></div></div>
+    <div class="f"><label for="pF">Forma de pagamento</label><input id="pF" value="50% na aprovação e 50% na entrega" maxlength="120"></div>
+    <div class="f"><label for="pO">Observações</label><textarea id="pO" maxlength="600" placeholder="Opcional"></textarea></div>`, ok: 'Gerar PDF', onOk: (d) => {
+    const items = $('#pI', d).value.split('\n').map((l) => l.split('|')).filter((a) => a[0].trim()).map((a) => ({ t: a[0].trim(), v: (() => { const r = String(a[1] || '').replace(/[^\d.,]/g, ''); return parseFloat(r.includes(',') ? r.replace(/\./g, '').replace(',', '.') : r) || 0; })() }));
+    if (!items.length) { toast('Adicione ao menos um item.', { type: 'err' }); return false; }
+    const total = items.reduce((s, x) => s + x.v, 0), val = new Date(); val.setDate(val.getDate() + (+$('#pV', d).value || 7));
+    const opt = (t, k) => k ? `<h2>${t}</h2><p>${esc(k)}</p>` : '';
+    printDoc('Proposta ' + $('#pC', d).value, docHead(`Proposta comercial<br>${fdate(new Date().toISOString())}`) + `<h1>Proposta para ${esc($('#pC', d).value)}</h1><p class="sub">Preparada por ${esc(myName())}, da Creative Codex.</p>
+      <h2>O que está incluso</h2><table><thead><tr><th>Descrição</th><th class="r">Valor</th></tr></thead><tbody>${items.map((x) => `<tr><td>${esc(x.t)}</td><td class="r">${x.v ? money(x.v) : 'Incluso'}</td></tr>`).join('')}<tr class="tot"><td>Total</td><td class="r">${money(total)}</td></tr></tbody></table>
+      <h2>Condições</h2><div class="g"><div class="box"><b>Prazo de entrega</b>${esc($('#pP', d).value)}</div><div class="box"><b>Pagamento</b>${esc($('#pF', d).value)}</div><div class="box"><b>Validade da proposta</b>${fdate(val.toISOString())}</div></div>${opt('Observações', $('#pO', d).value.trim())}
+      <div class="sig"><div>Creative Codex</div><div>${esc($('#pC', d).value)}</div></div><div class="ft">Obrigado pela confiança. Qualquer ajuste é só chamar no WhatsApp.</div>`);
+  } });
+}
+
+function receipt(id) {
+  const p = S.prospects.find((x) => x.id === id); if (!p || !p.commissionPaid) return;
+  const c = commission(num(p.value)) || 0;
+  printDoc('Recibo ' + p.name, docHead(`Recibo de comissão<br>Nº ${esc(p.id.slice(-6).toUpperCase())}`) + `<h1>Recibo de comissão</h1><p class="sub">Comprovante de pagamento da comissão por venda fechada.</p>
+    <div class="g"><div class="box"><b>Beneficiário</b>${esc(who(p.responsavel))}</div><div class="box"><b>Valor pago</b>${money(c)}</div><div class="box"><b>Cliente da venda</b>${esc(p.name)}</div><div class="box"><b>Serviço</b>${esc(p.service || '-')}</div><div class="box"><b>Valor da venda</b>${money(p.value)}</div><div class="box"><b>Data do pagamento</b>${fdate(p.paidAt)}</div></div>
+    ${p.paidNote ? `<h2>Observação</h2><p>${esc(p.paidNote)}</p>` : ''}<div class="sig"><div>Creative Codex</div><div>${esc(who(p.responsavel))}</div></div>`);
+}
+function payDialog(id) {
+  const p = S.prospects.find((x) => x.id === id); if (!p) return;
+  dialog({ title: 'Registrar pagamento', body: `<p style="color:var(--dim);margin-bottom:14px"><b style="color:var(--text)">${esc(who(p.responsavel))}</b> recebe <b style="color:var(--text)">${money(commission(num(p.value)) || 0)}</b> pela venda de ${esc(p.name)}.</p><div class="f"><label for="yD">Data do pagamento</label><input id="yD" type="date" value="${today()}"></div><div class="f"><label for="yN">Observação (forma, referência do Pix)</label><input id="yN" maxlength="200" placeholder="Ex: Pix, comprovante enviado no WhatsApp"></div>`, ok: 'Marcar como paga', onOk: (d) => {
+    p.commissionPaid = true; p.paidAt = $('#yD', d).value || today(); p.paidNote = $('#yN', d).value.trim();
+    touch(p, 'paid', 'Comissão paga em ' + fdate(p.paidAt)); save(); render(); toast('Pagamento registrado.', { type: 'ok' });
+  } });
+}
+function reportDialog() {
+  const ms = []; for (let i = 0; i < 12; i++) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); ms.push([mkey(d), d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })]); }
+  dialog({ title: 'Relatório de comissões', body: `<div class="f"><label for="rM">Mês (data do fechamento)</label><select id="rM">${ms.map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select></div><div class="f"><label for="rF">Formato</label><select id="rF"><option value="pdf">PDF (imprimir)</option><option value="csv">Planilha (CSV)</option></select></div>`, ok: 'Gerar', onOk: (d) => {
+    const mk = $('#rM', d).value, label = $('#rM', d).selectedOptions[0].text;
+    const rows = S.prospects.filter((p) => p.status === 'fechado' && p.responsavel !== 'dono' && mkey(closedOf(p)) === mk).sort((a, b) => who(a.responsavel).localeCompare(who(b.responsavel)));
+    if (!rows.length) { toast('Nenhuma venda de funcionário nesse mês.', { type: 'err' }); return false; }
+    const c = (p) => commission(num(p.value));
+    if ($('#rF', d).value === 'csv') {
+      download(`comissoes_${mk}.csv`, '﻿' + [['Funcionário', 'Cliente', 'Serviço', 'Fechado em', 'Valor', 'Comissão', 'Situação', 'Pago em', 'Observação'], ...rows.map((p) => [who(p.responsavel), p.name, p.service || '', fdate(closedOf(p)), num(p.value), c(p) ?? 'A combinar', p.commissionPaid ? 'Paga' : 'Pendente', p.commissionPaid ? fdate(p.paidAt) : '', p.paidNote || ''])].map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n'), 'text/csv;charset=utf-8;');
+      return;
+    }
+    const tot = rows.reduce((s, p) => s + (c(p) || 0), 0), paid = rows.filter((p) => p.commissionPaid).reduce((s, p) => s + (c(p) || 0), 0);
+    printDoc('Comissões ' + label, docHead(`Relatório de comissões<br>${esc(label)}`) + `<h1>Comissões de ${esc(label)}</h1><p class="sub">${rows.length} venda${rows.length > 1 ? 's' : ''} fechada${rows.length > 1 ? 's' : ''}.</p>
+      <table><thead><tr><th>Funcionário</th><th>Cliente</th><th>Fechado</th><th class="r">Venda</th><th class="r">Comissão</th><th>Situação</th></tr></thead><tbody>${rows.map((p) => `<tr><td>${esc(who(p.responsavel))}</td><td>${esc(p.name)}</td><td>${fdate(closedOf(p))}</td><td class="r">${money(p.value)}</td><td class="r">${c(p) ? money(c(p)) : 'A combinar'}</td><td>${p.commissionPaid ? 'Paga em ' + fdate(p.paidAt) : 'Pendente'}</td></tr>`).join('')}<tr class="tot"><td colspan="4">Total</td><td class="r">${money(tot)}</td><td></td></tr></tbody></table>
+      <div class="g" style="margin-top:20px"><div class="box"><b>Já pago</b>${money(paid)}</div><div class="box"><b>A pagar</b>${money(tot - paid)}</div></div>`);
+  } });
 }
 const genPw = () => { const c = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'; let r = ''; const a = crypto.getRandomValues(new Uint8Array(9)); a.forEach((n) => { r += c[n % c.length]; }); return r + '*'; };
 function empDialog(e) {
@@ -707,12 +828,12 @@ function vComm() {
   const c = (p) => commission(num(p.value));
   const tot = mine.reduce((s, p) => s + (c(p) || 0), 0), month = mine.filter((p) => mkey(closedOf(p)) === mk);
   const monthV = month.reduce((s, p) => s + (c(p) || 0), 0), paid = mine.filter((p) => p.commissionPaid).reduce((s, p) => s + (c(p) || 0), 0);
-  return `<div class="grid g4" style="margin-bottom:14px">
+  return `${isIntern() ? '' : `<div class="tools" style="justify-content:flex-end"><button class="btn gh" data-act="report">${ic('doc')}Relatório do mês</button></div>`}<div class="grid g4" style="margin-bottom:14px">
     <div class="card kpi"><div class="lbl">Comissão do mês</div><div class="big pos">${money(monthV)}</div><div class="sub">${month.length} negócio${month.length === 1 ? '' : 's'}</div></div>
     <div class="card kpi"><div class="lbl">Acumulada</div><div class="big">${money(tot)}</div><div class="sub">${mine.length} negócio${mine.length === 1 ? '' : 's'}</div></div>
     <div class="card kpi"><div class="lbl">Já paga</div><div class="big">${money(paid)}</div><div class="sub">${mine.filter((p) => p.commissionPaid).length} pagamento${mine.filter((p) => p.commissionPaid).length === 1 ? '' : 's'}</div></div>
     <div class="card kpi"><div class="lbl">A pagar</div><div class="big warn">${money(tot - paid)}</div><div class="sub">pendente</div></div></div>
-  <div class="tw">${mine.length ? `<table><thead><tr><th>Cliente</th>${isIntern() ? '' : '<th>Responsável</th>'}<th>Fechado em</th><th class="${isIntern() ? '' : ''}">Valor</th><th>Comissão</th><th>Pagamento</th></tr></thead><tbody>${mine.map((p) => { const cv = c(p); return `<tr><td class="c-main"><div class="nm">${esc(p.name)}</div><div class="ct">${esc(p.service || '')}</div></td>${isIntern() ? '' : `<td data-l="Resp.">${esc(who(p.responsavel))}</td>`}<td class="nc" data-l="Fechado">${fdate(closedOf(p))}</td><td class="val" data-l="Valor">${money(p.value)}</td><td class="val ${cv ? 'pos' : ''}" data-l="Comissão">${cv ? money(cv) : p.value < 300 ? 'Sem comissão' : 'A combinar'}</td><td>${isIntern() ? (p.commissionPaid ? '<span class="st fechado">Paga</span>' : '<span class="st prospectando">Pendente</span>') : `<label class="ck"><input type="checkbox" data-act="paid" data-id="${esc(p.id)}" ${p.commissionPaid ? 'checked' : ''}><span>${p.commissionPaid ? 'Paga' : 'Marcar como paga'}</span></label>`}</td></tr>`; }).join('')}</tbody></table>` : `<div class="empty">${ic('coin')}<p>Nenhum negócio fechado por estagiário ainda.</p></div>`}</div>
+  <div class="tw">${mine.length ? `<table><thead><tr><th>Cliente</th>${isIntern() ? '' : '<th>Responsável</th>'}<th>Fechado em</th><th class="${isIntern() ? '' : ''}">Valor</th><th>Comissão</th><th>Pagamento</th></tr></thead><tbody>${mine.map((p) => { const cv = c(p); return `<tr><td class="c-main"><div class="nm">${esc(p.name)}</div><div class="ct">${esc(p.service || '')}</div></td>${isIntern() ? '' : `<td data-l="Resp.">${esc(who(p.responsavel))}</td>`}<td class="nc" data-l="Fechado">${fdate(closedOf(p))}</td><td class="val" data-l="Valor">${money(p.value)}</td><td class="val ${cv ? 'pos' : ''}" data-l="Comissão">${cv ? money(cv) : p.value < 300 ? 'Sem comissão' : 'A combinar'}</td><td data-l="Pagamento">${p.commissionPaid ? `<span class="st fechado">Paga${p.paidAt ? ' em ' + fdate(p.paidAt) : ''}</span> <button class="btn sm gh" data-act="receipt" data-id="${esc(p.id)}">Recibo</button>${isIntern() ? '' : ` <button class="btn sm gh" data-act="unpay" data-id="${esc(p.id)}">Desfazer</button>`}` : (isIntern() ? '<span class="st prospectando">Pendente</span>' : (cv ? `<button class="btn sm pri" data-act="pay" data-id="${esc(p.id)}">Pagar</button>` : '<span class="st prospectando">Sem valor</span>'))}</td></tr>`; }).join('')}</tbody></table>` : `<div class="empty">${ic('coin')}<p>Nenhum negócio fechado por estagiário ainda.</p></div>`}</div>
   <h2 class="sec">Tabela de comissão por site fechado</h2>
   <div class="tw"><table><thead><tr><th>Faixa do site</th><th>Comissão</th></tr></thead><tbody>
     <tr><td data-l="Faixa">R$ 300 a R$ 599</td><td class="val">R$ 50 fixo</td></tr><tr><td data-l="Faixa">R$ 600 a R$ 999</td><td class="val">10%</td></tr><tr><td data-l="Faixa">R$ 1.000 a R$ 1.499</td><td class="val">15%</td></tr><tr><td data-l="Faixa">R$ 1.500 ou mais</td><td class="val">A combinar</td></tr></tbody></table></div>`;
@@ -777,7 +898,7 @@ function openProspect(id) {
   const ov = dialog({ title: p ? 'Editar prospecto' : 'Novo prospecto', ok: 'Salvar', small: false, body: `
     <div class="f"><label for="fName">Nome ou empresa</label><input id="fName" required value="${esc(v('name'))}" placeholder="Ex: Pet Café" maxlength="120"></div>
     <div class="f"><label for="fContact">Contato (WhatsApp ou e-mail)</label><input id="fContact" value="${esc(v('contact'))}" placeholder="(16) 99999-9999" maxlength="120" inputmode="tel"></div>
-    ${p && waLink(p.contact) ? `<div class="quick"><a class="btn sm wa" data-wa="${esc(p.id)}" href="${waLink(p.contact)}" target="_blank" rel="noopener">${ic('wa')}Abrir WhatsApp</a><button type="button" class="btn sm gh" data-contacted>${ic('check')}Registrar contato</button></div>` : ''}
+    ${p && waLink(p.contact) ? `<div class="quick"><a class="btn sm wa" data-wa="${esc(p.id)}" href="${waLink(p.contact)}" target="_blank" rel="noopener">${ic('wa')}Abrir WhatsApp</a><button type="button" class="btn sm gh" data-contacted>${ic('check')}Registrar contato</button></div><div class="f"><label for="fTpl">Mensagem pronta para o WhatsApp</label><select id="fTpl"><option value="">Escolher modelo</option>${(S.tpl || []).map((m) => `<option value="${esc(m.id)}">${esc(m.title)} (${esc(m.segment)})</option>`).join('')}</select></div>` : ''}${p ? `<div class="quick"><button type="button" class="btn sm gh" data-proposal>${ic('doc')}Gerar proposta em PDF</button></div>` : ''}
     <div class="f2"><div class="f"><label for="fService">Serviço</label><input id="fService" list="svcs" value="${esc(v('service'))}" placeholder="Ex: Landing Page" maxlength="120"><datalist id="svcs"><option>Landing Page</option><option>Site Institucional</option><option>Cardápio Digital</option><option>Manutenção de Site</option><option>Design Gráfico</option><option>Cartão ou Convite</option></datalist></div>
     <div class="f"><label for="fValue">Valor (R$)</label><input id="fValue" type="number" min="0" step="0.01" inputmode="decimal" value="${showMoney ? esc(v('value', '')) : ''}" ${showMoney ? '' : 'disabled'} placeholder="0,00"><div class="hint" id="fHint"></div></div></div>
     <div class="f"><label class="ck"><input type="checkbox" id="fRec" ${v('recurring') ? 'checked' : ''}><span>Valor <strong>mensal recorrente</strong> (não avulso)</span></label></div>
@@ -814,6 +935,10 @@ function openProspect(id) {
   $('#fValue', ov).addEventListener('input', hint); hint();
   $('#fStatus', ov).addEventListener('change', (e) => { $('#fLostW', ov).hidden = e.target.value !== 'perdido'; });
   $('#fQuick', ov).addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if (b) $('#fNext', ov).value = addDays(+b.dataset.d); });
+  const tp = $('#fTpl', ov);
+  if (tp) tp.onchange = () => { const m = (S.tpl || []).find((x) => x.id === tp.value); $('a[data-wa]', ov).href = waLink(p.contact, m ? fillTpl(m.text, p) : ''); };
+  const pb = $('[data-proposal]', ov);
+  if (pb) pb.onclick = () => { ov._close(false); proposal(p); };
   const cb = $('[data-contacted]', ov);
   if (cb) cb.onclick = () => { ov._close(false); contacted(p.id); };
 }
@@ -884,6 +1009,17 @@ document.addEventListener('click', (e) => {
     case 'emp-toggle': { const e = (S.team || []).find((x) => x.id === id); if (!e) break;
       if (!e.active) { saveEmp({ id, active: true }, 'Funcionário reativado.'); break; }
       dialog({ title: 'Desativar funcionário', body: `<p style="color:var(--dim)"><b style="color:var(--text)">${esc(e.name)}</b> deixa de conseguir entrar, e os leads em aberto dele ficam livres para os outros.</p>`, ok: 'Desativar', danger: true, onOk: () => { saveEmp({ id, active: false }, 'Funcionário desativado.'); } }); break; }
+    case 'pay': payDialog(id); break;
+    case 'receipt': receipt(id); break;
+    case 'unpay': { const p = S.prospects.find((x) => x.id === id); if (p) { p.commissionPaid = false; p.paidAt = ''; p.paidNote = ''; touch(p, 'paid', 'Pagamento desmarcado'); save(); render(); } break; }
+    case 'report': reportDialog(); break;
+    case 'tpl-new': tplDialog(null); break;
+    case 'tpl-edit': tplDialog(S.tpl.find((x) => x.id === id)); break;
+    case 'tpl-del': saveTpl(S.tpl.filter((x) => x.id !== id), 'Modelo excluído.'); break;
+    case 'tpl-copy': { const m = S.tpl.find((x) => x.id === id); if (m) navigator.clipboard.writeText(fillTpl(m.text, null)).then(() => toast('Texto copiado.', { type: 'ok' }), () => toast('Não consegui copiar.', { type: 'err' })); break; }
+    case 'bak-new': api('POST', {}, '?action=backups').then(() => { toast('Backup feito.', { type: 'ok' }); loadTeam(); }).catch((e) => toast(e.message, { type: 'err' })); break;
+    case 'bak-dl': api('GET', null, '?action=backups&id=' + encodeURIComponent(id)).then((d) => download(`backup_painel_${ymd(new Date(d.at))}.json`, JSON.stringify(d, null, 1), 'application/json')).catch((e) => toast(e.message, { type: 'err' })); break;
+    case 'bak-restore': dialog({ title: 'Restaurar backup', body: '<p style="color:var(--dim)">Os leads voltam ao estado desse backup. Antes disso, o painel guarda um backup do estado atual.</p>', ok: 'Restaurar', danger: true, onOk: () => { api('POST', { restore: id }, '?action=backups').then(async () => { toast('Backup restaurado.', { type: 'ok' }); await load(true); loadTeam(); }).catch((e) => toast(e.message, { type: 'err' })); } }); break;
     case 'logout': logout(); break;
     case 'filter': S.filter = t.dataset.k; saveUI(); render(); break;
     case 'resp': S.resp = t.dataset.k; saveUI(); render(); break;
@@ -899,7 +1035,6 @@ document.addEventListener('click', (e) => {
 document.addEventListener('change', (e) => {
   const t = e.target.closest('[data-act]'); if (!t) return;
   if (t.dataset.act === 'status') setStatus(t.dataset.id, t.value);
-  if (t.dataset.act === 'paid' && !isIntern()) { const p = S.prospects.find((x) => x.id === t.dataset.id); if (p) { p.commissionPaid = t.checked; touch(p, 'paid', t.checked ? 'Comissão paga' : 'Pagamento desmarcado'); save(); render(); } }
 });
 let qT;
 document.addEventListener('input', (e) => { if (e.target.id === 'q') { S.q = e.target.value; clearTimeout(qT); qT = setTimeout(render, 120); } });
