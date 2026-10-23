@@ -219,7 +219,10 @@ export default async function handler(req, res) {
           if (old && claimOf(old) && claimOf(old) !== role) { conflicts.push(p.id); continue; } // outra pessoa já assumiu
           p.claimedBy = role; // quem mexe primeiro assume o prospecto
           p.commissionPaid = old ? old.commissionPaid : false;
-          if (old && old.responsavel !== role) { // em prospecto de outro: só dados de trabalho
+          if (old && old.responsavel === 'dono' && !claimOf(old)) {
+            p.responsavel = role; // lead livre do dono: quem assume passa a ser o responsável e recebe a comissão
+            p.value = old.value || 0; p.recurring = old.recurring;
+          } else if (old && old.responsavel !== role) { // em prospecto de outro: só dados de trabalho
             p.value = old.value; p.recurring = old.recurring; p.responsavel = old.responsavel;
           }
         }

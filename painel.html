@@ -298,7 +298,7 @@ const who = (id) => id === 'dono' || !id ? 'Dono' : id === '*' ? 'Outra pessoa' 
 const staff = () => Object.entries(S.users || {}).filter(([k, u]) => k !== 'dono' && u.active).map(([k, u]) => [k, u.name]);
 const claim = (p) => p.claimedBy || (p.responsavel && p.responsavel !== 'dono' ? p.responsavel : '');
 const locked = (p) => isIntern() && claim(p) && claim(p) !== S.role;
-function take(p) { if (isIntern() && !claim(p)) { p.claimedBy = S.role; touch(p, 'claim', 'Assumido por ' + who(S.role)); } }
+function take(p) { if (isIntern() && !claim(p)) { p.claimedBy = S.role; if (p.responsavel === 'dono') p.responsavel = S.role; touch(p, 'claim', 'Assumido por ' + who(S.role)); } }
 const badge = (p) => claim(p) ? `<span class="tag">${claim(p) === S.role ? 'Seu' : isIntern() ? 'Em atendimento' : 'Em atendimento: ' + esc(who(claim(p)))}</span>` : (isIntern() ? '<span class="tag">Livre</span>' : '');
 const $ = (s, r = document) => r.querySelector(s);
 const ic = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-${n}"/></svg>`;
