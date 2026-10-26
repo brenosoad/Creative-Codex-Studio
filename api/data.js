@@ -172,7 +172,7 @@ function normStatus(cur, migrate) {
   let n = 0;
   for (const p of cur.prospects) {
     const c = claimOf(p);
-    if (!c && p.status === 'prospectando' && migrate) { p.status = 'novo'; n++; } // migração única
+    if (!c && OPEN.includes(p.status) && p.status !== 'novo' && migrate) { p.status = 'novo'; n++; } // migração única
     else if (c && p.status === 'novo') { p.status = 'prospectando'; n++; }
   }
   return n;
@@ -274,9 +274,9 @@ export default async function handler(req, res) {
 
     const logs = [];
     try {
-      const mig = !(await kv.get('painel_novo_v1'));
+      const mig = !(await kv.get('painel_novo_v2'));
       if (autoRelease(current, logs) + normStatus(current, mig)) { await kv.set(KEY, current); await logPush(logs.splice(0)); }
-      if (mig) await kv.set('painel_novo_v1', 1);
+      if (mig) await kv.set('painel_novo_v2', 1);
       const lastBak = Number(await kv.get(BAK_AT)) || 0;
       if (current.prospects.length && Date.now() - lastBak > BAK_EVERY) await snapshot(current, emps, 'auto');
     } catch (e) { console.error('manutenção', e); }
