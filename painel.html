@@ -1332,7 +1332,7 @@ document.addEventListener('click', (e) => {
       if (!e.active) { saveEmp({ id, active: true }, 'Funcionário reativado.'); break; }
       dialog({ title: 'Desativar funcionário', body: `<p style="color:var(--dim)"><b style="color:var(--text)">${esc(e.name)}</b> deixa de conseguir entrar, e os leads em aberto dele ficam livres para os outros.</p>`, ok: 'Desativar', danger: true, onOk: () => { saveEmp({ id, active: false }, 'Funcionário desativado.'); } }); break; }
     case 'emp-release': { const e = (S.team || []).find((x) => x.id === id); if (!e) break;
-      dialog({ title: 'Liberar leads', body: `<p style="color:var(--dim)">Os ${e.leads} leads em aberto de <b style="color:var(--text)">${esc(e.name)}</b> voltam para a fila. Vendas fechadas continuam com ele.</p>`, ok: 'Liberar', danger: true, onOk: () => { saveEmp({ id, release: true }, 'Leads liberados.'); } }); break; }
+      dialog({ title: 'Liberar leads', body: `<p style="color:var(--dim)">Os leads de <b style="color:var(--text)">${esc(e.name)}</b> sem contato registrado, anotação ou próximo contato voltam para a fila como Novo. Os que ele trabalhou e as vendas fechadas continuam com ele.</p>`, ok: 'Liberar', danger: true, onOk: () => { saveEmp({ id, release: true }, 'Leads liberados.'); } }); break; }
     case 'ig-new': igDialog(null); break;
     case 'ig-connect': igConnect(); break;
     case 'ig-sync': api('GET', null, '?action=insta&sync=force').then((r) => { S.insta = r.insta; S.ig = { connected: r.connected, username: r.username, error: r.igError }; toast(r.igError ? 'Falhou: ' + r.igError : 'Números atualizados.', { type: r.igError ? 'err' : 'ok' }); render(); }).catch((e) => toast(e.message, { type: 'err' })); break;
