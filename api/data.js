@@ -288,10 +288,10 @@ export default async function handler(req, res) {
 
     const logs = [];
     try {
-      const mig = !(await kv.get('painel_novo_v2')), mig3 = !(await kv.get('painel_novo_v4'));
+      const mig = !(await kv.get('painel_novo_v2')), mig3 = !(await kv.get('painel_novo_v5'));
       if (autoRelease(current, logs) + normStatus(current, mig) + (mig3 ? releaseUntouched(current, logs) : 0)) { await kv.set(KEY, current); await logPush(logs.splice(0)); }
       if (mig) await kv.set('painel_novo_v2', 1);
-      if (mig3) await kv.set('painel_novo_v4', 1);
+      if (mig3) await kv.set('painel_novo_v5', 1);
       const lastBak = Number(await kv.get(BAK_AT)) || 0;
       if (current.prospects.length && Date.now() - lastBak > BAK_EVERY) await snapshot(current, emps, 'auto');
     } catch (e) { console.error('manutenção', e); }
@@ -508,6 +508,7 @@ export default async function handler(req, res) {
         if (!p) continue;
         const old = byId.get(p.id);
         if (role !== 'dono') {
+          if (old && !(p.updatedAt > old.updatedAt)) continue; // funcionário reenviou a lista sem mexer neste lead: não assume
           if (old && ((claimOf(old) && claimOf(old) !== role) || (!claimOf(old) && old.status !== 'novo'))) { conflicts.push(p.id); continue; } // outra pessoa já assumiu, ou o dono reservou
           p.claimedBy = role; // quem mexe primeiro assume o prospecto
           p.commissionPaid = old ? old.commissionPaid : false;
