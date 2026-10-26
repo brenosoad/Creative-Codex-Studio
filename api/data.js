@@ -125,7 +125,7 @@ function view(data, role, emps) {
   users[role] = { name: me ? me.name : '', active: true };
   const prospects = (data.prospects || []).map((p) =>
     p.responsavel === role && claimOf(p) === role ? p
-      : claimOf(p) && claimOf(p) !== role ? { ...p, value: null, contact: '', notes: '', history: [], nextContact: '', claimedBy: '*', responsavel: '*' }
+      : (claimOf(p) && claimOf(p) !== role) || (!claimOf(p) && p.status !== 'novo') ? { ...p, value: null, contact: '', notes: '', history: [], nextContact: '', claimedBy: '*', responsavel: '*' }
       : { ...p, value: null, responsavel: p.responsavel === 'dono' ? 'dono' : '*' }
   );
   return { prospects, goal: null, goals: null, users };
@@ -168,11 +168,11 @@ async function logPush(entries) {
 
 // lead assumido e parado por 7 dias volta para a fila livre
 // lead livre fica como 'novo'; lead com dono deixa de ser 'novo'
-function normStatus(cur) {
+function normStatus(cur, migrate) {
   let n = 0;
   for (const p of cur.prospects) {
     const c = claimOf(p);
-    if (!c && p.status === 'prospectando') { p.status = 'novo'; n++; }
+    if (!c && p.status === 'prospectando' && migrate) { p.status = 'novo'; n++; } // migração única
     else if (c && p.status === 'novo') { p.status = 'prospectando'; n++; }
   }
   return n;
@@ -185,7 +185,7 @@ function autoRelease(cur, entries) {
     const c = claimOf(p);
     if (!c || !OPEN.includes(p.status) || now - (p.updatedAt || 0) < RELEASE_MS || (p.nextContact && p.nextContact >= t)) continue;
     entries.push({ at: now, by: 'sistema', lead: p.id, name: p.name, type: 'release', text: 'Liberado por falta de atividade (7 dias)', who: c });
-    p.claimedBy = ''; if (p.responsavel === c) p.responsavel = 'dono'; p.updatedAt = now; n++;
+    p.claimedBy = ''; if (p.responsavel === c) p.responsavel = 'dono'; p.status = 'novo'; p.updatedAt = now; n++;
   }
   return n;
 }
@@ -274,7 +274,9 @@ export default async function handler(req, res) {
 
     const logs = [];
     try {
-      if (autoRelease(current, logs) + normStatus(current)) { await kv.set(KEY, current); await logPush(logs.splice(0)); }
+      const mig = !(await kv.get('painel_novo_v1'));
+      if (autoRelease(current, logs) + normStatus(current, mig)) { await kv.set(KEY, current); await logPush(logs.splice(0)); }
+      if (mig) await kv.set('painel_novo_v1', 1);
       const lastBak = Number(await kv.get(BAK_AT)) || 0;
       if (current.prospects.length && Date.now() - lastBak > BAK_EVERY) await snapshot(current, emps, 'auto');
     } catch (e) { console.error('manutenção', e); }
@@ -458,7 +460,7 @@ export default async function handler(req, res) {
             e.active = b.active;
             if (!e.active) { // libera os leads em aberto dele para outras pessoas
               for (const p of current.prospects) {
-                if (claimOf(p) === e.id && p.status !== 'fechado' && p.status !== 'perdido') { p.claimedBy = ''; if (p.responsavel === e.id) p.responsavel = 'dono'; p.updatedAt = Date.now(); }
+                if (claimOf(p) === e.id && p.status !== 'fechado' && p.status !== 'perdido') { p.claimedBy = ''; if (p.responsavel === e.id) p.responsavel = 'dono'; p.status = 'novo'; p.updatedAt = Date.now(); }
               }
               await kv.set(KEY, current);
             }
@@ -491,7 +493,7 @@ export default async function handler(req, res) {
         if (!p) continue;
         const old = byId.get(p.id);
         if (role !== 'dono') {
-          if (old && claimOf(old) && claimOf(old) !== role) { conflicts.push(p.id); continue; } // outra pessoa já assumiu
+          if (old && ((claimOf(old) && claimOf(old) !== role) || (!claimOf(old) && old.status !== 'novo'))) { conflicts.push(p.id); continue; } // outra pessoa já assumiu, ou o dono reservou
           p.claimedBy = role; // quem mexe primeiro assume o prospecto
           p.commissionPaid = old ? old.commissionPaid : false;
           p.paidAt = old ? old.paidAt || '' : ''; p.paidNote = old ? old.paidNote || '' : '';
@@ -503,7 +505,7 @@ export default async function handler(req, res) {
           }
         }
         if (role === 'dono' && old && !Object.prototype.hasOwnProperty.call(raw, 'claimedBy')) p.claimedBy = old.claimedBy || '';
-        if (p.status === 'novo' && claimOf(p)) p.status = 'prospectando'; else if (p.status === 'prospectando' && !claimOf(p)) p.status = 'novo';
+        if (p.status === 'novo' && claimOf(p)) p.status = 'prospectando';
         if (old && old.updatedAt > p.updatedAt) continue; // versão mais nova já salva
         if (old && role !== 'dono' && old.value != null && p.value == null) p.value = old.value;
         if (!old) logs.push({ at: Date.now(), by: role, lead: p.id, name: p.name, type: 'new', text: 'Lead cadastrado' });
