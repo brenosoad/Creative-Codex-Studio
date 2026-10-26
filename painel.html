@@ -820,7 +820,7 @@ function vList() {
   ${(() => { const o = isIntern() ? [['todos', 'Todos os leads'], ['livres', 'Só livres'], ['meus', 'Só meus']] : [['todos', 'Todos os responsáveis'], ['dono', 'Do dono'], ...staff().map(([k, n]) => [k, 'De ' + n])]; return `<div class="tools" style="margin-bottom:12px"><select data-act="resp-sel" aria-label="Filtrar por responsável" style="width:auto;padding:.5rem .8rem;border-radius:10px;border:1px solid var(--line);background:var(--panel)">${o.map(([k, t]) => `<option value="${k}" ${S.resp === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`; })()}
   <div class="tw">${l.length ? `<table><thead><tr>${th('name', 'Cliente')}<th>Serviço</th><th class="money s ${S.sort === 'value' ? 'on' : ''}" data-act="sort" data-k="value">Valor${S.sort === 'value' ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th><th>Status</th>${th('date', 'Cadastro')}${th('next', 'Próximo contato')}<th></th></tr></thead>
   <tbody>${l.map((p) => { const n = nextInfo(p), wa = waLink(p.contact); return `<tr>
-    <td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}${isIntern() ? `<div class="ct">${badge(p)}</div>` : (isOpen(p) ? `<select class="asg" data-act="assign" data-id="${esc(p.id)}" aria-label="Designar ${esc(p.name)}"><option value="">Livre (sem responsável)</option>${staff().map(([k, n]) => `<option value="${esc(k)}" ${claim(p) === k ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select>` : (p.responsavel !== 'dono' ? `<div class="ct">${esc(who(p.responsavel))}</div>` : ''))}</td>
+    <td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}${isIntern() ? `<div class="ct">${badge(p)}</div>` : (isOpen(p) ? `<select class="asg" data-act="assign" data-id="${esc(p.id)}" aria-label="Designar ${esc(p.name)}"><option value="" ${!claim(p) && p.status === 'novo' ? 'selected' : ''}>Livre (sem responsável)</option><option value="dono" ${!claim(p) && p.status !== 'novo' ? 'selected' : ''}>Eu (Breno)</option>${staff().map(([k, n]) => `<option value="${esc(k)}" ${claim(p) === k ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select>` : (p.responsavel !== 'dono' ? `<div class="ct">${esc(who(p.responsavel))}</div>` : ''))}</td>
     <td data-l="Serviço">${esc(p.service || '-')}</td>
     <td class="val money" data-l="Valor">${p.value == null ? '' : money(p.value)}${p.recurring ? '<span class="tag">/mês</span>' : ''}</td>
     <td><select class="st ${stK(p)}" data-act="status" ${locked(p) ? 'disabled' : ''} data-id="${esc(p.id)}" aria-label="Status de ${esc(p.name)}">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
@@ -1383,11 +1383,11 @@ document.addEventListener('change', (e) => {
   if (t.dataset.act === 'status') setStatus(t.dataset.id, t.value);
   if (t.dataset.act === 'assign') {
     const p = S.prospects.find((x) => x.id === t.dataset.id); if (!p || isIntern()) return;
-    const v = t.value;
-    p.claimedBy = v; p.responsavel = v || 'dono';
+    const v = t.value, emp = v && v !== 'dono' ? v : '';
+    p.claimedBy = emp; p.responsavel = emp || 'dono';
     if (v && p.status === 'novo') p.status = 'prospectando'; else if (!v && p.status === 'prospectando') p.status = 'novo';
-    touch(p, 'claim', v ? 'Designado para ' + who(v) : 'Devolvido para a fila');
-    save(); render(); toast(v ? 'Designado para ' + who(v) + '.' : 'Devolvido para a fila.', { type: 'ok' });
+    touch(p, 'claim', v === 'dono' ? 'Reservado pelo dono' : v ? 'Designado para ' + who(v) : 'Devolvido para a fila');
+    save(); render(); toast(v === 'dono' ? 'Lead reservado para você.' : v ? 'Designado para ' + who(v) + '.' : 'Devolvido para a fila.', { type: 'ok' });
   }
   if (t.dataset.act === 'resp-sel') { S.resp = t.value; saveUI(); render(); }
 });
