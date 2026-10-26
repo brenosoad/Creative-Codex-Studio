@@ -142,7 +142,7 @@ select.st{padding-right:.7rem;cursor:pointer}
 .item.over{border-left:3px solid var(--red)}.item.today{border-left:3px solid var(--amber)}
 
 /* kanban */
-.kb{display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:14px;overflow-x:auto;padding-bottom:10px;align-items:start}
+.kb{display:grid;grid-template-columns:repeat(6,minmax(220px,1fr));gap:14px;overflow-x:auto;padding-bottom:10px;align-items:start}
 .kc{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;min-height:200px}
 .kc.over{border-color:var(--brand);background:var(--panel2)}
 .kc h4{display:flex;align-items:center;gap:8px;font-size:.85rem;padding:2px 4px 10px}
@@ -259,7 +259,7 @@ body.intern .money{display:none!important}
   td.c-main{grid-column:1/-1}
   td.c-act{grid-column:1/-1}
   .acts{justify-content:flex-start}
-  .kb{grid-template-columns:repeat(5,82vw);scroll-snap-type:x mandatory}
+  .kb{grid-template-columns:repeat(6,82vw);scroll-snap-type:x mandatory}
   .kc{scroll-snap-align:start}
   .fr{grid-template-columns:90px 1fr 30px}
   input,select,textarea{font-size:16px!important}
@@ -343,16 +343,16 @@ body.intern .money{display:none!important}
 /* ---------- estado ---------- */
 const API = '/api/data';
 const S = { token: null, role: null, users: {}, team: null, sub: { msgs: 'prop', team: 'staff', finance: 'resumo' }, tpl: null, cts: null, company: null, prices: null, insta: null, ig: null, log: [], baks: [], prospects: [], goal: 0, goals: {}, deleted: [], view: 'overview', filter: 'todos', resp: 'todos', q: '', sort: 'date', dir: 'desc' };
-const STATUS = { prospectando: 'Prospectando', semresposta: 'Sem resposta', negociando: 'Negociando', fechado: 'Fechado', perdido: 'Perdido' };
-const STCOL = { prospectando: '#A29FB8', semresposta: '#7dd3fc', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
+const STATUS = { novo: 'Novo', prospectando: 'Prospectando', semresposta: 'Sem resposta', negociando: 'Negociando', fechado: 'Fechado', perdido: 'Perdido' };
+const STCOL = { novo: '#8B7CFF', prospectando: '#A29FB8', semresposta: '#7dd3fc', negociando: '#fbbf24', fechado: '#34d399', perdido: '#f87171' };
 const who = (id) => id === 'dono' || !id ? 'Dono' : id === '*' ? 'Outra pessoa' : ((S.users[id] && S.users[id].name) || 'Funcionário');
 const staff = () => Object.entries(S.users || {}).filter(([k, u]) => k !== 'dono' && u.active).map(([k, u]) => [k, u.name]);
 const claim = (p) => p.claimedBy || (p.responsavel && p.responsavel !== 'dono' ? p.responsavel : '');
-const isNovo = (p) => p.status === 'prospectando' && !claim(p);
-const stK = (p) => isNovo(p) ? 'novo' : p.status;
-const stT = (p) => isNovo(p) ? 'Novo' : STATUS[p.status];
+const isNovo = (p) => p.status === 'novo';
+const stK = (p) => p.status;
+const stT = (p) => STATUS[p.status] || p.status;
 const locked = (p) => isIntern() && claim(p) && claim(p) !== S.role;
-function take(p) { if (isIntern() && !claim(p)) { p.claimedBy = S.role; if (p.responsavel === 'dono') p.responsavel = S.role; touch(p, 'claim', 'Assumido por ' + who(S.role)); } }
+function take(p) { if (isIntern() && !claim(p)) { if (p.status === 'novo') p.status = 'prospectando'; p.claimedBy = S.role; if (p.responsavel === 'dono') p.responsavel = S.role; touch(p, 'claim', 'Assumido por ' + who(S.role)); } }
 const badge = (p) => claim(p) ? `<span class="tag">${claim(p) === S.role ? 'Seu' : isIntern() ? 'Em atendimento' : 'Em atendimento: ' + esc(who(claim(p)))}</span>` : (isIntern() ? '<span class="tag">Livre</span>' : '');
 const $ = (s, r = document) => r.querySelector(s);
 const ic = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-${n}"/></svg>`;
@@ -391,7 +391,7 @@ function nextInfo(p) {
   if (diff === 1) return { t: 'Amanhã', c: '', d: 1 };
   return { t: fdate(p.nextContact), c: '', d: diff };
 }
-const isOpen = (p) => p.status === 'prospectando' || p.status === 'semresposta' || p.status === 'negociando';
+const isOpen = (p) => p.status === 'novo' || p.status === 'prospectando' || p.status === 'semresposta' || p.status === 'negociando';
 const dueList = () => S.prospects.filter((p) => !locked(p) && isOpen(p) && p.nextContact && p.nextContact <= today()).sort((a, b) => a.nextContact.localeCompare(b.nextContact));
 
 /* ---------- toast ---------- */
@@ -764,8 +764,6 @@ function bindDnD() {
 function filtered() {
   let l = S.prospects.slice();
   if (S.filter === 'todos') l = l.filter((p) => p.status !== 'perdido');
-  else if (S.filter === 'novo') l = l.filter(isNovo);
-  else if (S.filter === 'prospectando') l = l.filter((p) => p.status === 'prospectando' && claim(p));
   else l = l.filter((p) => p.status === S.filter);
   if (S.resp === 'livres') l = l.filter((p) => !claim(p));
   else if (S.resp === 'meus') l = l.filter((p) => claim(p) === S.role);
@@ -784,18 +782,18 @@ function filtered() {
   return l;
 }
 function vList() {
-  const l = filtered(), cnt = (k) => k === 'todos' ? S.prospects.filter((p) => p.status !== 'perdido').length : k === 'novo' ? S.prospects.filter(isNovo).length : k === 'prospectando' ? S.prospects.filter((p) => p.status === k && claim(p)).length : S.prospects.filter((p) => p.status === k).length;
+  const l = filtered(), cnt = (k) => k === 'todos' ? S.prospects.filter((p) => p.status !== 'perdido').length : S.prospects.filter((p) => p.status === k).length;
   const th = (k, t) => `<th class="s ${S.sort === k ? 'on' : ''}" data-act="sort" data-k="${k}">${t}${S.sort === k ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th>`;
   return `<div class="tools"><div class="search">${ic('search')}<input id="q" type="search" placeholder="Buscar lead ( / )" value="${esc(S.q)}" aria-label="Buscar"></div>
     ${!isIntern() ? `<button class="btn gh" data-act="export">${ic('dl')}CSV</button><button class="btn gh" data-act="backup">${ic('dl')}Backup</button><button class="btn gh" data-act="restore">${ic('ul')}Restaurar</button>` : `<button class="btn gh" data-act="export">${ic('dl')}CSV</button>`}</div>
-  <div class="chips" role="group" aria-label="Status">${['todos', 'novo', ...Object.keys(STATUS)].map((k) => `<button class="chip ${S.filter === k ? 'on' : ''}" data-act="filter" data-k="${k}">${k === 'todos' ? 'Todos' : k === 'novo' ? 'Novo' : STATUS[k]}<b>${cnt(k)}</b></button>`).join('')}</div>
+  <div class="chips" role="group" aria-label="Status">${['todos', ...Object.keys(STATUS)].map((k) => `<button class="chip ${S.filter === k ? 'on' : ''}" data-act="filter" data-k="${k}">${k === 'todos' ? 'Todos' : STATUS[k]}<b>${cnt(k)}</b></button>`).join('')}</div>
   ${(() => { const o = isIntern() ? [['todos', 'Todos os leads'], ['livres', 'Só livres'], ['meus', 'Só meus']] : [['todos', 'Todos os responsáveis'], ['dono', 'Do dono'], ...staff().map(([k, n]) => [k, 'De ' + n])]; return `<div class="tools" style="margin-bottom:12px"><select data-act="resp-sel" aria-label="Filtrar por responsável" style="width:auto;padding:.5rem .8rem;border-radius:10px;border:1px solid var(--line);background:var(--panel)">${o.map(([k, t]) => `<option value="${k}" ${S.resp === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`; })()}
   <div class="tw">${l.length ? `<table><thead><tr>${th('name', 'Cliente')}<th>Serviço</th><th class="money s ${S.sort === 'value' ? 'on' : ''}" data-act="sort" data-k="value">Valor${S.sort === 'value' ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th><th>Status</th>${th('date', 'Cadastro')}${th('next', 'Próximo contato')}<th></th></tr></thead>
   <tbody>${l.map((p) => { const n = nextInfo(p), wa = waLink(p.contact); return `<tr>
     <td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}${!isIntern() && p.responsavel !== 'dono' ? `<div class="ct">${esc(who(p.responsavel))}</div>` : ''}${isIntern() ? `<div class="ct">${badge(p)}</div>` : (claim(p) ? `<div class="ct">${badge(p)}</div>` : '')}</td>
     <td data-l="Serviço">${esc(p.service || '-')}</td>
     <td class="val money" data-l="Valor">${p.value == null ? '' : money(p.value)}${p.recurring ? '<span class="tag">/mês</span>' : ''}</td>
-    <td><select class="st ${stK(p)}" data-act="status" ${locked(p) ? 'disabled' : ''} data-id="${esc(p.id)}" aria-label="Status de ${esc(p.name)}">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${k === 'prospectando' && isNovo(p) ? 'Novo' : v}</option>`).join('')}</select></td>
+    <td><select class="st ${stK(p)}" data-act="status" ${locked(p) ? 'disabled' : ''} data-id="${esc(p.id)}" aria-label="Status de ${esc(p.name)}">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
     <td class="nc" data-l="Cadastro">${fdate(p.date)}</td>
     <td data-l="Próximo"><span class="nc ${isOpen(p) ? n.c : ''}">${isOpen(p) ? n.t : '-'}</span></td>
     <td class="c-act"><div class="acts">${locked(p) ? '' : `${wa ? `<a class="ib" data-wa="${esc(p.id)}" href="${wa}" target="_blank" rel="noopener" aria-label="WhatsApp">${ic('wa')}</a>` : ''}<button class="ib" data-act="edit" data-id="${esc(p.id)}" aria-label="Editar">${ic('edit')}</button><button class="ib del" data-act="del" data-id="${esc(p.id)}" aria-label="Excluir">${ic('trash')}</button>`}</div></td></tr>`; }).join('')}</tbody></table>`
@@ -1198,7 +1196,7 @@ function openProspect(id) {
     <div class="f2"><div class="f"><label for="fService">Serviço</label><input id="fService" list="svcs" value="${esc(v('service'))}" placeholder="Ex: Landing Page" maxlength="120"><datalist id="svcs"><option>Landing Page</option><option>Site Institucional</option><option>Cardápio Digital</option><option>Manutenção de Site</option><option>Design Gráfico</option><option>Cartão ou Convite</option></datalist></div>
     <div class="f"><label for="fValue">Valor (R$)</label><input id="fValue" type="number" min="0" step="0.01" inputmode="decimal" value="${showMoney ? esc(v('value', '')) : ''}" ${showMoney ? '' : 'disabled'} placeholder="0,00"><div class="hint" id="fHint"></div></div></div>
     <div class="f"><label class="ck"><input type="checkbox" id="fRec" ${v('recurring') ? 'checked' : ''}><span>Valor <strong>mensal recorrente</strong> (não avulso)</span></label></div>
-    <div class="f2"><div class="f"><label for="fStatus">Status</label><select id="fStatus">${Object.entries(STATUS).map(([k, t]) => `<option value="${k}" ${v('status', 'prospectando') === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+    <div class="f2"><div class="f"><label for="fStatus">Status</label><select id="fStatus">${Object.entries(STATUS).map(([k, t]) => `<option value="${k}" ${v('status', isIntern() ? 'prospectando' : 'novo') === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
     <div class="f"><label for="fNext">Próximo contato</label><input id="fNext" type="date" value="${esc(v('nextContact'))}"></div></div>
     <div class="quick" id="fQuick"><button type="button" class="btn sm gh" data-d="1">Amanhã</button><button type="button" class="btn sm gh" data-d="3">+3 dias</button><button type="button" class="btn sm gh" data-d="7">+7 dias</button></div>
     <div class="f" id="fLostW" ${v('status') === 'perdido' ? '' : 'hidden'}><label for="fLost">Motivo da perda</label><input id="fLost" value="${esc(v('lostReason'))}" maxlength="200"></div>
@@ -1210,7 +1208,7 @@ function openProspect(id) {
       const val = $('#fValue', d).disabled ? null : (parseFloat($('#fValue', d).value) || 0);
       const status = $('#fStatus', d).value;
       let item = p;
-      if (!item) { item = { id: uid(), date: new Date().toISOString(), status: 'prospectando', responsavel: isIntern() ? S.role : 'dono', claimedBy: isIntern() ? S.role : '', history: [], closedAt: null }; S.prospects.push(item); touch(item, 'new', 'Cadastrado'); }
+      if (!item) { item = { id: uid(), date: new Date().toISOString(), status: isIntern() ? 'prospectando' : 'novo', responsavel: isIntern() ? S.role : 'dono', claimedBy: isIntern() ? S.role : '', history: [], closedAt: null }; S.prospects.push(item); touch(item, 'new', 'Cadastrado'); }
       take(item);
       if (!isIntern()) item.claimedBy = $('#fClaim', d).value;
       const prev = item.status;
@@ -1243,7 +1241,7 @@ function contacted(id) {
   if (locked(p)) { toast('Outra pessoa já está atendendo este prospecto.', { type: 'err' }); return; }
   dialog({ title: 'Registrar contato', body: `<div class="f"><label for="cNote">O que foi combinado? (opcional)</label><input id="cNote" placeholder="Ex: enviou orçamento"></div><div class="f"><label for="cNext">Próximo contato</label><input id="cNext" type="date" value="${addDays(3)}"></div><div class="quick"><button type="button" class="btn sm gh" data-d="1">Amanhã</button><button type="button" class="btn sm gh" data-d="3">+3 dias</button><button type="button" class="btn sm gh" data-d="7">+7 dias</button></div>`, ok: 'Registrar', onOk: (d) => {
     take(p);
-    p.nextContact = $('#cNext', d).value; if (p.status === 'prospectando') p.status = 'negociando';
+    p.nextContact = $('#cNext', d).value; if (p.status === 'prospectando' || p.status === 'novo') p.status = 'negociando';
     touch(p, 'contact', 'Contato feito' + ($('#cNote', d).value.trim() ? ': ' + $('#cNote', d).value.trim() : ''));
     save(); render(); toast('Contato registrado.', { type: 'ok' });
   } }).addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if (b) $('#cNext').value = addDays(+b.dataset.d); });

@@ -81,7 +81,7 @@ function readToken(req, secret, emps) {
   } catch { return null; }
 }
 
-const STATUS = ['prospectando', 'semresposta', 'negociando', 'fechado', 'perdido'];
+const STATUS = ['novo', 'prospectando', 'semresposta', 'negociando', 'fechado', 'perdido'];
 // Quem assumiu o contato com o prospecto (só uma pessoa por vez). Prospectos antigos de estagiário/Diogo contam como assumidos por quem os criou.
 const claimOf = (p) => (p && (p.claimedBy || (p.responsavel && p.responsavel !== 'dono' ? p.responsavel : ''))) || '';
 const str = (v, n) => String(v ?? '').slice(0, n);
@@ -141,7 +141,7 @@ async function loginLimit(req) {
 
 const TPL_KEY = 'painel_modelos', LOG_KEY = 'painel_log', BAK_KEY = 'painel_backups', BAK_AT = 'painel_backup_at';
 const RELEASE_MS = 7 * 86400000, BAK_EVERY = 86400000, BAK_KEEP = 14;
-const OPEN = ['prospectando', 'semresposta', 'negociando'];
+const OPEN = ['novo', 'prospectando', 'semresposta', 'negociando'];
 
 const MODELOS = [
   ['Primeiro contato', 'Geral', 'Oi, {nome}! Tudo bem? Aqui é {meu_nome}, da Creative Codex, de São Carlos, SP. A gente cria sites e artes para negócios como o seu. Posso te mandar uma ideia rápida de como ficaria o seu?'],
@@ -160,6 +160,17 @@ async function logPush(entries) {
 }
 
 // lead assumido e parado por 7 dias volta para a fila livre
+// lead livre fica como 'novo'; lead com dono deixa de ser 'novo'
+function normStatus(cur) {
+  let n = 0;
+  for (const p of cur.prospects) {
+    const c = claimOf(p);
+    if (!c && p.status === 'prospectando') { p.status = 'novo'; n++; }
+    else if (c && p.status === 'novo') { p.status = 'prospectando'; n++; }
+  }
+  return n;
+}
+
 function autoRelease(cur, entries) {
   const now = Date.now(), t = new Date().toISOString().slice(0, 10);
   let n = 0;
@@ -256,7 +267,7 @@ export default async function handler(req, res) {
 
     const logs = [];
     try {
-      if (autoRelease(current, logs)) { await kv.set(KEY, current); await logPush(logs.splice(0)); }
+      if (autoRelease(current, logs) + normStatus(current)) { await kv.set(KEY, current); await logPush(logs.splice(0)); }
       const lastBak = Number(await kv.get(BAK_AT)) || 0;
       if (current.prospects.length && Date.now() - lastBak > BAK_EVERY) await snapshot(current, emps, 'auto');
     } catch (e) { console.error('manutenção', e); }
@@ -468,6 +479,7 @@ export default async function handler(req, res) {
           }
         }
         if (role === 'dono' && old && !Object.prototype.hasOwnProperty.call(raw, 'claimedBy')) p.claimedBy = old.claimedBy || '';
+        if (p.status === 'novo' && claimOf(p)) p.status = 'prospectando'; else if (p.status === 'prospectando' && !claimOf(p)) p.status = 'novo';
         if (old && old.updatedAt > p.updatedAt) continue; // versão mais nova já salva
         if (old && role !== 'dono' && old.value != null && p.value == null) p.value = old.value;
         if (!old) logs.push({ at: Date.now(), by: role, lead: p.id, name: p.name, type: 'new', text: 'Lead cadastrado' });
