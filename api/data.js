@@ -178,6 +178,19 @@ function normStatus(cur, migrate) {
   return n;
 }
 
+// migração única: lead assumido sem nenhum contato registrado volta para a fila
+function releaseUntouched(cur, entries) {
+  let n = 0;
+  for (const p of cur.prospects) {
+    const c = claimOf(p);
+    if (!c || (p.status !== 'prospectando' && p.status !== 'novo') || p.nextContact) continue;
+    if ((p.history || []).some((h) => h.type !== 'claim' && h.type !== 'new')) continue;
+    entries.push({ at: Date.now(), by: 'sistema', lead: p.id, name: p.name, type: 'release', text: 'Liberado: assumido sem contato registrado', who: c });
+    p.claimedBy = ''; if (p.responsavel === c) p.responsavel = 'dono'; p.status = 'novo'; p.updatedAt = Date.now(); n++;
+  }
+  return n;
+}
+
 function autoRelease(cur, entries) {
   const now = Date.now(), t = new Date().toISOString().slice(0, 10);
   let n = 0;
@@ -274,9 +287,10 @@ export default async function handler(req, res) {
 
     const logs = [];
     try {
-      const mig = !(await kv.get('painel_novo_v2'));
-      if (autoRelease(current, logs) + normStatus(current, mig)) { await kv.set(KEY, current); await logPush(logs.splice(0)); }
+      const mig = !(await kv.get('painel_novo_v2')), mig3 = !(await kv.get('painel_novo_v3'));
+      if (autoRelease(current, logs) + normStatus(current, mig) + (mig3 ? releaseUntouched(current, logs) : 0)) { await kv.set(KEY, current); await logPush(logs.splice(0)); }
       if (mig) await kv.set('painel_novo_v2', 1);
+      if (mig3) await kv.set('painel_novo_v3', 1);
       const lastBak = Number(await kv.get(BAK_AT)) || 0;
       if (current.prospects.length && Date.now() - lastBak > BAK_EVERY) await snapshot(current, emps, 'auto');
     } catch (e) { console.error('manutenção', e); }
