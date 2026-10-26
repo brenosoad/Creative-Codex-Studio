@@ -288,6 +288,16 @@ export default async function handler(req, res) {
 
     const logs = [];
     try {
+      if (!(await kv.get('painel_novo_v6'))) { // pedido do dono: todos os prospectos em aberto voltam para Novo, sem responsável
+        await snapshot(current, emps, 'antes de zerar');
+        let z = 0;
+        for (const p of current.prospects) {
+          if (!OPEN.includes(p.status) || (p.status === 'novo' && !claimOf(p))) continue;
+          p.status = 'novo'; p.claimedBy = ''; p.responsavel = 'dono'; p.updatedAt = Date.now(); z++;
+        }
+        logs.push({ at: Date.now(), by: 'sistema', type: 'release', text: 'Todos os prospectos em aberto voltaram para Novo (' + z + ')' });
+        await kv.set(KEY, current); await kv.set('painel_novo_v6', 1);
+      }
       const mig = !(await kv.get('painel_novo_v2')), mig3 = !(await kv.get('painel_novo_v5'));
       if (autoRelease(current, logs) + normStatus(current, mig) + (mig3 ? releaseUntouched(current, logs) : 0)) { await kv.set(KEY, current); await logPush(logs.splice(0)); }
       if (mig) await kv.set('painel_novo_v2', 1);
