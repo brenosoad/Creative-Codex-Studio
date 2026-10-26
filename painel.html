@@ -122,6 +122,7 @@ tr.clk{cursor:pointer}
 .tag{display:inline-block;margin-left:6px;font:700 .65rem var(--mono);color:var(--green);background:rgba(52,211,153,.12);padding:.12rem .4rem;border-radius:6px}
 .st{display:inline-flex;align-items:center;gap:6px;padding:.28rem .7rem;border-radius:99px;font-size:.78rem;font-weight:700;border:0;appearance:none;-webkit-appearance:none}
 select.st{padding-right:.7rem;cursor:pointer}
+.st.novo{background:rgba(139,124,255,.18);color:#c4baff}
 .st.prospectando{background:rgba(162,159,184,.16);color:#d4d1e6}
 .st.semresposta{background:rgba(125,211,252,.14);color:#7dd3fc}
 .st.negociando{background:rgba(251,191,36,.15);color:var(--amber)}
@@ -347,6 +348,9 @@ const STCOL = { prospectando: '#A29FB8', semresposta: '#7dd3fc', negociando: '#f
 const who = (id) => id === 'dono' || !id ? 'Dono' : id === '*' ? 'Outra pessoa' : ((S.users[id] && S.users[id].name) || 'Funcionário');
 const staff = () => Object.entries(S.users || {}).filter(([k, u]) => k !== 'dono' && u.active).map(([k, u]) => [k, u.name]);
 const claim = (p) => p.claimedBy || (p.responsavel && p.responsavel !== 'dono' ? p.responsavel : '');
+const isNovo = (p) => p.status === 'prospectando' && !claim(p);
+const stK = (p) => isNovo(p) ? 'novo' : p.status;
+const stT = (p) => isNovo(p) ? 'Novo' : STATUS[p.status];
 const locked = (p) => isIntern() && claim(p) && claim(p) !== S.role;
 function take(p) { if (isIntern() && !claim(p)) { p.claimedBy = S.role; if (p.responsavel === 'dono') p.responsavel = S.role; touch(p, 'claim', 'Assumido por ' + who(S.role)); } }
 const badge = (p) => claim(p) ? `<span class="tag">${claim(p) === S.role ? 'Seu' : isIntern() ? 'Em atendimento' : 'Em atendimento: ' + esc(who(claim(p)))}</span>` : (isIntern() ? '<span class="tag">Livre</span>' : '');
@@ -686,7 +690,7 @@ function render() {
 }
 
 function rowSimple(p) {
-  return `<tr class="clk" data-act="edit" data-id="${esc(p.id)}"><td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}</td><td>${esc(p.service || '-')}</td><td class="val money">${p.value == null ? '' : money(p.value)}${p.recurring ? '<span class="tag">/mês</span>' : ''}</td><td><span class="st ${p.status}">${STATUS[p.status]}</span></td><td class="nc">${fdate(p.date)}</td></tr>`;
+  return `<tr class="clk" data-act="edit" data-id="${esc(p.id)}"><td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}</td><td>${esc(p.service || '-')}</td><td class="val money">${p.value == null ? '' : money(p.value)}${p.recurring ? '<span class="tag">/mês</span>' : ''}</td><td><span class="st ${stK(p)}">${stT(p)}</span></td><td class="nc">${fdate(p.date)}</td></tr>`;
 }
 
 function vOverview() {
@@ -727,7 +731,7 @@ function vToday() {
   const none = S.prospects.filter((p) => !locked(p) && isOpen(p) && !p.nextContact);
   const card = (p) => {
     const n = nextInfo(p), wa = waLink(p.contact, `Olá, ${p.name.split(' ')[0]}! Tudo bem?`);
-    return `<div class="item ${n.c}"><div class="info"><div class="nm">${esc(p.name)} <span class="st ${p.status}" style="margin-left:6px">${STATUS[p.status]}</span></div><div class="ct">${esc(p.service || 'Sem serviço')}${p.contact ? ' | ' + esc(p.contact) : ''}</div></div>
+    return `<div class="item ${n.c}"><div class="info"><div class="nm">${esc(p.name)} <span class="st ${stK(p)}" style="margin-left:6px">${stT(p)}</span></div><div class="ct">${esc(p.service || 'Sem serviço')}${p.contact ? ' | ' + esc(p.contact) : ''}</div></div>
       <span class="nc ${n.c}">${n.t}</span>
       <div class="acts">${wa ? `<a class="btn sm wa" data-wa="${esc(p.id)}" href="${wa}" target="_blank" rel="noopener">${ic('wa')}WhatsApp</a>` : ''}<button class="btn sm gh" data-act="contacted" data-id="${esc(p.id)}">${ic('check')}Contatei</button><button class="ib" data-act="edit" data-id="${esc(p.id)}" aria-label="Editar">${ic('edit')}</button></div></div>`;
   };
@@ -760,6 +764,8 @@ function bindDnD() {
 function filtered() {
   let l = S.prospects.slice();
   if (S.filter === 'todos') l = l.filter((p) => p.status !== 'perdido');
+  else if (S.filter === 'novo') l = l.filter(isNovo);
+  else if (S.filter === 'prospectando') l = l.filter((p) => p.status === 'prospectando' && claim(p));
   else l = l.filter((p) => p.status === S.filter);
   if (S.resp === 'livres') l = l.filter((p) => !claim(p));
   else if (S.resp === 'meus') l = l.filter((p) => claim(p) === S.role);
@@ -778,11 +784,11 @@ function filtered() {
   return l;
 }
 function vList() {
-  const l = filtered(), cnt = (k) => k === 'todos' ? S.prospects.filter((p) => p.status !== 'perdido').length : S.prospects.filter((p) => p.status === k).length;
+  const l = filtered(), cnt = (k) => k === 'todos' ? S.prospects.filter((p) => p.status !== 'perdido').length : k === 'novo' ? S.prospects.filter(isNovo).length : k === 'prospectando' ? S.prospects.filter((p) => p.status === k && claim(p)).length : S.prospects.filter((p) => p.status === k).length;
   const th = (k, t) => `<th class="s ${S.sort === k ? 'on' : ''}" data-act="sort" data-k="${k}">${t}${S.sort === k ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th>`;
   return `<div class="tools"><div class="search">${ic('search')}<input id="q" type="search" placeholder="Buscar lead ( / )" value="${esc(S.q)}" aria-label="Buscar"></div>
     ${!isIntern() ? `<button class="btn gh" data-act="export">${ic('dl')}CSV</button><button class="btn gh" data-act="backup">${ic('dl')}Backup</button><button class="btn gh" data-act="restore">${ic('ul')}Restaurar</button>` : `<button class="btn gh" data-act="export">${ic('dl')}CSV</button>`}</div>
-  <div class="chips" role="group" aria-label="Status">${['todos', ...Object.keys(STATUS)].map((k) => `<button class="chip ${S.filter === k ? 'on' : ''}" data-act="filter" data-k="${k}">${k === 'todos' ? 'Todos' : STATUS[k]}<b>${cnt(k)}</b></button>`).join('')}</div>
+  <div class="chips" role="group" aria-label="Status">${['todos', 'novo', ...Object.keys(STATUS)].map((k) => `<button class="chip ${S.filter === k ? 'on' : ''}" data-act="filter" data-k="${k}">${k === 'todos' ? 'Todos' : k === 'novo' ? 'Novo' : STATUS[k]}<b>${cnt(k)}</b></button>`).join('')}</div>
   ${(() => { const o = isIntern() ? [['todos', 'Todos os leads'], ['livres', 'Só livres'], ['meus', 'Só meus']] : [['todos', 'Todos os responsáveis'], ['dono', 'Do dono'], ...staff().map(([k, n]) => [k, 'De ' + n])]; return `<div class="tools" style="margin-bottom:12px"><select data-act="resp-sel" aria-label="Filtrar por responsável" style="width:auto;padding:.5rem .8rem;border-radius:10px;border:1px solid var(--line);background:var(--panel)">${o.map(([k, t]) => `<option value="${k}" ${S.resp === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`; })()}
   <div class="tw">${l.length ? `<table><thead><tr>${th('name', 'Cliente')}<th>Serviço</th><th class="money s ${S.sort === 'value' ? 'on' : ''}" data-act="sort" data-k="value">Valor${S.sort === 'value' ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th><th>Status</th>${th('date', 'Cadastro')}${th('next', 'Próximo contato')}<th></th></tr></thead>
   <tbody>${l.map((p) => { const n = nextInfo(p), wa = waLink(p.contact); return `<tr>
