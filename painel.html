@@ -122,6 +122,10 @@ tr.clk{cursor:pointer}
 .tag{display:inline-block;margin-left:6px;font:700 .65rem var(--mono);color:var(--green);background:rgba(52,211,153,.12);padding:.12rem .4rem;border-radius:6px}
 .st{display:inline-flex;align-items:center;gap:6px;padding:.28rem .7rem;border-radius:99px;font-size:.78rem;font-weight:700;border:0;appearance:none;-webkit-appearance:none}
 select.st{padding-right:.7rem;cursor:pointer}
+.asbar{position:fixed;top:0;left:0;right:0;height:40px;z-index:60;background:#8B7CFF;color:#120d33;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 12px;font-size:.84rem;font-weight:700}
+.asbar select{background:#120d33;color:#fff;border:0;border-radius:8px;padding:.3rem .5rem;font-size:.82rem}
+.asbar button{background:#120d33;color:#fff;border:0;border-radius:8px;padding:.35rem .7rem;font-weight:700;font-size:.82rem}
+body.as{padding-top:40px}body.as .side{top:40px!important;height:calc(100vh - 40px)!important}
 .st.novo{background:rgba(139,124,255,.18);color:#c4baff}
 .st.prospectando{background:rgba(162,159,184,.16);color:#d4d1e6}
 .st.semresposta{background:rgba(125,211,252,.14);color:#7dd3fc}
@@ -316,12 +320,14 @@ body.intern .money{display:none!important}
   </form>
 </div>
 
+<div id="asBar" class="asbar" hidden></div>
 <aside class="side" id="side" hidden>
   <div class="brand"><svg viewBox="0 0 64 40" aria-hidden="true"><use href="#sym"/></svg><div>Painel<small>creative codex</small></div></div>
   <nav class="nav" id="nav" aria-label="Seções"></nav>
   <div class="side-foot">
     <div class="sync" id="sync"><i></i><span>Salvo</span></div>
     <span id="who"></span>
+    <button class="link" data-act="switch" id="swBtn" hidden>Trocar de conta</button>
     <button class="link" data-act="logout">Sair</button>
   </div>
 </aside>
@@ -571,13 +577,36 @@ function welcome(name) {
 function enter() {
   $('#login').hidden = true; $('#side').hidden = $('#main').hidden = $('#tabs').hidden = false;
   document.body.classList.toggle('intern', isIntern());
+  asBar(); $('#swBtn').hidden = isIntern();
   $('#who').textContent = isIntern() ? who(S.role) + '' : 'Acesso completo';
   try { const f = JSON.parse(sessionStorage.getItem('painel_ui') || '{}'); Object.assign(S, { filter: f.filter || 'todos', resp: f.resp || 'todos', view: f.view || 'overview' }); } catch {}
-  load().then(() => { if (S.welcome) welcome(isIntern() ? who(S.role).split(' ')[0] : 'Breno'); S.welcome = false; }); loadTpl();
+  load().then(() => { asBar(); if (S.welcome) welcome(isIntern() ? who(S.role).split(' ')[0] : 'Breno'); S.welcome = false; }); loadTpl();
   if (S.view === 'team' && !isIntern()) loadTeam();
   if (S.view === 'insta' && !isIntern()) loadInsta();
 }
+function asBar() {
+  const bar = $('#asBar'), on = !!sessionStorage.getItem('painel_dono_token');
+  document.body.classList.toggle('as', on); bar.hidden = !on;
+  if (on) bar.innerHTML = `<span>Vendo como ${esc(who(S.role))}</span><select id="asSel" aria-label="Trocar de conta">${[['dono', 'Dono'], ...staff()].map(([k, n]) => `<option value="${esc(k)}" ${k === S.role ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select><button type="button" id="asBack">Voltar ao dono</button>`;
+  if (on) { $('#asSel').onchange = (e) => viewAs(e.target.value); $('#asBack').onclick = () => viewAs('dono'); }
+}
+async function viewAs(id) {
+  const dt = sessionStorage.getItem('painel_dono_token') || S.token;
+  try {
+    S.token = dt;
+    const d = await api('POST', { id }, '?action=impersonate');
+    if (id === 'dono') { sessionStorage.removeItem('painel_dono_token'); } else sessionStorage.setItem('painel_dono_token', dt);
+    S.token = d.token; S.role = d.role; S.prospects = []; S.view = 'overview'; S.filter = 'todos'; S.resp = 'todos'; S.team = null;
+    sessionStorage.setItem('painel_token', d.token); sessionStorage.setItem('painel_role', d.role);
+    enter();
+  } catch (err) { S.token = sessionStorage.getItem('painel_token'); toast(err.message || 'Não foi possível trocar de conta.', { type: 'err' }); }
+}
+function accountSheet() {
+  const ov = dialog({ title: 'Trocar de conta', body: `<div style="display:grid;gap:8px">${staff().map(([k, n]) => `<button type="button" class="btn gh" data-as="${esc(k)}" style="justify-content:flex-start">${ic('users')}${esc(n)}</button>`).join('') || '<p style="color:var(--dim)">Nenhum funcionário ativo.</p>'}</div>`, ok: 'Fechar' });
+  ov.querySelectorAll('[data-as]').forEach((b) => { b.onclick = () => { ov._close(false); viewAs(b.dataset.as); }; });
+}
 function logout(expired) {
+  sessionStorage.removeItem('painel_dono_token');
   sessionStorage.removeItem('painel_token'); sessionStorage.removeItem('painel_role');
   S.token = S.role = null; S.prospects = [];
   showLogin();
@@ -627,8 +656,8 @@ function renderNav() {
 }
 function moreSheet() {
   const rest = views().filter((v) => !MAIN_TABS.includes(v[0]));
-  const ov = dialog({ title: 'Mais', body: `<div style="display:grid;gap:8px">${rest.map(([k, n, i]) => `<button type="button" class="btn gh" data-mv="${k}" style="justify-content:flex-start">${ic(i)}${n}</button>`).join('')}</div>`, ok: 'Fechar' });
-  ov.querySelectorAll('[data-mv]').forEach((b) => { b.onclick = () => { ov._close(false); setView(b.dataset.mv); }; });
+  const ov = dialog({ title: 'Mais', body: `<div style="display:grid;gap:8px">${rest.map(([k, n, i]) => `<button type="button" class="btn gh" data-mv="${k}" style="justify-content:flex-start">${ic(i)}${n}</button>`).join('')}${!isIntern() ? `<button type="button" class="btn gh" data-mv="__as" style="justify-content:flex-start">${ic('users')}Trocar de conta</button>` : ''}</div>`, ok: 'Fechar' });
+  ov.querySelectorAll('[data-mv]').forEach((b) => { b.onclick = () => { ov._close(false); if (b.dataset.mv === '__as') accountSheet(); else setView(b.dataset.mv); }; });
 }
 function setView(v) { S.view = v; saveUI(); render(); window.scrollTo(0, 0); if (v === 'team') loadTeam(); if (v === 'insta') loadInsta(); if (v === 'msgs') loadCts(); }
 
@@ -1323,6 +1352,7 @@ document.addEventListener('click', (e) => {
     case 'ct-cancel': dialog({ title: 'Cancelar contrato', body: '<p style="color:var(--dim)">O link deixa de funcionar. Essa ação não pode ser desfeita.</p>', ok: 'Cancelar contrato', danger: true, onOk: () => { api('POST', { cancel: id }, '?action=contracts').then((r) => { S.cts = r.contracts; toast('Contrato cancelado.', { type: 'ok' }); render(); }).catch((e) => toast(e.message, { type: 'err' })); } }); break;
     case 'more': moreSheet(); break;
     case 'tour': tour(true); break;
+    case 'switch': accountSheet(); break;
     case 'sub': S.sub[t.dataset.v] = t.dataset.k; render(); break;
     case 'pay': payDialog(id); break;
     case 'receipt': receipt(id); break;

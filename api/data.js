@@ -272,6 +272,17 @@ export default async function handler(req, res) {
       if (current.prospects.length && Date.now() - lastBak > BAK_EVERY) await snapshot(current, emps, 'auto');
     } catch (e) { console.error('manutenção', e); }
 
+    // dono entra na conta de um funcionário sem precisar da senha dele
+    if (req.method === 'POST' && req.query.action === 'impersonate') {
+      if (role !== 'dono') return res.status(403).json({ error: 'Sem permissão.' });
+      const id = String((req.body || {}).id || '');
+      if (id === 'dono') return res.status(200).json({ token: makeToken('dono', secret), role: 'dono' });
+      const e = emps.find((x) => x.id === id && x.active);
+      if (!e) return res.status(404).json({ error: 'Funcionário não encontrado.' });
+      await logPush([{ at: Date.now(), by: 'dono', type: 'impersonate', text: 'Dono entrou na conta de ' + e.name, who: e.id }]);
+      return res.status(200).json({ token: makeToken(e.id, secret), role: e.id });
+    }
+
     // dados da empresa (contratada nos contratos)
     if (req.query.action === 'company') {
       if (req.method === 'POST') {
