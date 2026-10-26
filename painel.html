@@ -126,6 +126,7 @@ select.st{padding-right:.7rem;cursor:pointer}
 .asbar select{background:#120d33;color:#fff;border:0;border-radius:8px;padding:.3rem .5rem;font-size:.82rem}
 .asbar button{background:#120d33;color:#fff;border:0;border-radius:8px;padding:.35rem .7rem;font-weight:700;font-size:.82rem}
 body.as{padding-top:40px}body.as .side{top:40px!important;height:calc(100vh - 40px)!important}
+.asg{margin-top:4px;background:var(--bg);color:var(--dim);border:1px solid var(--line);border-radius:8px;padding:.25rem .4rem;font-size:.74rem;max-width:100%}
 .st.novo{background:rgba(139,124,255,.18);color:#c4baff}
 .st.prospectando{background:rgba(162,159,184,.16);color:#d4d1e6}
 .st.semresposta{background:rgba(125,211,252,.14);color:#7dd3fc}
@@ -819,7 +820,7 @@ function vList() {
   ${(() => { const o = isIntern() ? [['todos', 'Todos os leads'], ['livres', 'Só livres'], ['meus', 'Só meus']] : [['todos', 'Todos os responsáveis'], ['dono', 'Do dono'], ...staff().map(([k, n]) => [k, 'De ' + n])]; return `<div class="tools" style="margin-bottom:12px"><select data-act="resp-sel" aria-label="Filtrar por responsável" style="width:auto;padding:.5rem .8rem;border-radius:10px;border:1px solid var(--line);background:var(--panel)">${o.map(([k, t]) => `<option value="${k}" ${S.resp === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`; })()}
   <div class="tw">${l.length ? `<table><thead><tr>${th('name', 'Cliente')}<th>Serviço</th><th class="money s ${S.sort === 'value' ? 'on' : ''}" data-act="sort" data-k="value">Valor${S.sort === 'value' ? (S.dir === 'asc' ? ' ↑' : ' ↓') : ''}</th><th>Status</th>${th('date', 'Cadastro')}${th('next', 'Próximo contato')}<th></th></tr></thead>
   <tbody>${l.map((p) => { const n = nextInfo(p), wa = waLink(p.contact); return `<tr>
-    <td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}${!isIntern() && p.responsavel !== 'dono' ? `<div class="ct">${esc(who(p.responsavel))}</div>` : ''}${isIntern() ? `<div class="ct">${badge(p)}</div>` : (claim(p) ? `<div class="ct">${badge(p)}</div>` : '')}</td>
+    <td class="c-main"><div class="nm">${esc(p.name)}</div>${p.contact ? `<div class="ct">${esc(p.contact)}</div>` : ''}${isIntern() ? `<div class="ct">${badge(p)}</div>` : (isOpen(p) ? `<select class="asg" data-act="assign" data-id="${esc(p.id)}" aria-label="Designar ${esc(p.name)}"><option value="">Livre (sem responsável)</option>${staff().map(([k, n]) => `<option value="${esc(k)}" ${claim(p) === k ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select>` : (p.responsavel !== 'dono' ? `<div class="ct">${esc(who(p.responsavel))}</div>` : ''))}</td>
     <td data-l="Serviço">${esc(p.service || '-')}</td>
     <td class="val money" data-l="Valor">${p.value == null ? '' : money(p.value)}${p.recurring ? '<span class="tag">/mês</span>' : ''}</td>
     <td><select class="st ${stK(p)}" data-act="status" ${locked(p) ? 'disabled' : ''} data-id="${esc(p.id)}" aria-label="Status de ${esc(p.name)}">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
@@ -1380,6 +1381,14 @@ document.addEventListener('click', (e) => {
 document.addEventListener('change', (e) => {
   const t = e.target.closest('[data-act]'); if (!t) return;
   if (t.dataset.act === 'status') setStatus(t.dataset.id, t.value);
+  if (t.dataset.act === 'assign') {
+    const p = S.prospects.find((x) => x.id === t.dataset.id); if (!p || isIntern()) return;
+    const v = t.value;
+    p.claimedBy = v; p.responsavel = v || 'dono';
+    if (v && p.status === 'novo') p.status = 'prospectando'; else if (!v && p.status === 'prospectando') p.status = 'novo';
+    touch(p, 'claim', v ? 'Designado para ' + who(v) : 'Devolvido para a fila');
+    save(); render(); toast(v ? 'Designado para ' + who(v) + '.' : 'Devolvido para a fila.', { type: 'ok' });
+  }
   if (t.dataset.act === 'resp-sel') { S.resp = t.value; saveUI(); render(); }
 });
 let qT;
