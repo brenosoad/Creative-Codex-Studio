@@ -150,7 +150,14 @@ const MODELOS = [
   ['Primeiro contato', 'Igreja', 'Oi, {nome}! Paz do Senhor! Aqui é {meu_nome}, da Creative Codex. A gente cria sites para igrejas, com programação dos cultos, avisos, eventos e área de contribuição. Posso te mostrar um exemplo?'],
   ['Acompanhamento', 'Geral', 'Oi, {nome}! Passando para saber se você chegou a ver minha mensagem sobre {servico}. Se fizer sentido, te mando uma proposta sem compromisso.'],
   ['Envio de proposta', 'Geral', '{nome}, segue a proposta de {servico}. Qualquer dúvida é só me chamar, e posso ajustar o que for preciso.'],
-  ['Após o fechamento', 'Geral', 'Fechado, {nome}! Para começar, vou precisar do logo, das cores e dos textos do seu negócio. Posso te mandar a lista do que preciso?']
+  ['Após o fechamento', 'Geral', 'Fechado, {nome}! Para começar, vou precisar do logo, das cores e dos textos do seu negócio. Posso te mandar a lista do que preciso?'],
+  ['Acompanhamento', 'Segundo contato', 'Oi, {nome}! Sei que a rotina é corrida. Só queria saber se faz sentido conversarmos sobre {servico}. Se preferir, te mando um exemplo pronto para você ver como fica.'],
+  ['Acompanhamento', 'Último contato', 'Oi, {nome}! Vou encerrar por aqui para não incomodar. Se mais para frente quiser {servico}, é só me chamar. Fico à disposição!'],
+  ['Negociação', 'Pediu desconto', 'Entendo, {nome}. O valor já considera o tempo de criação e a entrega completa. Posso te oferecer pagamento em duas parcelas ou um pacote mais enxuto de {servico}. Qual prefere?'],
+  ['Contrato', 'Envio do link', '{nome}, seu contrato de {servico} está pronto. É só abrir o link, ler e assinar pelo celular. Qualquer dúvida, me chame.'],
+  ['Pagamento', 'Lembrete', 'Oi, {nome}! Passando para lembrar do pagamento de {servico}. Se já fez, pode desconsiderar. Qualquer dúvida, me chame.'],
+  ['Pós-entrega', 'Pedido de indicação', '{nome}, que bom que você gostou do resultado! Se conhecer alguém que também precisa de site ou artes, pode me indicar. Vou cuidar bem dele, como cuidei de você.'],
+  ['Manutenção', 'Mensal', 'Oi, {nome}! Passando para lembrar que a manutenção mensal do seu site está ativa. Se precisar trocar textos, fotos ou preços, é só me mandar por aqui.']
 ].map(([title, segment, text], i) => ({ id: 'm' + (i + 1), title, segment, text }));
 
 async function logPush(entries) {
@@ -350,7 +357,13 @@ export default async function handler(req, res) {
         await kv.set(TPL_KEY, list);
         return res.status(200).json({ templates: list });
       }
-      return res.status(200).json({ templates: (await kv.get(TPL_KEY)) || MODELOS });
+      let tl = await kv.get(TPL_KEY);
+      if (tl && !(await kv.get('painel_modelos_v2'))) { // acrescenta os modelos novos a quem já salvou a lista
+        const have = new Set(tl.map((x) => x.id));
+        tl = [...tl, ...MODELOS.filter((m) => !have.has(m.id))];
+        await kv.set(TPL_KEY, tl); await kv.set('painel_modelos_v2', 1);
+      }
+      return res.status(200).json({ templates: tl || MODELOS });
     }
 
     // conexão automática com o Instagram (token guardado só no servidor)
