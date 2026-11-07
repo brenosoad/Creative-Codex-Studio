@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demonstração: aprovação de posts | Creative Codex</title>
+<meta name="description" content="Demonstração com dados fictícios do sistema de aprovação de posts para restaurantes, desenvolvido pela Creative Codex.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1b1410">
+<style>
+:root{--bg:#1b1410;--card:#261c16;--line:#3a2c23;--tx:#f6efe8;--dim:#b9a898;--ac:#ea6a1a;--ok:#4cc38a;--warn:#f2b23d}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+.demo{background:var(--ac);color:#1b1410;text-align:center;font-weight:700;font-size:.82rem;padding:.55rem 1rem}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--ac);display:grid;place-items:center;font-weight:800;color:#1b1410}
+h1{font-size:1.15rem;line-height:1.2}header p{color:var(--dim);font-size:.85rem}
+.prog{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.prog b{font-size:1.4rem}.bar{height:8px;background:var(--line);border-radius:8px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .35s}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tabs button{flex:1;padding:.7rem;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--dim);font:inherit;font-weight:600;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--card);color:var(--tx);border-color:var(--ac)}
+.post{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.art{aspect-ratio:1/1;display:grid;place-items:center;text-align:center;padding:24px;font-weight:800;font-size:1.7rem;line-height:1.1;letter-spacing:-.01em}
+.body{padding:14px 16px 16px}
+.meta{display:flex;justify-content:space-between;gap:8px;color:var(--dim);font-size:.8rem;margin-bottom:8px}
+.cap{font-size:.95rem;margin-bottom:14px}
+.row{display:flex;gap:8px}
+.btn{flex:1;min-height:46px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--tx);font:inherit;font-weight:700;cursor:pointer}
+.btn.ok{background:var(--ac);border-color:var(--ac);color:#1b1410}
+.btn:focus-visible,.tabs button:focus-visible,textarea:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
+textarea{width:100%;margin-top:10px;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:12px;padding:.7rem;font:inherit;resize:vertical;min-height:80px}
+.st{display:inline-block;border-radius:99px;padding:.2rem .65rem;font-size:.78rem;font-weight:700}
+.st.a{background:rgba(76,195,138,.16);color:var(--ok)}.st.r{background:rgba(242,178,61,.16);color:var(--warn)}
+.empty{text-align:center;color:var(--dim);padding:40px 10px}
+footer{color:var(--dim);font-size:.8rem;text-align:center;margin-top:26px}
+footer a{color:var(--tx)}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="demo">Demonstração com dados fictícios. Nenhuma informação real de cliente.</div>
+<div class="wrap">
+  <header>
+    <div class="logo" aria-hidden="true">CE</div>
+    <div><h1>Cantina Exemplo</h1><p>Cronograma de novembro</p></div>
+  </header>
+  <div class="prog" aria-live="polite"><b id="cnt">0 de 6</b> posts aprovados<div class="bar"><i id="bar"></i></div></div>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="t-p" aria-selected="true">Pendentes</button>
+    <button role="tab" id="t-d" aria-selected="false">Respondidos</button>
+  </div>
+  <div id="list"></div>
+  <footer>Sistema de aprovação de posts desenvolvido por <a href="/">Creative Codex</a>.</footer>
+</div>
+<script>
+const posts=[
+ {id:1,d:'Seg, 10/11',c:'Feed',t:'Massa fresca\nfeita todo dia',bg:'linear-gradient(135deg,#ea6a1a,#8a3a0c)',cap:'Segunda é dia de massa fresca. Venha almoçar com a gente e peça o prato do dia com 10% de desconto até as 14h.'},
+ {id:2,d:'Qua, 12/11',c:'Stories',t:'Enquete:\nrondelli ou lasanha?',bg:'linear-gradient(135deg,#3b6b4f,#16301f)',cap:'Enquete nos stories para movimentar o perfil e descobrir o prato favorito do público.'},
+ {id:3,d:'Sex, 14/11',c:'Feed',t:'Sexta com\nvinho da casa',bg:'linear-gradient(135deg,#7a2338,#2e0d16)',cap:'Taça de vinho da casa por R$ 12 para quem pedir qualquer massa na sexta à noite.'},
+ {id:4,d:'Sáb, 15/11',c:'Reels',t:'Bastidores\nda cozinha',bg:'linear-gradient(135deg,#caa24a,#6b4f14)',cap:'Vídeo curto mostrando o preparo do molho, com legenda convidando para o jantar de sábado.'},
+ {id:5,d:'Dom, 16/11',c:'Feed',t:'Almoço em\nfamília',bg:'linear-gradient(135deg,#2f5d8a,#10243a)',cap:'Menu família para 4 pessoas com entrada, massa e sobremesa. Reservas pelo WhatsApp.'},
+ {id:6,d:'Ter, 18/11',c:'Carrossel',t:'3 molhos,\n1 favorito',bg:'linear-gradient(135deg,#b5452a,#4a1a0e)',cap:'Carrossel apresentando os três molhos da casa e convidando o cliente a votar nos comentários.'}
+];
+const S={};let tab='p';
+const $=s=>document.querySelector(s),L=$('#list');
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function render(){
+  const a=posts.filter(p=>S[p.id]&&S[p.id].s==='a').length;
+  $('#cnt').textContent=a+' de '+posts.length;$('#bar').style.width=a/posts.length*100+'%';
+  const list=posts.filter(p=>tab==='p'?!S[p.id]:!!S[p.id]);
+  $('#t-p').textContent='Pendentes ('+posts.filter(p=>!S[p.id]).length+')';
+  $('#t-d').textContent='Respondidos ('+posts.filter(p=>S[p.id]).length+')';
+  L.innerHTML=list.length?list.map(p=>`<article class="post" data-id="${p.id}">
+    <div class="art" style="background:${p.bg}">${esc(p.t).replace(/\n/g,'<br>')}</div>
+    <div class="body"><div class="meta"><span>${p.d}, ${p.c}</span>${S[p.id]?`<span class="st ${S[p.id].s}">${S[p.id].s==='a'?'Aprovado':'Ajuste pedido'}</span>`:''}</div>
+    <p class="cap">${esc(p.cap)}</p>
+    ${S[p.id]?(S[p.id].n?`<p class="cap" style="color:var(--dim)">Seu pedido: ${esc(S[p.id].n)}</p>`:'')+`<button class="btn" data-a="undo">Desfazer</button>`:
+    `<div class="row"><button class="btn" data-a="adj">Pedir ajuste</button><button class="btn ok" data-a="ok">Aprovar</button></div><div class="adj hide"><textarea placeholder="O que você quer mudar neste post?" aria-label="Pedido de ajuste"></textarea><button class="btn ok" data-a="send" style="width:100%;margin-top:8px">Enviar pedido</button></div>`}
+    </div></article>`).join(''):'<p class="empty">'+(tab==='p'?'Tudo respondido. Bom trabalho!':'Nenhum post respondido ainda.')+'</p>';
+}
+L.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;
+  const post=b.closest('.post'),id=+post.dataset.id,act=b.dataset.a;
+  if(act==='ok')S[id]={s:'a'};
+  else if(act==='adj'){post.querySelector('.adj').classList.toggle('hide');return}
+  else if(act==='send'){S[id]={s:'r',n:post.querySelector('textarea').value.trim()}}
+  else if(act==='undo')delete S[id];
+  render();
+});
+$('#t-p').onclick=()=>{tab='p';$('#t-p').setAttribute('aria-selected',true);$('#t-d').setAttribute('aria-selected',false);render()};
+$('#t-d').onclick=()=>{tab='d';$('#t-d').setAttribute('aria-selected',true);$('#t-p').setAttribute('aria-selected',false);render()};
+render();
+</script>
+</body>
+</html>
