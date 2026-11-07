@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demonstração: gestão de conteúdo para agências | Creative Codex</title>
+<meta name="description" content="Demonstração com dados fictícios de um sistema de gestão de cronogramas, posts e pedidos de arte para agências de marketing.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#16110e">
+<style>
+:root{--bg:#16110e;--side:#1d1612;--card:#251c17;--line:#38291f;--tx:#f6efe8;--dim:#b3a291;--ac:#ea6a1a;--ok:#4cc38a;--warn:#f2b23d;--bad:#ef5d5d;--info:#6aa8ff}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,select,input{font:inherit;color:inherit}
+select,input{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.45rem .6rem;color-scheme:dark}
+.demo{background:var(--ac);color:#16110e;text-align:center;font-weight:700;font-size:.8rem;padding:.45rem 1rem}
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.side{background:var(--side);border-right:1px solid var(--line);padding:18px 14px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;gap:10px;align-items:center;margin-bottom:18px}.brand i{width:36px;height:36px;border-radius:10px;background:var(--ac);display:grid;place-items:center;font-style:normal;font-weight:800;color:#16110e}
+.brand b{display:block;line-height:1.1}.brand span{font-size:.75rem;color:var(--dim)}
+.nav button{display:flex;width:100%;align-items:center;gap:10px;background:none;border:0;border-radius:10px;padding:.6rem .7rem;color:var(--dim);cursor:pointer;text-align:left;font-weight:600}
+.nav button:hover{background:var(--card)}.nav button[aria-current=page]{background:var(--card);color:var(--tx);box-shadow:inset 3px 0 0 var(--ac)}
+.nav kbd{margin-left:auto;font-size:.7rem;border:1px solid var(--line);border-radius:6px;padding:0 .35rem;color:var(--dim)}
+.sec{font-size:.72rem;color:var(--dim);margin:18px 8px 6px;font-weight:700}
+.cl{max-height:40vh;overflow:auto}
+.cl button{font-weight:500;font-size:.88rem;padding:.45rem .7rem}
+.dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px}
+.app>div{min-width:0}
+main{padding:26px clamp(16px,3vw,40px) 60px;max-width:1240px;width:100%}
+h1{font-size:1.6rem;line-height:1.2}.sub{color:var(--dim);margin:2px 0 18px}
+.top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start;margin-bottom:6px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:.55rem .9rem;cursor:pointer;font-weight:600}
+.btn.pri{background:var(--ac);border-color:var(--ac);color:#16110e}.btn:hover{filter:brightness(1.12)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}.k b{font-size:1.9rem;display:block;line-height:1.1}.k span{color:var(--dim);font-size:.84rem}
+.k.bad b{color:var(--bad)}.k.ok b{color:var(--ok)}
+.grid2{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h2{font-size:.78rem;color:var(--dim);margin-bottom:12px;letter-spacing:.04em}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal .h{color:var(--dim);font-size:.75rem}.cal .d{position:relative;aspect-ratio:1;display:grid;place-items:center;border-radius:8px;font-size:.85rem}
+.cal .d.has{background:rgba(234,106,26,.16)}.cal .d.has::after{content:"";position:absolute;bottom:4px;width:5px;height:5px;border-radius:50%;background:var(--ac)}
+.cal .d.today{outline:2px solid var(--ac)}
+.row{display:flex;align-items:center;gap:10px;padding:.55rem 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}
+.row .t{flex:1;min-width:0}.row .t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.row .t span{font-size:.8rem;color:var(--dim)}
+.chip{display:inline-block;border-radius:99px;padding:.15rem .6rem;font-size:.74rem;font-weight:700;white-space:nowrap}
+.c-ok{background:rgba(76,195,138,.15);color:var(--ok)}.c-warn{background:rgba(242,178,61,.15);color:var(--warn)}.c-bad{background:rgba(239,93,93,.15);color:var(--bad)}.c-info{background:rgba(106,168,255,.15);color:var(--info)}.c-mut{background:var(--line);color:var(--dim)}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}.tabs button{border:1px solid var(--line);background:none;border-radius:10px;padding:.45rem .9rem;color:var(--dim);cursor:pointer;font-weight:600}.tabs button[aria-selected=true]{background:var(--card);color:var(--tx);border-color:var(--ac)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.filters select,.filters input,.f select,.f input{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.5rem .7rem}
+table{width:100%;border-collapse:collapse}th{text-align:left;font-size:.75rem;color:var(--dim);padding:.5rem .6rem}td{padding:.65rem .6rem;border-top:1px solid var(--line);vertical-align:middle}
+.tw{overflow-x:auto}
+.empty{text-align:center;color:var(--dim);padding:34px 8px}
+dialog{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:16px;padding:20px;width:min(440px,92vw)}dialog::backdrop{background:rgba(0,0,0,.6)}
+.f{display:grid;gap:10px;margin:14px 0}.f label{display:grid;gap:4px;font-size:.82rem;color:var(--dim)}
+.bar{height:8px;background:var(--line);border-radius:8px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--ac)}
+.mnav{display:none}
+@media (max-width:860px){
+ .app{grid-template-columns:1fr}.side{display:none}
+ .mnav{display:flex;position:sticky;top:0;z-index:40;background:var(--side);border-bottom:1px solid var(--line);overflow-x:auto;gap:6px;padding:8px 12px}
+ .mnav button{flex:0 0 auto;border:1px solid var(--line);background:none;border-radius:99px;padding:.4rem .8rem;color:var(--dim);font-weight:600;cursor:pointer}.mnav kbd{display:none}.mnav button[aria-current=page]{background:var(--ac);color:#16110e;border-color:var(--ac)}
+ .kpis{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}
+}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
+@media print{.demo,.side,.mnav,.btn{display:none}.app{display:block}body{background:#fff;color:#000}.card,.k{border-color:#ccc;background:#fff}}
+</style>
+</head>
+<body>
+<div class="demo">Demonstração com dados fictícios. Nenhuma informação real de agência ou cliente.</div>
+<div class="app">
+ <aside class="side">
+  <div class="brand"><i>AD</i><div><b>Agência Demo</b><span>Gestão de conteúdo</span></div></div>
+  <nav class="nav" id="nav"></nav>
+  <div class="sec">CLIENTES</div>
+  <nav class="nav cl" id="cl"></nav>
+ </aside>
+ <div>
+  <nav class="mnav" id="mnav"></nav>
+  <main id="main"></main>
+ </div>
+</div>
+<dialog id="dlg"></dialog>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const day=86400000,T0=new Date();T0.setHours(12,0,0,0);
+const dt=n=>new Date(T0.getTime()+n*day);
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const br=d=>String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+const MES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const clients=[['Casa do Pão',[1,0,1,2,3,4,5,6]],['Pizzaria Napoli',[0,2,4,6,8,10,12]],['Burger Lab',[1,3,6,9]],['Sushi Kaze',[0,1,3,5,7,9,11,13,15,17]],['Academia Pulse',[2,4,9,12,16]],['Café Aroma',[]],['Churrasco do Zé',[-3,-1]],['Doceria Mel',[1,2,5]],['Bistrô Verde',[]],['Tapioca da Vila',[-2,0,1]],['Lanchonete Central',[4,7,10,14,18,21]],['Studio Fit',[]],['Padaria Sol',[-1]],['Sorveteria Gelato',[3,6,9,12,15,18,21,24]]].map((c,i)=>({id:i,name:c[0]}));
+const FMT=['Reels','Feed','Stories','Carrossel'],TIT=['Prato do dia','Promoção da semana','Bastidores','Aniversariante','Novidade no cardápio','Depoimento de cliente','Combo família','Dica do chef','Instrumental','Lançamento'];
+const STP=['Rascunho','Esperando aprovação','Aprovado','Programado','Publicado'];
+let posts=[],n=0;
+clients.forEach(c=>{const offs=[[1,0,1,2,3,4,5,6],[0,2,4,6,8,10,12],[1,3,6,9],[0,1,3,5,7,9,11,13,15,17],[2,4,9,12,16],[],[-3,-1],[1,2,5],[],[-2,0,1],[4,7,10,14,18,21],[],[-1],[3,6,9,12,15,18,21,24]][c.id];
+ offs.forEach((o,j)=>{n++;const past=o<0,today=o===0;posts.push({id:n,c:c.id,d:iso(dt(o)),f:FMT[(n+j)%4],t:TIT[(n*3+j)%TIT.length],s:past?4:today?(n%2?4:1):[1,2,3][n%3]})})});
+const reqs=[];[['Casa do Pão','Arte nova','Recorrente',1,0],['Pizzaria Napoli','Atualização','Feriado',0,1],['Burger Lab','Arte nova','Outro',2,2],['Sushi Kaze','Atualização','Recorrente',-1,0],['Academia Pulse','Arte nova','Aulão',3,2],['Doceria Mel','Arte nova','Feriado',5,3],['Café Aroma','Atualização','Recorrente',0,5],['Sorveteria Gelato','Arte nova','Outro',-2,1]].forEach((r,i)=>reqs.push({id:i+1,c:r[0],k:r[1],cat:r[2],d:iso(dt(r[3])),s:['Aguardando','Em produção','Alteração solicitada','Entregue','Aprovada','Em produção'][r[4]]||'Aguardando',w:r[1]==='Arte nova'?3:1}));
+const ST={view:'home',sub:'geral',cid:null,rtab:'ped',rview:'lista',rf:'Abertas',cap:{teto:20,nova:3,atu:1}};
+const stClass=s=>({'Publicado':'c-ok','Aprovado':'c-ok','Programado':'c-info','Esperando aprovação':'c-warn','Rascunho':'c-mut'}[s]||'c-mut');
+function pcl(c){const ps=posts.filter(p=>p.c===c.id&&p.d>=iso(T0)).sort((a,b)=>a.d<b.d?-1:1);const last=ps.length?ps[ps.length-1].d:(posts.filter(p=>p.c===c.id).map(p=>p.d).sort().pop()||'');
+ const days=last?Math.round((new Date(last+'T12:00:00')-T0)/day):null;
+ let st,cls,col;if(!last){st='Sem conteúdo';cls='c-bad';col='var(--bad)'}else if(days<0){st='Vencido';cls='c-bad';col='var(--bad)'}else if(days<=2){st='Acaba em breve';cls='c-warn';col='var(--warn)'}else if(days<=7){st='Acabando';cls='c-warn';col='var(--warn)'}else{st='Em dia';cls='c-ok';col='var(--ok)'}
+ return{c,fut:ps.length,last,days,st,cls,col}}
+function nav(){const it=[['home','Início'],['search','Buscar'],['reqs','Pedidos de arte'],['sched','Cronogramas']];
+ const h=it.map(([k,l])=>`<button data-v="${k}" ${ST.view===k?'aria-current="page"':''}>${l}${k==='search'?'<kbd>Ctrl K</kbd>':''}</button>`).join('');
+ $('#nav').innerHTML=h;$('#mnav').innerHTML=h;
+ $('#cl').innerHTML=clients.map(c=>{const p=pcl(c);return`<button data-c="${c.id}" ${ST.view==='sched'&&ST.cid===c.id?'aria-current="page"':''}><span class="dot" style="background:${p.col}"></span>${esc(c.name)}</button>`}).join('')}
+function home(){const all=clients.map(pcl),crit=all.filter(p=>p.days===null||p.days<=2);
+ const up=posts.filter(p=>p.d>=iso(T0)).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.id-b.id);
+ const nf=posts.filter(p=>p.d>=iso(T0)).length,ok=all.filter(p=>p.days!==null&&p.days>7).length;
+ const y=T0.getFullYear(),m=T0.getMonth(),first=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate();
+ const has=new Set(posts.map(p=>p.d));
+ let cal='';['D','S','T','Q','Q','S','S'].forEach(l=>cal+=`<div class="h">${l}</div>`);for(let i=0;i<first;i++)cal+='<div></div>';
+ for(let d=1;d<=dim;d++){const k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');cal+=`<div class="d ${has.has(k)?'has':''} ${d===T0.getDate()?'today':''}">${d}</div>`}
+ const tabs=`<div class="tabs" role="tablist"><button data-sub="geral" aria-selected="${ST.sub==='geral'}">Visão geral</button><button data-sub="fila" aria-selected="${ST.sub==='fila'}">Minha fila</button></div>`;
+ if(ST.sub==='fila'){const mine=posts.filter(p=>p.s===1).slice(0,8),r=reqs.filter(r=>['Aguardando','Em produção','Alteração solicitada'].includes(r.s));
+  return`<div class="top"><div><h1>Minha fila</h1><p class="sub">O que precisa da sua atenção hoje.</p></div></div>${tabs}<div class="grid2"><div class="card"><h2>POSTS PARA APROVAR</h2>${mine.map(p=>`<div class="row"><div class="t"><b>${esc(p.t)}</b><span>${esc(clients[p.c].name)} · ${br(new Date(p.d+'T12:00'))} · ${p.f}</span></div><button class="btn" data-ap="${p.id}">Aprovar</button></div>`).join('')||'<p class="empty">Nada pendente.</p>'}</div><div class="card"><h2>PEDIDOS DE ARTE EM ABERTO</h2>${r.map(q=>`<div class="row"><div class="t"><b>${esc(q.c)}</b><span>${q.k} · ${br(new Date(q.d+'T12:00'))}</span></div><span class="chip c-warn">${q.s}</span></div>`).join('')||'<p class="empty">Nada em aberto.</p>'}</div></div>`}
+ return`<div class="top"><div><h1>Visão geral</h1><p class="sub">Até quando cada cliente tem conteúdo programado.</p></div><button class="btn" onclick="window.print()">Baixar relatório (PDF)</button></div>${tabs}
+ <div class="kpis"><div class="k"><b>${clients.length}</b><span>Clientes ativos</span></div><div class="k"><b>${nf}</b><span>Posts programados</span></div><div class="k ok"><b>${ok}</b><span>Cronogramas em dia</span></div><div class="k bad"><b>${crit.length}</b><span>Clientes críticos</span></div></div>
+ <div class="grid2"><div class="card"><h2>CALENDÁRIO DE POSTS · ${MES[m].toUpperCase()} DE ${y}</h2><div class="cal">${cal}</div></div>
+ <div class="card"><h2>PRÓXIMOS POSTS</h2>${up.slice(0,6).map(p=>`<div class="row"><div class="t"><b>${esc(p.t)}</b><span>${br(new Date(p.d+'T12:00'))} · ${p.f} · ${esc(clients[p.c].name)}</span></div><span class="chip ${stClass(STP[p.s])}">${STP[p.s]}</span></div>`).join('')}</div></div>
+ <div class="card" style="margin-bottom:14px"><h2>${crit.length} CLIENTES COM 2 DIAS OU MENOS DE CONTEÚDO</h2><p style="color:var(--dim);font-size:.88rem">${crit.map(p=>esc(p.c.name)+(p.days===null?' (sem posts)':p.days<0?' (vencido)':' (acaba em breve)')).join(' · ')}</p></div>
+ <div class="card"><h2>CLIENTES POR PRAZO DE CONTEÚDO</h2>${all.slice().sort((a,b)=>(a.days===null?-99:a.days)-(b.days===null?-99:b.days)).map(p=>`<div class="row" data-c="${p.c.id}" style="cursor:pointer"><div class="t"><b>${esc(p.c.name)}</b><span>${p.last?'Conteúdo até '+br(new Date(p.last+'T12:00'))+' · '+p.fut+' post(s) futuros':'Nenhum post cadastrado'}</span></div><span class="chip ${p.cls}">${p.st}</span></div>`).join('')}</div>`}
+const csel=()=>`<div class="filters"><select data-cs aria-label="Cliente"><option value="">Selecione um cliente</option>${clients.map(c=>`<option value="${c.id}" ${ST.cid===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>`;
+function sched(){const c=clients[ST.cid];if(!c)return`<div class="top"><div><h1>Cronograma</h1></div><button class="btn pri" data-new>Nova postagem</button></div>${csel()}<div class="card empty"><b>Selecione um cliente</b><br>Escolha um cliente na barra lateral para ver o cronograma.</div>`;
+ const ps=posts.filter(p=>p.c===c.id).sort((a,b)=>a.d<b.d?-1:1);
+ return`<div class="top"><div><h1>${esc(c.name)}</h1><p class="sub">${ps.length} posts no cronograma.</p></div><button class="btn pri" data-new>Nova postagem</button></div>${csel()}<div class="card tw">${ps.length?`<table><thead><tr><th>Data</th><th>Formato</th><th>Título</th><th>Status</th><th></th></tr></thead><tbody>${ps.map(p=>`<tr><td>${br(new Date(p.d+'T12:00'))}</td><td>${p.f}</td><td>${esc(p.t)}</td><td><span class="chip ${stClass(STP[p.s])}">${STP[p.s]}</span></td><td style="text-align:right">${p.s<4?`<button class="btn" data-adv="${p.id}">Avançar</button>`:''} <button class="btn" data-del="${p.id}" aria-label="Excluir">Excluir</button></td></tr>`).join('')}</tbody></table>`:'<p class="empty">Nenhum post cadastrado. Use "Nova postagem".</p>'}</div>`}
+function reqsV(){let l=reqs.slice();const f=ST.rf,ab=['Aguardando','Em produção','Alteração solicitada'];if(f==='Abertas')l=l.filter(r=>ab.includes(r.s));else if(f!=='Todas')l=l.filter(r=>r.s===f);
+ l.sort((a,b)=>a.d<b.d?-1:1);const open=reqs.filter(r=>ab.includes(r.s)),hoje=open.filter(r=>r.d===iso(T0)).length,atr=open.filter(r=>r.d<iso(T0)).length,used=open.reduce((s,r)=>s+r.w,0);
+ const sc={'Aguardando':'c-warn','Em produção':'c-info','Alteração solicitada':'c-bad','Entregue':'c-ok','Aprovada':'c-ok','Recusada':'c-mut'};
+ return`<div class="top"><div><h1>Artes</h1><p class="sub">Pedidos de arte dos clientes.</p></div><div style="display:flex;gap:8px"><button class="btn" onclick="window.print()">Gerar PDF</button><button class="btn pri" data-nreq>Solicitar arte</button></div></div>
+ <div class="tabs"><button data-rt="ped" aria-selected="${ST.rtab==='ped'}">Pedidos</button><button data-rt="rec" aria-selected="${ST.rtab==='rec'}">Recorrentes</button></div>
+ <div class="kpis"><div class="k"><b>1,5 dia</b><span>Tempo médio de entrega</span></div><div class="k ok"><b>92%</b><span>Entregas no prazo</span></div><div class="k"><b>${open.length}</b><span>Em aberto</span></div><div class="k ${atr?'bad':''}"><b>${atr}</b><span>Atrasadas · ${hoje} vencem hoje</span></div></div>
+ <div class="card" style="margin-bottom:14px"><h2>CAPACIDADE DIÁRIA</h2><div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center"><span>${used} de ${ST.cap.teto} pontos em uso</span><div class="bar" style="flex:1;min-width:140px"><i style="width:${Math.min(100,used/ST.cap.teto*100)}%"></i></div></div></div>
+ ${ST.rtab==='rec'?`<div class="card"><h2>PEDIDOS RECORRENTES</h2>${['Casa do Pão · Prato do dia · toda segunda','Sushi Kaze · Promoção semanal · toda quinta','Academia Pulse · Treino da semana · todo domingo'].map(t=>`<div class="row"><div class="t"><b>${t.split(' · ')[1]}</b><span>${t.split(' · ')[0]} · ${t.split(' · ')[2]}</span></div><span class="chip c-info">Ativo</span></div>`).join('')}</div>`:
+ `<div class="filters"><select data-rf aria-label="Status">${['Abertas','Aguardando','Em produção','Alteração solicitada','Entregue','Aprovada','Recusada','Todas'].map(s=>`<option ${s===f?'selected':''}>${s}</option>`).join('')}</select></div>
+ <div class="card tw"><p style="color:var(--dim);margin-bottom:8px">${l.length} pedidos encontrados</p>${l.length?`<table><thead><tr><th>Cliente</th><th>Tipo</th><th>Categoria</th><th>Prazo</th><th>Status</th></tr></thead><tbody>${l.map(r=>`<tr><td><b>${esc(r.c)}</b></td><td>${r.k}</td><td>${r.cat}</td><td>${br(new Date(r.d+'T12:00'))}${r.d<iso(T0)&&['Aguardando','Em produção','Alteração solicitada'].includes(r.s)?' <span class="chip c-bad">Atrasada</span>':''}</td><td><select data-rs="${r.id}" aria-label="Status do pedido">${['Aguardando','Em produção','Alteração solicitada','Entregue','Aprovada','Recusada'].map(s=>`<option ${s===r.s?'selected':''}>${s}</option>`).join('')}</select></td></tr>`).join('')}</tbody></table>`:'<p class="empty">Nenhuma solicitação aqui.</p>'}</div>`}`}
+function search(){return`<div class="top"><div><h1>Buscar</h1></div></div><div class="filters"><input id="q" placeholder="Buscar cliente ou post" style="flex:1;min-width:200px" aria-label="Buscar" autofocus></div><div id="qr"></div>`}
+function render(){nav();$('#main').innerHTML=({home,sched,reqs:reqsV,search})[ST.view]();if(ST.view==='search')qs('')}
+function qs(v){v=v.toLowerCase();const c=clients.filter(c=>c.name.toLowerCase().includes(v)),p=v?posts.filter(p=>p.t.toLowerCase().includes(v)).slice(0,8):[];
+ $('#qr').innerHTML=`<div class="card"><h2>CLIENTES</h2>${c.map(c=>`<div class="row" data-c="${c.id}" style="cursor:pointer"><div class="t"><b>${esc(c.name)}</b></div></div>`).join('')||'<p class="empty">Nada encontrado.</p>'}</div>`+(p.length?`<div class="card" style="margin-top:12px"><h2>POSTS</h2>${p.map(p=>`<div class="row"><div class="t"><b>${esc(p.t)}</b><span>${esc(clients[p.c].name)} · ${br(new Date(p.d+'T12:00'))}</span></div></div>`).join('')}</div>`:'')}
+function dlg(h){const d=$('#dlg');d.innerHTML=h;d.showModal();return d}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-v],[data-c],[data-sub],[data-new],[data-adv],[data-del],[data-ap],[data-nreq],[data-rt]');if(!t)return;
+ const g=k=>t.dataset[k];
+ if(g('v')){ST.view=g('v');if(ST.view==='sched'&&ST.cid==null)ST.cid=null}
+ else if(g('c')!==undefined){ST.view='sched';ST.cid=+g('c')}
+ else if(g('sub')){ST.sub=g('sub')}
+ else if(g('rt')){ST.rtab=g('rt')}
+ else if(g('adv')){const p=posts.find(p=>p.id==g('adv'));if(p&&p.s<4)p.s++}
+ else if(g('del')){posts=posts.filter(p=>p.id!=g('del'))}
+ else if(g('ap')){const p=posts.find(p=>p.id==g('ap'));if(p)p.s=2}
+ else if(t.hasAttribute('data-new')){if(ST.cid==null){ST.cid=0;render()}
+  const d=dlg(`<form method="dialog"><h2>Nova postagem</h2><p style="color:var(--dim)">${esc(clients[ST.cid].name)}</p><div class="f"><label>Data<input type="date" name="d" value="${iso(dt(1))}" required></label><label>Formato<select name="f">${FMT.map(x=>`<option>${x}</option>`).join('')}</select></label><label>Título<input name="t" required maxlength="60" placeholder="Ex.: Prato do dia"></label></div><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="x" formnovalidate>Cancelar</button><button class="btn pri" value="ok">Adicionar</button></div></form>`);
+  d.onclose=()=>{if(d.returnValue==='ok'){const f=new FormData(d.querySelector('form'));posts.push({id:++n+100,c:ST.cid,d:f.get('d'),f:f.get('f'),t:String(f.get('t')).slice(0,60),s:0});render()}};return}
+ else if(t.hasAttribute('data-nreq')){const d=dlg(`<form method="dialog"><h2>Solicitar arte</h2><div class="f"><label>Cliente<select name="c">${clients.map(c=>`<option>${esc(c.name)}</option>`).join('')}</select></label><label>Tipo<select name="k"><option>Arte nova</option><option>Atualização</option></select></label><label>Categoria<select name="cat"><option>Recorrente</option><option>Feriado</option><option>Aulão</option><option>Outro</option></select></label><label>Prazo<input type="date" name="d" value="${iso(dt(2))}" required></label></div><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="x" formnovalidate>Cancelar</button><button class="btn pri" value="ok">Solicitar</button></div></form>`);
+  d.onclose=()=>{if(d.returnValue==='ok'){const f=new FormData(d.querySelector('form'));reqs.push({id:reqs.length+1,c:f.get('c'),k:f.get('k'),cat:f.get('cat'),d:f.get('d'),s:'Aguardando',w:f.get('k')==='Arte nova'?3:1});render()}};return}
+ render()});
+document.addEventListener('change',e=>{if(e.target.matches('[data-cs]')){ST.cid=e.target.value===''?null:+e.target.value;render()}if(e.target.matches('[data-rf]')){ST.rf=e.target.value;render()}if(e.target.matches('[data-rs]')){reqs.find(r=>r.id==e.target.dataset.rs).s=e.target.value;render()}});
+document.addEventListener('input',e=>{if(e.target.id==='q')qs(e.target.value)});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();ST.view='search';render();$('#q')&&$('#q').focus()}});
+render();
+</script>
+</body>
+</html>
