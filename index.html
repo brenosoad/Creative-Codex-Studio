@@ -308,10 +308,17 @@
       </div>
       <p class="sis-note" data-r>Exemplo: sistema de cronogramas para agências, com dados fictícios.</p>
     </div>
-    <a class="sis-fig" href="/demo-sistema/" target="_blank" rel="noopener" aria-label="Abrir demonstração do sistema" data-r>
-      <div class="sis-bar" aria-hidden="true"><i></i><i></i><i></i></div>
-      <img src="img/aprovacao-demo.jpg" alt="Exemplo de sistema: gestão de cronogramas para agências" loading="lazy" width="1280" height="800">
-    </a>
+    <div class="sis-show" data-r>
+      <a class="sis-fig" href="/demo-sistema/" target="_blank" rel="noopener" aria-label="Abrir exemplo de sistema">
+        <div class="sis-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+        <img id="sisImg" src="img/aprovacao-demo.jpg" alt="Exemplo de sistema: tela inicial com calendário e próximos posts" width="1280" height="800" loading="lazy">
+      </a>
+      <div class="sis-tabs" role="group" aria-label="Telas do exemplo">
+        <button type="button" class="on" data-img="img/aprovacao-demo.jpg" data-alt="Exemplo de sistema: tela inicial com calendário e próximos posts">Início</button>
+        <button type="button" data-img="img/sistema-artes.jpg" data-alt="Exemplo de sistema: pedidos com prazo e status">Pedidos</button>
+        <button type="button" data-img="img/sistema-financeiro.jpg" data-alt="Exemplo de sistema: controle financeiro com caixa e indicadores">Financeiro</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -495,5 +502,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
 <script src="site.js" defer></script>
+<script>
+(function(){var i=document.getElementById('sisImg');if(!i)return;var t=document.querySelectorAll('.sis-tabs button');
+t.forEach(function(b){b.addEventListener('click',function(){t.forEach(function(x){x.classList.remove('on')});b.classList.add('on');i.src=b.dataset.img;i.alt=b.dataset.alt})})})();
+</script>
 </body>
 </html>
