@@ -413,3 +413,26 @@ html.js .hero-foot[data-r].in{transform:translateX(-50%)}
 @media (max-width:760px){
   .about-grid h2,.about-grid h3,.about-grid .eyebrow,.svc h3,.svc-in h3,.pc h3,.contact-grid h2,.contact-grid h3,.contact-grid .eyebrow{text-align:center;justify-content:center}
 }
+
+/* SISTEMA */
+.sis{z-index:4}
+.sis-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(2rem,5vw,4.5rem);align-items:center}
+.sis-list{list-style:none;margin:1.6rem 0 2rem;padding:0;display:grid;gap:.8rem}
+.sis-list li{display:flex;gap:.7rem;align-items:flex-start;line-height:1.45}
+.sis-list .i{flex:none;width:20px;height:20px;margin-top:2px;fill:none;stroke:#8B7CFF;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.sis-cta{display:flex;flex-wrap:wrap;gap:.8rem}
+.sis-note{margin-top:1rem;font-size:.85rem;opacity:.6}
+.sis-fig{display:block;border-radius:14px;overflow:hidden;background:#1a1a24;box-shadow:0 30px 80px -30px rgba(75,50,217,.6),0 0 0 1px rgba(255,255,255,.1);transition:transform .5s var(--ease)}
+.sis-fig:hover{transform:translateY(-6px)}
+.sis-bar{display:flex;gap:6px;padding:10px 14px;background:#22222e}
+.sis-bar i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.25)}
+.sis-fig img{display:block;width:100%;height:auto}
+@media (max-width:860px){
+  .sis-grid{grid-template-columns:1fr}
+  .sis-txt{text-align:center}
+  .sis-list{text-align:left;max-width:30rem;margin-inline:auto}
+  .sis-cta{justify-content:center}
+  .sis-cta .btn{width:100%}
+  .sis-txt .eyebrow{justify-content:center}
+  .sis-txt .sub{margin-inline:auto}
+}
