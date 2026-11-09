@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Demonstração: reservas de excursões | Creative Codex</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--tx:#1b1d2a;--mu:#6b7085;--bd:#e4e6f0;--pr:#4B32D9;--ok:#14a76c;--wa:#e8a317;--rd:#e5484d}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx)}
+header{background:#fff;border-bottom:1px solid var(--bd);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.lg{font-weight:800;font-size:1.05rem}.lg small{display:block;font-weight:500;color:var(--mu);font-size:.75rem}
+.tag{font-size:.75rem;color:var(--mu)}.back{color:var(--pr);font-weight:600;text-decoration:none;font-size:.9rem}
+main{max-width:1100px;margin:0 auto;padding:18px;display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+h2{margin:0 0 10px;font-size:1.05rem}
+.trips{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:12px}
+.trip{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.trip.on{border-color:var(--pr);box-shadow:0 0 0 2px rgba(75,50,217,.15)}
+.trip b{display:block;font-size:1rem}.trip span{color:var(--mu);font-size:.85rem}
+.bar{height:6px;background:var(--bd);border-radius:9px;margin-top:10px;overflow:hidden}.bar i{display:block;height:100%;background:var(--pr)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px}
+.bus{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:300px;margin:0 auto}
+.bus .gap{visibility:hidden}.wheel{grid-column:1/-1;text-align:center;color:var(--mu);font-size:.78rem;padding-bottom:4px}
+.s{aspect-ratio:1;border-radius:8px;border:1px solid var(--bd);background:#fff;font:600 .78rem inherit;cursor:pointer;color:var(--tx)}
+.s.pg{background:#d9f5e8;border-color:#9edcbf;color:#0b7a4d}.s.pd{background:#fdf0d1;border-color:#f1d489;color:#8a5d00}
+.s.sel{outline:2px solid var(--pr);background:#ece9ff}
+.leg{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:14px;font-size:.78rem;color:var(--mu)}.leg i{display:inline-block;width:11px;height:11px;border-radius:3px;border:1px solid var(--bd);margin-right:5px;vertical-align:-1px}
+form{display:grid;gap:10px}label{font-size:.82rem;color:var(--mu);display:grid;gap:4px}
+input,select{font:inherit;padding:.6rem .7rem;border:1px solid var(--bd);border-radius:9px;background:#fff;width:100%}
+.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:.7rem 1rem;background:var(--pr);color:#fff;cursor:pointer}
+.btn.g{background:#fff;color:var(--rd);border:1px solid var(--bd)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.sum div{background:var(--bg);border-radius:10px;padding:10px;text-align:center}.sum b{display:block;font-size:1.15rem}.sum span{font-size:.75rem;color:var(--mu)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--bd)}th{color:var(--mu);font-weight:600;font-size:.78rem}
+.pill{border-radius:99px;padding:2px 9px;font-size:.75rem;font-weight:600;border:0;cursor:pointer;font-family:inherit}.pill.pg{background:#d9f5e8;color:#0b7a4d}.pill.pd{background:#fdf0d1;color:#8a5d00}
+.empty{color:var(--mu);text-align:center;padding:18px 0;font-size:.9rem}
+.msg{font-size:.82rem;color:var(--mu)}
+@media(max-width:820px){.grid{grid-template-columns:1fr}main{padding:14px}.box{padding:14px}.sum{gap:6px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="lg">Viagens Exemplo<small>Reservas de excursões</small></div>
+  <div class="tag">Demonstração com dados fictícios. Nada é salvo.</div>
+  <a class="back" href="/#sistema">Voltar ao site</a>
+</header>
+<main>
+  <section><h2>Próximas saídas</h2><div class="trips" id="trips"></div></section>
+  <div class="grid">
+    <section class="box"><h2 id="tt">Escolha a poltrona</h2>
+      <div class="bus" id="bus"></div>
+      <div class="leg"><span><i style="background:#fff"></i>Livre</span><span><i style="background:#d9f5e8"></i>Pago</span><span><i style="background:#fdf0d1"></i>Pendente</span><span><i style="background:#ece9ff"></i>Selecionada</span></div>
+    </section>
+    <section class="box"><h2>Reservar</h2>
+      <form id="f">
+        <label>Poltrona<input id="seat" readonly placeholder="Toque em uma poltrona livre"></label>
+        <label>Nome do passageiro<input id="nm" required placeholder="Nome completo" autocomplete="off"></label>
+        <label>WhatsApp<input id="wa" inputmode="tel" placeholder="(00) 00000-0000" autocomplete="off"></label>
+        <label>Pagamento<select id="pg"><option value="pd">Pendente</option><option value="pg">Pago</option></select></label>
+        <div class="row"><button class="btn" type="submit">Confirmar reserva</button></div>
+        <div class="msg" id="msg"></div>
+      </form>
+    </section>
+  </div>
+  <section class="box"><h2>Lista de passageiros</h2>
+    <div class="sum"><div><b id="s1">0</b><span>Reservadas</span></div><div><b id="s2">0</b><span>Livres</span></div><div><b id="s3">R$ 0</b><span>Recebido</span></div></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>Poltrona</th><th>Passageiro</th><th>WhatsApp</th><th>Pagamento</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
+    <div class="empty" id="em">Nenhuma reserva nesta saída.</div>
+  </section>
+</main>
+<script>
+var N=44,trips=[
+{n:'Foz do Iguaçu',d:'12 a 16 de dezembro',p:890,r:{3:['Marina Alves','(16) 99100-0001','pg'],4:['Carlos Mota','(16) 99100-0002','pg'],9:['Helena Duarte','(16) 99100-0003','pd'],10:['Paulo Reis','(16) 99100-0004','pd'],15:['Sônia Lima','(16) 99100-0005','pg'],22:['Rui Campos','(16) 99100-0006','pg'],23:['Bia Nunes','(16) 99100-0007','pg'],30:['Davi Prado','(16) 99100-0008','pd']}},
+{n:'Caldas Novas',d:'20 a 23 de novembro',p:640,r:{1:['Lúcia Ramos','(16) 99100-0009','pg'],2:['Tiago Silva','(16) 99100-0010','pg'],7:['Ana Paula Cruz','(16) 99100-0011','pg'],8:['Júlio Faria','(16) 99100-0012','pd'],17:['Rita Gomes','(16) 99100-0013','pg'],18:['Beto Lopes','(16) 99100-0014','pg'],25:['Clara Reis','(16) 99100-0015','pg'],26:['Nando Melo','(16) 99100-0016','pg'],31:['Iara Pinto','(16) 99100-0017','pg'],32:['Léo Matos','(16) 99100-0018','pg'],40:['Vera Souza','(16) 99100-0019','pd'],41:['Edu Franco','(16) 99100-0020','pg']}},
+{n:'Campos do Jordão',d:'5 a 7 de dezembro',p:520,r:{5:['Olga Neri','(16) 99100-0021','pg'],6:['Caio Brito','(16) 99100-0022','pd']}},
+{n:'Brás (bate e volta)',d:'Toda terça',p:120,r:{1:['Sara Lins','(16) 99100-0023','pg'],2:['Dora Vaz','(16) 99100-0024','pg'],3:['Edna Cruz','(16) 99100-0025','pg'],4:['Gil Rocha','(16) 99100-0026','pg'],5:['Jô Prado','(16) 99100-0027','pg'],11:['Kátia Dias','(16) 99100-0028','pg'],12:['Lia Torres','(16) 99100-0029','pg'],13:['Mel Costa','(16) 99100-0030','pd'],14:['Nei Alves','(16) 99100-0031','pg'],19:['Odair Luz','(16) 99100-0032','pg']}}
+];
+var cur=0,sel=null,$=function(i){return document.getElementById(i)};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function money(v){return 'R$ '+v.toLocaleString('pt-BR')}
+function render(){
+ var t=trips[cur],ks=Object.keys(t.r);
+ $('trips').innerHTML=trips.map(function(x,i){var c=Object.keys(x.r).length;return '<button type="button" class="trip'+(i==cur?' on':'')+'" data-i="'+i+'"><b>'+x.n+'</b><span>'+x.d+' · '+money(x.p)+'</span><span style="display:block;margin-top:6px">'+c+' de '+N+' poltronas</span><div class="bar"><i style="width:'+(c/N*100)+'%"></i></div></button>'}).join('');
+ $('tt').textContent=t.n+': escolha a poltrona';
+ var h='<div class="wheel">Frente do ônibus</div>';
+ for(var i=1;i<=N;i++){var r=t.r[i];h+='<button type="button" class="s'+(r?' '+r[2]:'')+(sel==i?' sel':'')+'" data-s="'+i+'" '+(r?'title="'+esc(r[0])+'"':'')+'>'+i+'</button>';if(i%4==2)h+='<span class="gap"></span>'}
+ $('bus').innerHTML=h;
+ $('tb').innerHTML=ks.sort(function(a,b){return a-b}).map(function(k){var r=t.r[k];return '<tr><td>'+k+'</td><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td><button type="button" class="pill '+r[2]+'" data-p="'+k+'">'+(r[2]=='pg'?'Pago':'Pendente')+'</button></td><td><button type="button" class="pill" style="background:#fdecec;color:#b42328" data-x="'+k+'">Cancelar</button></td></tr>'}).join('');
+ $('em').style.display=ks.length?'none':'block';
+ var paid=ks.filter(function(k){return t.r[k][2]=='pg'}).length;
+ $('s1').textContent=ks.length;$('s2').textContent=N-ks.length;$('s3').textContent=money(paid*t.p);
+ $('seat').value=sel?'Poltrona '+sel:'';
+}
+document.addEventListener('click',function(e){
+ var b=e.target.closest('button');if(!b)return;var t=trips[cur];
+ if(b.dataset.i!==undefined){cur=+b.dataset.i;sel=null;$('msg').textContent='';render()}
+ else if(b.dataset.s!==undefined){var k=+b.dataset.s;if(t.r[k]){$('msg').textContent='Poltrona '+k+' já reservada para '+t.r[k][0]+'.'}else{sel=k;$('msg').textContent='';$('nm').focus()}render()}
+ else if(b.dataset.p!==undefined){t.r[b.dataset.p][2]=t.r[b.dataset.p][2]=='pg'?'pd':'pg';render()}
+ else if(b.dataset.x!==undefined){delete t.r[b.dataset.x];render()}
+});
+$('f').addEventListener('submit',function(e){e.preventDefault();
+ if(!sel){$('msg').textContent='Escolha uma poltrona livre no mapa.';return}
+ var nm=$('nm').value.trim();if(!nm){$('msg').textContent='Informe o nome do passageiro.';return}
+ trips[cur].r[sel]=[nm,$('wa').value.trim()||'-',$('pg').value];
+ $('msg').textContent='Reserva confirmada: poltrona '+sel+', '+nm+'.';sel=null;$('nm').value='';$('wa').value='';render()});
+render();
+</script>
+</body>
+</html>
