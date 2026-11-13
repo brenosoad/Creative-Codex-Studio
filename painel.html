@@ -470,6 +470,7 @@ async function load(silent) {
 
 /* ---------- sessão ---------- */
 function boot() {
+  try { localStorage.setItem('cc_owner', '1'); } catch {}
   const t = sessionStorage.getItem('painel_token'), r = sessionStorage.getItem('painel_role');
   if (t && r) { S.token = t; S.role = r; enter(); } else showLogin();
 }
@@ -584,6 +585,7 @@ function enter() {
   load().then(() => { asBar(); if (S.welcome) welcome(isIntern() ? who(S.role).split(' ')[0] : 'Breno'); S.welcome = false; }); loadTpl();
   if (S.view === 'team' && !isIntern()) loadTeam();
   if (S.view === 'insta' && !isIntern()) loadInsta();
+  if (S.view === 'visits' && !isIntern()) loadVisits();
 }
 function asBar() {
   const bar = $('#asBar'), on = !!sessionStorage.getItem('painel_dono_token');
@@ -640,7 +642,7 @@ const VIEWS = [
   ['comm', 'Comissões', 'coin'],
   ['msgs', 'Vendas', 'chat']
 ];
-const views = () => isIntern() ? VIEWS : [...VIEWS, ['finance', 'Financeiro', 'chart'], ['insta', 'Instagram', 'insta'], ['team', 'Equipe', 'team']];
+const views = () => isIntern() ? VIEWS : [...VIEWS, ['finance', 'Financeiro', 'chart'], ['insta', 'Instagram', 'insta'], ['visits', 'Visitas', 'chart'], ['team', 'Equipe', 'team']];
 const subTabs = (v, list) => `<div class="chips" role="group">${list.map(([k, t]) => `<button class="chip ${S.sub[v] === k ? 'on' : ''}" data-act="sub" data-v="${v}" data-k="${k}">${t}</button>`).join('')}</div>`;
 const MAIN_TABS = ['overview', 'today', 'list', 'msgs'];
 function renderNav() {
@@ -660,7 +662,7 @@ function moreSheet() {
   const ov = dialog({ title: 'Mais', body: `<div style="display:grid;gap:8px">${rest.map(([k, n, i]) => `<button type="button" class="btn gh" data-mv="${k}" style="justify-content:flex-start">${ic(i)}${n}</button>`).join('')}${!isIntern() ? `<button type="button" class="btn gh" data-mv="__as" style="justify-content:flex-start">${ic('users')}Trocar de conta</button>` : ''}</div>`, ok: 'Fechar' });
   ov.querySelectorAll('[data-mv]').forEach((b) => { b.onclick = () => { ov._close(false); if (b.dataset.mv === '__as') accountSheet(); else setView(b.dataset.mv); }; });
 }
-function setView(v) { S.view = v; saveUI(); render(); window.scrollTo(0, 0); if (v === 'team') loadTeam(); if (v === 'insta') loadInsta(); if (v === 'msgs') loadCts(); }
+function setView(v) { S.view = v; saveUI(); render(); window.scrollTo(0, 0); if (v === 'team') loadTeam(); if (v === 'insta') loadInsta(); if (v === 'visits') loadVisits(); if (v === 'msgs') loadCts(); }
 
 /* ---------- métricas ---------- */
 function metrics() {
@@ -696,7 +698,7 @@ function chartHtml(m, field) {
 function render() {
   if (!S.token) return;
   renderNav();
-  if ((S.view === 'team' || S.view === 'finance' || S.view === 'insta') && isIntern()) S.view = 'overview';
+  if ((S.view === 'team' || S.view === 'finance' || S.view === 'insta' || S.view === 'visits') && isIntern()) S.view = 'overview';
   const v = views().find((x) => x[0] === S.view) || VIEWS[0];
   $('#title').textContent = v[1];
   { const nb = $('[data-act="new"]'); if (nb) nb.hidden = S.view !== 'list'; }
@@ -708,13 +710,14 @@ function render() {
     comm: () => 'Comissão por site fechado',
     msgs: () => 'Propostas e mensagens prontas',
     insta: () => '@creativecodex.studio',
+    visits: () => 'Quem acessou o site nos últimos 30 dias',
     finance: () => 'Faturamento, comissões e lucro',
     team: () => 'Quem trabalha nos seus leads'
   };
   $('#subtitle').textContent = sub[S.view]();
   const el = $('#view');
   const focus = document.activeElement && document.activeElement.id === 'q' ? document.activeElement.selectionStart : null;
-  el.innerHTML = ({ overview: vOverview, today: vToday, funnel: vFunnel, list: vList, comm: vComm, finance: vFinance, team: vTeam, msgs: vMsgs, insta: vInsta }[S.view])();
+  el.innerHTML = ({ overview: vOverview, today: vToday, funnel: vFunnel, list: vList, comm: vComm, finance: vFinance, team: vTeam, msgs: vMsgs, insta: vInsta, visits: vVisits }[S.view])();
   if (S.view === 'funnel') bindDnD();
   if (focus !== null) { const q = $('#q'); if (q) { q.focus(); q.setSelectionRange(focus, focus); } }
 }
@@ -828,6 +831,43 @@ function vList() {
     <td data-l="Próximo"><span class="nc ${isOpen(p) ? n.c : ''}">${isOpen(p) ? n.t : '-'}</span></td>
     <td class="c-act"><div class="acts">${locked(p) ? '' : `${wa ? `<a class="ib" data-wa="${esc(p.id)}" href="${wa}" target="_blank" rel="noopener" aria-label="WhatsApp">${ic('wa')}</a>` : ''}<button class="ib" data-act="edit" data-id="${esc(p.id)}" aria-label="Editar">${ic('edit')}</button><button class="ib del" data-act="del" data-id="${esc(p.id)}" aria-label="Excluir">${ic('trash')}</button>`}</div></td></tr>`; }).join('')}</tbody></table>`
     : `<div class="empty">${ic('users')}<p>${S.prospects.length ? 'Nada encontrado com esses filtros.' : 'Nenhum prospecto ainda. Clique em "Novo prospecto".'}</p></div>`}</div>`;
+}
+
+/* ---------- visitas ao site (só o dono) ---------- */
+async function loadVisits() {
+  try { S.visits = await api('GET', null, '?action=stats'); }
+  catch (e) { if (e.message !== 'sessão') toast('Não consegui carregar as visitas: ' + e.message, { type: 'err' }); S.visits = S.visits || { days: [], pages: {}, refs: {}, devs: {}, u7: 0, u30: 0 }; }
+  if (S.view === 'visits') render();
+}
+function vVisits() {
+  const v = S.visits;
+  if (!v) return '<div class="card empty"><p>Carregando...</p></div>';
+  const days = v.days, n = (x) => Number(x || 0).toLocaleString('pt-BR');
+  const last = days[days.length - 1] || { u: 0, pv: 0 };
+  const pv7 = days.slice(-7).reduce((s, d) => s + d.pv, 0), pv30 = days.reduce((s, d) => s + d.pv, 0);
+  const card = (l, big, sub) => `<div class="card kpi"><div class="lbl">${l}</div><div class="big">${big}</div><div class="sub">${sub}</div></div>`;
+  const max = Math.max(1, ...days.map((d) => d.u));
+  const chart = `<div class="chart" style="gap:3px">${days.map((d, i) => `<div class="col ${i === days.length - 1 ? 'cur' : ''}"><span style="height:${Math.max(2, Math.round(d.u / max * 100))}%;max-width:none" title="${d.d.split('-').reverse().slice(0, 2).join('/')}: ${d.u} visitante${d.u === 1 ? '' : 's'}, ${d.pv} visualizações"></span></div>`).join('')}</div>
+    <div class="row" style="margin-top:6px;font:500 .72rem var(--mono);color:var(--dim)"><span>${days[0] ? days[0].d.split('-').reverse().slice(0, 2).join('/') : ''}</span><span>hoje</span></div>`;
+  const list = (obj, empty) => {
+    const e = Object.entries(obj).sort((a, b) => b[1] - a[1]).slice(0, 6), t = Math.max(1, ...e.map((x) => x[1]));
+    return e.length ? `<div class="funnel">${e.map(([k, c]) => `<div class="fr" style="grid-template-columns:minmax(0,1fr) 90px 44px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(k)}</span><div class="bar"><i style="width:${Math.round(c / t * 100)}%"></i></div><b>${n(c)}</b></div>`).join('')}</div>` : `<p class="hint" style="margin:0">${empty}</p>`;
+  };
+  const names = { '/': 'Site (português)', '/index-en.html': 'Site (inglês)', '/demo-sistema/': 'Demo do sistema', '/demo-reservas/': 'Demo de reservas', '/demo-aprovacao/': 'Demo de aprovação', '/outros': 'Outras páginas' };
+  const pages = Object.fromEntries(Object.entries(v.pages).map(([k, c]) => [names[k] || k, c]));
+  return `<div class="grid g4" style="margin-bottom:14px">
+    ${card('Hoje', n(last.u), `${n(last.pv)} visualizações`)}
+    ${card('7 dias', n(v.u7), `${n(pv7)} visualizações`)}
+    ${card('30 dias', n(v.u30), `${n(pv30)} visualizações`)}
+    ${card('Média por dia', n(Math.round(days.reduce((t, d) => t + d.u, 0) / Math.max(1, days.length))), 'visitantes por dia')}
+  </div>
+  <div class="card" style="margin-bottom:14px"><h3>${ic('chart')}Visitantes por dia</h3>${chart}</div>
+  <div class="grid g2">
+    <div class="card"><h3>Páginas mais vistas</h3>${list(pages, 'Ainda sem dados.')}</div>
+    <div class="card"><h3>De onde vêm</h3>${list(v.refs, 'Ainda sem dados.')}</div>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>Aparelho</h3>${list(v.devs, 'Ainda sem dados.')}</div>
+  <p class="hint" style="margin-top:12px">Contagem anônima, sem guardar IP nem dados pessoais. Suas visitas e as de robôs não entram. Os números começam a partir de hoje.</p>`;
 }
 
 /* ---------- equipe (só o dono) ---------- */

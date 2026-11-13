@@ -317,6 +317,27 @@ export default async function handler(req, res) {
       return res.status(200).json({ token: makeToken(e.id, secret), role: e.id });
     }
 
+    // visitas ao site (só o dono)
+    if (req.query.action === 'stats') {
+      if (role !== 'dono') return res.status(403).json({ error: 'Sem permissão.' });
+      const N = 30, days = [];
+      for (let i = N - 1; i >= 0; i--) days.push(new Date(Date.now() - 3 * 3600e3 - i * 86400e3).toISOString().slice(0, 10));
+      const [uniq, pv, pgs, rfs, dvs] = await Promise.all([
+        Promise.all(days.map((d) => kv.pfcount('vis_u_' + d))),
+        Promise.all(days.map((d) => kv.get('vis_pv_' + d))),
+        Promise.all(days.map((d) => kv.hgetall('vis_pg_' + d))),
+        Promise.all(days.map((d) => kv.hgetall('vis_rf_' + d))),
+        Promise.all(days.map((d) => kv.hgetall('vis_dv_' + d)))
+      ]);
+      const sumMap = (list) => { const o = {}; for (const m of list) for (const [k, v] of Object.entries(m || {})) o[k] = (o[k] || 0) + Number(v); return o; };
+      const u7 = await kv.pfcount(...days.slice(-7).map((d) => 'vis_u_' + d));
+      const u30 = await kv.pfcount(...days.map((d) => 'vis_u_' + d));
+      return res.status(200).json({
+        days: days.map((d, i) => ({ d, u: uniq[i] || 0, pv: Number(pv[i]) || 0 })),
+        u7, u30, pages: sumMap(pgs), refs: sumMap(rfs), devs: sumMap(dvs)
+      });
+    }
+
     // dados da empresa (contratada nos contratos)
     if (req.query.action === 'company') {
       if (req.method === 'POST') {

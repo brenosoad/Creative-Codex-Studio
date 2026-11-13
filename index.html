@@ -511,5 +511,11 @@
 (function(){var i=document.getElementById('sisImg');if(!i)return;var t=document.querySelectorAll('.sis-tabs button');
 t.forEach(function(b){b.addEventListener('click',function(){t.forEach(function(x){x.classList.remove('on')});b.classList.add('on');i.src=b.dataset.img;i.alt=b.dataset.alt})})})();
 </script>
+<script>
+(function(){try{var h=location.hostname;if(h!=='creativecodex.com.br'&&h!=='www.creativecodex.com.br')return;if(localStorage.getItem('cc_owner'))return;
+var id=localStorage.getItem('cc_vid');if(!id){id=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('cc_vid',id)}
+var b=JSON.stringify({id:id,path:location.pathname,ref:document.referrer});
+if(navigator.sendBeacon)navigator.sendBeacon('/api/track',new Blob([b],{type:'application/json'}));else fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:b,keepalive:true})}catch(e){}})();
+</script>
 </body>
 </html>
