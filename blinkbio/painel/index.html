@@ -18,7 +18,7 @@ main{max-width:960px;margin:0 auto}
 header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:24px}
 h1{line-height:0}
 h1 .logo{height:54px;width:auto;display:block}
-#login h1 .logo{height:64px;margin:0 auto}
+#login h1 .logo{height:72px;margin:0 auto 28px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .range{display:flex;gap:6px}
 select{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px}
@@ -39,8 +39,9 @@ h2{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
 .days i{flex:1;background:var(--brand);border-radius:3px 3px 0 0;min-height:2px;opacity:.9}
 .days i:hover{opacity:1;background:var(--brand-2)}
 .empty{color:var(--mut)}
-#login{max-width:360px;margin:12vh auto;text-align:center}
-#login input{width:100%;margin:16px 0 10px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0b0b0b;color:#fff;font:inherit}
+#login{max-width:360px;min-height:80vh;margin:0 auto;display:flex;flex-direction:column;justify-content:center;text-align:center}
+#login input{width:100%;margin:0 0 10px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:#fff;font:inherit}
+#login input:focus{outline:2px solid var(--brand);border-color:transparent}
 #login button{width:100%;padding:12px;border:0;border-radius:12px;background:var(--brand);color:#fff;font:inherit;font-weight:800;cursor:pointer}
 #err{color:#ff7a7a;font-size:13px;min-height:20px;margin-top:8px}
 [hidden]{display:none!important}
