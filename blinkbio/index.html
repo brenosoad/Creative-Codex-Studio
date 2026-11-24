@@ -190,8 +190,9 @@
 
   footer { text-align: center; font-size: 12px; color: #6f6f6f; margin-top: 26px; line-height: 1.7; }
   footer strong { color: #fff; font-size: 14.5px; }
-  footer .credit { color: #a3a3a3; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(var(--o-rgb), .6); transition: color .2s; }
-  footer .credit:hover { color: var(--orange); }
+  footer .credit { display: inline-block; margin-top: 12px; opacity: .8; transition: opacity .2s; }
+  footer .credit img { display: block; height: 30px; width: auto; }
+  footer .credit:hover { opacity: 1; }
 
   /* Botão flutuante */
   .fab {
@@ -391,7 +392,7 @@
     <section class="cards">${(cfg.cards || []).map(card).join('')}</section>
     <footer>
       <strong>© ${esc(cfg.nome)}</strong><br>
-      Desenvolvido por <a class="credit" href="https://www.creativecodex.com.br/" target="_blank" rel="noopener">Creative Codex Studio</a>
+      <a class="credit" href="https://www.creativecodex.com.br/" target="_blank" rel="noopener" aria-label="Desenvolvido por BlinkBio, Creative Codex Studio"><img src="assets/logo-dark.png" width="120" height="30" alt="BlinkBio by Creative Codex" loading="lazy" decoding="async"></a>
     </footer>`;
   if (fabC) $('#fab-slot').innerHTML = `<a class="fab" id="fab" data-id="${esc(fabC.id || 'fab')}" target="_blank" rel="noopener" aria-label="${esc(fabC.aria || fabC.texto)}" href="${esc(url(fabC.link))}">${esc(fabC.texto)} ${ARROW}</a>`;
 
