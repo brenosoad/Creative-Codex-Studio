@@ -5,9 +5,11 @@ const SLUG = /^[a-z0-9-]{1,32}$/;
 
 module.exports = async (req, res) => {
   if (req.method === 'DELETE') {
-    if (!isAdmin(req)) return res.status(401).json({ error: 'unauthorized' });
     try {
-      const c = String(req.query.c || '');
+      const admin = isAdmin(req), own = admin ? null : await clientFor(req);
+      if (!admin && !own) return res.status(401).json({ error: 'unauthorized' });
+      // Cliente só apaga os próprios dados, ignorando ?c.
+      const c = own || String(req.query.c || '');
       if (c && !SLUG.test(c)) return res.status(400).json({ error: 'slug' });
       const [keys] = await pipeline([['KEYS', c ? `bb:${c}:*` : 'bb:*']]);
       for (let i = 0; i < keys.length; i += 100) await pipeline(keys.slice(i, i + 100).map(k => ['DEL', k]));
