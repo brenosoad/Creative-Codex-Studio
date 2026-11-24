@@ -153,6 +153,15 @@ tr.click:hover td{background:var(--card-2)}
 .st.ok{background:rgba(52,211,153,.15);border-color:#34d399;color:#34d399}
 .st.late{border-color:#ff8f8f;color:#ff8f8f}
 .backb{margin-bottom:12px}
+.exp-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.exp-form select{padding:8px 12px}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mut);white-space:nowrap}
+.socios{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.socio{border:1px solid var(--line);border-radius:14px;padding:14px}
+.socio b{display:block;font-size:15px;margin-bottom:8px}
+.socio .ln{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:3px 0;color:var(--mut)}
+.socio .ln span:last-child{color:#fff;font-weight:700}
+.acerto{grid-column:1/-1;font-weight:700;font-size:14px;color:var(--brand-2);text-align:center;padding:4px 0 0}
 </style>
 </head>
 <body>
@@ -216,7 +225,18 @@ tr.click:hover td{background:var(--card-2)}
     <div class="seg" id="finMes" role="group" aria-label="Mês"><button type="button" data-m="-1" aria-label="Mês anterior">‹</button><button type="button" id="finLbl" disabled style="min-width:150px"></button><button type="button" data-m="1" aria-label="Próximo mês">›</button></div>
   </div>
   <div class="kpis" id="finKpis"></div>
-  <div class="box"><h2>Mensalidades</h2><div class="scroll"><table id="finTbl"></table></div></div>
+  <div class="box" style="margin-bottom:12px"><h2>Mensalidades</h2><div class="scroll"><table id="finTbl"></table></div></div>
+  <div class="box" style="margin-bottom:12px"><h2>Gastos</h2>
+    <form id="expForm" class="exp-form" autocomplete="off">
+      <input class="fin-in" name="desc" type="text" maxlength="80" placeholder="Descrição (ex.: Domínio, Vercel)" required style="flex:2 1 160px;width:auto">
+      <input class="fin-in" name="valor" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Valor" required style="flex:1 1 90px">
+      <select name="quem" aria-label="Quem pagou"><option value="empresa">Empresa</option><option value="breno">Breno</option><option value="fabio">Fábio</option></select>
+      <label class="chk"><input type="checkbox" name="fixo"> Todo mês</label>
+      <button class="btn pri sm" type="submit">Adicionar</button>
+    </form>
+    <div class="scroll"><table id="expTbl"></table></div>
+  </div>
+  <div class="box"><h2>Sócios</h2><div class="socios" id="socios"></div></div>
 </section>
 
 <section id="editor" hidden>
@@ -711,13 +731,13 @@ function showTab(t) {
 $('#tabs').onclick = e => { const b = e.target.closest('button'); if (b) showTab(b.dataset.tab); };
 
 /* ---- financeiro ---- */
-const fin = { items: {}, ym: '' };
+const fin = { items: {}, exp: [], ym: '' };
 const brl = n => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const ymOf = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 fin.ym = ymOf(new Date());
 async function loadFin() {
   if (!ed.list.length) await loadList();
-  if (!DEMO) { try { const r = await fetch(`${EAPI}/finance`, { headers: { 'X-Key': key }, cache: 'no-store' }); if (r.ok) fin.items = (await r.json()).items; } catch {} }
+  if (!DEMO) { try { const r = await fetch(`${EAPI}/finance`, { headers: { 'X-Key': key }, cache: 'no-store' }); if (r.ok) { const j = await r.json(); fin.items = j.items; fin.exp = j.exp || []; } } catch {} }
   drawFin();
 }
 function drawFin() {
@@ -726,8 +746,13 @@ function drawFin() {
   const L = ed.list.map(c => ({ slug: c.slug, nome: c.nome, f: fin.items[c.slug] || { valor: 0, venc: 10, obs: '', pagos: {} } }));
   let prev = 0, rec = 0, pay = 0;
   L.forEach(c => { prev += c.f.valor; if (c.f.pagos[fin.ym]) { rec += c.f.valor; pay++; } });
-  $('#finKpis').innerHTML = [['Previsto', brl(prev), 'no mês'], ['Recebido', brl(rec), `${pay} de ${L.length} clientes`], ['Pendente', brl(prev - rec), `${L.length - pay} em aberto`], ['Clientes', String(L.length), 'cadastrados']]
-    .map(([a, b, c]) => `<div class="box kpi"><h2>${a}</h2><b>${b}</b><small class="flat">${c}</small></div>`).join('');
+  const ex = fin.exp.filter(e => e.mes === fin.ym || (e.fixo && e.mes < fin.ym)), gasto = ex.reduce((a, e) => a + e.valor, 0);
+  const por = q => ex.filter(e => e.quem === q).reduce((a, e) => a + e.valor, 0), pB = por('breno'), pF = por('fabio'), lucro = rec - gasto;
+  $('#finKpis').innerHTML = [['Previsto', brl(prev), `${brl(prev - rec)} pendente`], ['Recebido', brl(rec), `${pay} de ${L.length} clientes`], ['Gastos', brl(gasto), `${ex.length} lançamento${ex.length === 1 ? '' : 's'}`], ['Lucro', brl(lucro), 'recebido − gastos']]
+    .map(([a, b, c]) => `<div class="box kpi"><h2>${a}</h2><b ${a === 'Lucro' && lucro < 0 ? 'style="color:#ff8f8f"' : ''}>${b}</b><small class="flat">${c}</small></div>`).join('');
+  $('#expTbl').innerHTML = ex.length ? `<thead><tr><th>Descrição</th><th>Valor</th><th>Pago por</th><th></th></tr></thead><tbody>${ex.map(e => `<tr><td>${esc(e.desc || '—')}${e.fixo ? ' <small class="mut">· todo mês</small>' : ''}</td><td>${brl(e.valor)}</td><td>${{ breno: 'Breno', fabio: 'Fábio', empresa: 'Empresa' }[e.quem]}</td><td><button type="button" class="ibtn" data-del="${esc(e.id)}" aria-label="Remover">✕</button></td></tr>`).join('')}</tbody>` : '<tbody><tr><td class="empty">Nenhum gasto neste mês.</td></tr></tbody>';
+  const dif = (pB - pF) / 2, cash = (n, p) => `<div class="socio"><b>${n}</b><div class="ln"><span>Parte do lucro (50%)</span><span>${brl(lucro / 2)}</span></div><div class="ln"><span>Gastos que pagou</span><span>${brl(p)}</span></div></div>`;
+  $('#socios').innerHTML = cash('Breno', pB) + cash('Fábio', pF) + `<div class="acerto">${Math.abs(dif) < 0.005 ? 'Sócios em dia: nada a acertar.' : dif > 0 ? `Fábio deve ${brl(dif)} ao Breno` : `Breno deve ${brl(-dif)} ao Fábio`}</div>`;
   const late = c => !c.f.pagos[fin.ym] && c.f.valor > 0 && (fin.ym < today || (fin.ym === today && now.getDate() > c.f.venc));
   $('#finTbl').innerHTML = L.length ? `<thead><tr><th>Cliente</th><th>Valor (R$)</th><th>Vence dia</th><th>Obs.</th><th>${esc('Status')}</th></tr></thead><tbody>${L.map(c => `<tr data-s="${esc(c.slug)}"><td>${esc(c.nome)}</td><td><input class="fin-in" data-f="valor" type="number" min="0" step="0.01" inputmode="decimal" value="${c.f.valor || ''}" placeholder="0,00"></td><td><input class="fin-in sm" data-f="venc" type="number" min="1" max="31" inputmode="numeric" value="${c.f.venc}"></td><td><input class="fin-in" style="width:140px" data-f="obs" type="text" maxlength="200" value="${esc(c.f.obs)}" placeholder="—"></td><td><button type="button" class="st ${c.f.pagos[fin.ym] ? 'ok' : late(c) ? 'late' : ''}" data-f="pago">${c.f.pagos[fin.ym] ? 'Pago' : late(c) ? 'Atrasado' : 'Pendente'}</button></td></tr>`).join('')}</tbody>` : '<tbody><tr><td class="empty">Nenhum cliente cadastrado.</td></tr></tbody>';
 }
@@ -738,6 +763,24 @@ async function saveFin(slug) {
     if (!r.ok) throw 0; fin.items[slug] = (await r.json()).fin;
   } catch { ptoast('Não consegui salvar.', true); }
 }
+async function saveExp() {
+  if (DEMO) return;
+  try {
+    const r = await fetch(`${EAPI}/finance?exp=1`, { method: 'POST', headers: { 'X-Key': key, 'Content-Type': 'application/json' }, body: JSON.stringify({ list: fin.exp }) });
+    if (!r.ok) throw 0; fin.exp = (await r.json()).exp;
+  } catch { ptoast('Não consegui salvar.', true); }
+}
+$('#expForm').onsubmit = async e => {
+  e.preventDefault();
+  const f = e.target, v = +f.valor.value;
+  if (!(v > 0)) return;
+  fin.exp.push({ id: 'e' + Date.now().toString(36), desc: f.desc.value.trim(), valor: v, mes: fin.ym, quem: f.quem.value, fixo: f.fixo.checked ? 1 : 0 });
+  f.reset(); drawFin(); await saveExp(); drawFin();
+};
+$('#expTbl').addEventListener('click', async e => {
+  const b = e.target.closest('[data-del]'); if (!b) return;
+  fin.exp = fin.exp.filter(x => x.id !== b.dataset.del); drawFin(); await saveExp(); drawFin();
+});
 $('#finMes').onclick = e => {
   const b = e.target.closest('[data-m]'); if (!b) return;
   const [y, m] = fin.ym.split('-').map(Number); fin.ym = ymOf(new Date(y, m - 1 + +b.dataset.m, 1)); drawFin();
