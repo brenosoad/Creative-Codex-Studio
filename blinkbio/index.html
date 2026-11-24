@@ -397,7 +397,7 @@
   if (fabC) $('#fab-slot').innerHTML = `<a class="fab" id="fab" data-id="${esc(fabC.id || 'fab')}" target="_blank" rel="noopener" aria-label="${esc(fabC.aria || fabC.texto)}" href="${esc(url(fabC.link))}">${esc(fabC.texto)} ${ARROW}</a>`;
 
   /* Interações */
-  track('page_view');
+  track('page_view', { ref: document.referrer });
   document.addEventListener('click', e => {
     const el = e.target.closest('a, button');
     if (!el) return;

@@ -11,40 +11,84 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--brand:#4B32D9;--brand-2:#8B7CFF;--bg:#0D0B1A;--card:#17142B;--line:#2A2650;--mut:#9a98b8}
+:root{--brand:#4B32D9;--brand-2:#8B7CFF;--bg:#0D0B1A;--card:#17142B;--card-2:#1d1938;--line:#2A2650;--mut:#9a98b8;--ok:#34d399;--bad:#f87171;--amber:#ffb547}
 *{box-sizing:border-box;margin:0}
-body{background:var(--bg);color:#fff;font:500 15px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;padding:24px 16px 56px}
-main{max-width:960px;margin:0 auto}
-header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:24px}
+body{background:var(--bg);color:#fff;font:500 14px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;padding:20px 16px 64px}
+main{max-width:1120px;margin:0 auto}
+button,select{font:inherit}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 h1{line-height:0}
 h1 .logo{height:54px;width:auto;display:block}
 #login h1 .logo{height:72px;margin:0 auto 28px}
-.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.range{display:flex;gap:6px}
-select{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px}
-.range button{background:none;border:1px solid var(--line);color:#fff;font:inherit;font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px;cursor:pointer}
-.range button[aria-pressed=true]{background:var(--brand);border-color:var(--brand)}
+h2{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.mut{color:var(--mut)}
+[hidden]{display:none!important}
+
+/* topo */
+header{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:space-between;margin-bottom:18px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{background:none;border:0;color:var(--mut);font-weight:700;font-size:13px;padding:7px 13px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--brand);color:#fff}
+select,.btn{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer}
+.btn:hover,select:hover{border-color:var(--brand-2)}
+.upd{font-size:12px;color:var(--mut)}
+
+/* kpis */
 .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
-@media(min-width:720px){.kpis{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:760px){.kpis{grid-template-columns:repeat(4,1fr)}}
 .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
-.kpi b{display:block;font:400 clamp(30px,6vw,44px)/1 Anton,sans-serif;color:var(--brand-2)}
-.kpi span{color:var(--mut);font-size:13px}
-h2{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:14px}
-.grid{display:grid;gap:12px}
-@media(min-width:720px){.grid{grid-template-columns:3fr 2fr}}
-.bar{display:grid;grid-template-columns:110px 1fr 48px;gap:10px;align-items:center;margin:10px 0;font-size:14px}
-.bar i{display:block;height:10px;border-radius:6px;background:linear-gradient(90deg,var(--brand),var(--brand-2));min-width:2px}
-.bar span:last-child{text-align:right;font-weight:800}
-.days{display:flex;align-items:flex-end;gap:3px;height:120px}
-.days i{flex:1;background:var(--brand);border-radius:3px 3px 0 0;min-height:2px;opacity:.9}
-.days i:hover{opacity:1;background:var(--brand-2)}
-.empty{color:var(--mut)}
+.kpi b{display:block;font:400 clamp(30px,5vw,42px)/1.05 Anton,sans-serif;color:var(--brand-2);margin:6px 0 4px}
+.kpi small{font-size:12px;font-weight:700}
+.up{color:var(--ok)}.down{color:var(--bad)}.flat{color:var(--mut)}
+
+/* layout */
+.grid{display:grid;gap:12px;margin-bottom:12px}
+@media(min-width:900px){.g2{grid-template-columns:1fr 1fr}.g32{grid-template-columns:3fr 2fr}.g3{grid-template-columns:repeat(3,1fr)}}
+.insights{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{background:var(--card-2);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px}
+.chip b{color:var(--brand-2)}
+
+/* gráfico */
+.chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--mut)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.chart{position:relative}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:#0b0918;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;white-space:nowrap;transform:translate(-50%,-110%);z-index:3}
+.tip b{display:block;margin-bottom:2px}
+
+/* tabelas e barras */
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:right;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);padding:8px 6px}
+th:first-child,td:first-child{text-align:left}
+td{text-align:right;padding:10px 6px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+td:first-child{font-weight:700}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--card-2)}
+.bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-2));border-radius:4px}
+.row{margin:14px 0}
+.row .top{display:flex;justify-content:space-between;gap:10px}
+.row .top span:last-child{font-weight:800;font-variant-numeric:tabular-nums}
+.hours{display:flex;align-items:flex-end;gap:3px;height:110px;margin-top:14px}
+.hours i{flex:1;background:var(--brand);border-radius:3px 3px 0 0;min-height:2px;opacity:.85;position:relative}
+.hours i.max{background:var(--brand-2);opacity:1}
+.hl{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);margin-top:6px}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
+.wk div{text-align:center;font-size:11px;color:var(--mut)}
+.wk i{display:block;height:54px;border-radius:8px;margin-bottom:6px}
+.empty{color:var(--mut);padding:18px 0;text-align:center}
+.spark{width:84px;height:24px;vertical-align:middle}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:640px){.hide-s{display:none}.box{padding:14px}td,th{padding-left:4px;padding-right:4px}}
+
+/* login */
 #login{max-width:360px;min-height:80vh;margin:0 auto;display:flex;flex-direction:column;justify-content:center;text-align:center}
 #login input{width:100%;margin:0 0 10px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:#fff;font:inherit}
 #login input:focus{outline:2px solid var(--brand);border-color:transparent}
-#login button{width:100%;padding:12px;border:0;border-radius:12px;background:var(--brand);color:#fff;font:inherit;font-weight:800;cursor:pointer}
+#login button{width:100%;padding:12px;border:0;border-radius:12px;background:var(--brand);color:#fff;font-weight:800;cursor:pointer}
 #err{color:#ff7a7a;font-size:13px;min-height:20px;margin-top:8px}
-[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -58,115 +102,273 @@ h2{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
 <main id="app" hidden>
   <header>
     <h1><img class="logo" src="../assets/logo-dark.png" alt="BlinkBio by Creative Codex" width="220" height="56"><span class="sr-only">Painel</span></h1>
-    <select id="site" hidden aria-label="Cliente"></select>
-    <div class="range" id="range">
-      <button data-d="7" aria-pressed="false">7 dias</button>
-      <button data-d="30" aria-pressed="true">30 dias</button>
-      <button data-d="90" aria-pressed="false">90 dias</button>
+    <div class="tools">
+      <select id="site" aria-label="Cliente"></select>
+      <div class="seg" id="range" role="group" aria-label="Período">
+        <button data-d="1" aria-pressed="false">Hoje</button>
+        <button data-d="7" aria-pressed="false">7 dias</button>
+        <button data-d="30" aria-pressed="true">30 dias</button>
+        <button data-d="90" aria-pressed="false">90 dias</button>
+      </div>
+      <button class="btn" id="refresh" type="button">Atualizar</button>
+      <button class="btn" id="csv" type="button">CSV</button>
     </div>
   </header>
-  <div class="kpis">
-    <div class="box kpi"><b id="k-views">0</b><span>Visitas</span></div>
-    <div class="box kpi"><b id="k-clicks">0</b><span>Cliques em links</span></div>
-    <div class="box kpi"><b id="k-copies">0</b><span>Cupons copiados</span></div>
-    <div class="box kpi"><b id="k-ctr">0%</b><span>Taxa de clique</span></div>
+  <p class="upd" id="upd" style="margin:-6px 0 14px"></p>
+
+  <div class="kpis" id="kpis"></div>
+  <div class="insights" id="insights"></div>
+
+  <div class="box chart-head-wrap" style="margin-bottom:12px">
+    <div class="chart-head">
+      <h2>Visitas e cliques por dia</h2>
+      <div class="legend"><span><i style="background:var(--brand-2)"></i>Visitas</span><span><i style="background:var(--amber)"></i>Cliques</span></div>
+    </div>
+    <div class="chart" id="chart"></div>
   </div>
-  <div class="grid">
-    <div class="box"><h2>Por card</h2><div id="cards"></div></div>
-    <div class="box"><h2>Visitas por dia</h2><div class="days" id="days"></div></div>
+
+  <div class="grid g32">
+    <div class="box"><h2>Desempenho por card</h2><div id="cards"></div></div>
+    <div class="box"><h2>Origem das visitas</h2><div id="refs"></div></div>
+  </div>
+
+  <div class="box" id="clientsBox" style="margin-bottom:12px"><h2>Clientes</h2><div id="clients"></div></div>
+
+  <div class="grid g3">
+    <div class="box"><h2>Dispositivo</h2><div id="devs"></div></div>
+    <div class="box"><h2>Horário das visitas</h2><div id="hours"></div></div>
+    <div class="box"><h2>Dia da semana</h2><div id="wk"></div></div>
   </div>
 </main>
 
 <script>
-/* URL do Worker (Cloudflare). Use ?demo para ver com dados de exemplo. */
+/* URL da API. Use ?demo para ver com dados de exemplo. */
 const API = '/api/blinkbio/stats';
-const NOMES = {
-  'capa-anuncie':'Anuncie (capa)','growth':'Growth','letz':"Let'z",'petiko':'BOX Petiko',
-  'sorteio':'Sorteio','youtube':'YouTube','fab-anunciar':'Botão Anunciar'
-};
+const NOMES = { 'capa-anuncie': 'Anuncie (capa)', 'fab-anunciar': 'Botão Anunciar' };
 const $ = s => document.querySelector(s);
-let rows = [], days = 30, site = '';
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nf = n => Math.round(n).toLocaleString('pt-BR');
+const DEMO = location.search.includes('demo');
+const brt = t => new Date(t - 3 * 3600e3).toISOString().slice(0, 10);
+const dayOf = off => brt(Date.now() - off * 864e5);
 
-const demo = () => {
-  const ids = Object.keys(NOMES), out = [];
-  for (let i = 0; i < 90; i++) {
-    const day = new Date(Date.now() - i * 864e5).toISOString().slice(0, 10);
-    const v = 80 + Math.floor(Math.random() * 120);
-    out.push({ site: 'sancaporai', day, event: 'page_view', id: '-', n: v });
-    ids.forEach((id, j) => {
-      out.push({ site: 'sancaporai', day, event: 'abrir_link', id, n: Math.floor(v * (0.22 - j * 0.025) * Math.random()) });
-      if (['growth', 'letz', 'petiko'].includes(id)) out.push({ site: 'sancaporai', day, event: 'copiar_cupom', id, n: Math.floor(v * 0.08 * Math.random()) });
-    });
-  }
+let rows = [], sites = [], conf = {}, days = 30, site = '', key = '', timer = 0;
+
+/* ---------- dados ---------- */
+function demoRows() {
+  const out = [], cl = {
+    sancaporai: ['capa-anuncie', 'growth', 'letz', 'petiko', 'sorteio', 'youtube', 'fab-anunciar'],
+    'academia-forte': ['capa-anuncie', 'planos', 'aula-gratis', 'whatsapp'],
+    'restaurante-sabor': ['capa-anuncie', 'cardapio', 'delivery', 'reservas']
+  }, base = { sancaporai: 160, 'academia-forte': 70, 'restaurante-sabor': 110 };
+  Object.entries(cl).forEach(([s, ids]) => {
+    for (let i = 0; i < 120; i++) {
+      const day = dayOf(i), wd = new Date(day + 'T12:00:00Z').getUTCDay();
+      const v = Math.round(base[s] * (0.7 + Math.random() * 0.6) * (wd === 0 || wd === 6 ? 1.25 : 1) * (1 + (120 - i) / 400));
+      out.push({ site: s, day, event: 'page_view', id: '-', n: v });
+      out.push({ site: s, day, event: 'dev', id: 'celular', n: Math.round(v * 0.9) });
+      out.push({ site: s, day, event: 'dev', id: 'computador', n: v - Math.round(v * 0.9) });
+      [['instagram', .72], ['whatsapp', .12], ['direto', .1], ['outros', .06]].forEach(([r, p]) => out.push({ site: s, day, event: 'ref', id: r, n: Math.round(v * p) }));
+      for (let h = 0; h < 24; h++) { const w = [1, 1, 0, 0, 0, 1, 2, 4, 5, 5, 6, 8, 9, 7, 6, 6, 7, 9, 12, 14, 13, 9, 5, 2][h]; out.push({ site: s, day, event: 'hr', id: String(h).padStart(2, '0'), n: Math.round(v * w / 130) }); }
+      ids.forEach((id, j) => {
+        out.push({ site: s, day, event: 'abrir_link', id, n: Math.round(v * Math.max(.04, .24 - j * .03) * Math.random()) });
+        if (j && j < 4) out.push({ site: s, day, event: 'copiar_cupom', id, n: Math.round(v * .07 * Math.random()) });
+      });
+    }
+  });
   return out;
+}
+
+async function load() {
+  let data;
+  if (DEMO) data = { sites: ['academia-forte', 'restaurante-sabor', 'sancaporai'], rows: demoRows() };
+  else {
+    const r = await fetch(API, { headers: { 'X-Key': key }, cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status === 401 ? 'Chave inválida.' : 'Erro ao carregar.');
+    data = await r.json();
+  }
+  rows = data.rows; sites = data.sites;
+  await Promise.all(sites.filter(s => !(s in conf)).map(async s => {
+    conf[s] = null;
+    try { const r = await fetch(`../clients/${s}/config.json`); if (r.ok) conf[s] = await r.json(); } catch {}
+  }));
+  const sel = $('#site'), cur = sel.value || site;
+  sel.replaceChildren(new Option('Todos os clientes', ''), ...sites.map(s => new Option(conf[s]?.nome || s, s)));
+  sel.value = sites.includes(cur) ? cur : ''; site = sel.value;
+  $('#upd').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ' · atualiza sozinho a cada minuto';
+}
+
+/* ---------- cálculos ---------- */
+const inRange = (from, to, s) => rows.filter(x => x.day >= from && x.day <= to && (s === undefined ? (!site || x.site === site) : x.site === s));
+const sum = (r, ev, id) => r.reduce((a, x) => a + (x.event === ev && (id === undefined || x.id === id) ? x.n : 0), 0);
+const group = (r, ev) => { const m = {}; r.forEach(x => { if (x.event === ev) m[x.id] = (m[x.id] || 0) + x.n; }); return m; };
+const pct = (a, b) => (b ? a / b * 100 : 0);
+const cardName = (s, id) => {
+  const c = conf[s]?.cards?.find(x => x.id === id);
+  return NOMES[id] || c?.titulo || c?.marca || id.replace(/-/g, ' ').replace(/^./, m => m.toUpperCase());
+};
+const delta = (cur, prev) => {
+  if (!prev) return cur ? '<small class="up">novo</small>' : '<small class="flat">sem dados</small>';
+  const d = (cur - prev) / prev * 100, cls = d > 0.5 ? 'up' : d < -0.5 ? 'down' : 'flat';
+  return `<small class="${cls}">${d > 0.5 ? '▲' : d < -0.5 ? '▼' : '●'} ${Math.abs(d).toFixed(0)}% vs período anterior</small>`;
 };
 
-async function load(key) {
-  if (location.search.includes('demo')) return demo();
-  const r = await fetch(API, { headers: { 'X-Key': key } });
-  if (!r.ok) throw new Error(r.status === 401 ? 'Chave inválida.' : 'Erro ao carregar.');
-  const j = await r.json();
-  const sel = $('#site');
-  if (j.sites.length) {
-    sel.replaceChildren(new Option('Todos os clientes', ''), ...j.sites.map(x => new Option(x, x)));
-    sel.hidden = false;
-  }
-  return j.rows;
-}
-
+/* ---------- render ---------- */
 function render() {
-  const from = new Date(Date.now() - (days - 1) * 864e5).toISOString().slice(0, 10);
-  const r = rows.filter(x => x.day >= from && (!site || x.site === site));
-  const sum = ev => r.filter(x => x.event === ev).reduce((a, x) => a + x.n, 0);
-  const views = sum('page_view'), clicks = sum('abrir_link');
-  $('#k-views').textContent = views.toLocaleString('pt-BR');
-  $('#k-clicks').textContent = clicks.toLocaleString('pt-BR');
-  $('#k-copies').textContent = sum('copiar_cupom').toLocaleString('pt-BR');
-  $('#k-ctr').textContent = (views ? Math.round(clicks / views * 100) : 0) + '%';
+  const to = dayOf(0), from = dayOf(days - 1), pFrom = dayOf(days * 2 - 1), pTo = dayOf(days);
+  const r = inRange(from, to), p = inRange(pFrom, pTo);
+  const v = sum(r, 'page_view'), c = sum(r, 'abrir_link'), k = sum(r, 'copiar_cupom');
+  const pv = sum(p, 'page_view'), pc = sum(p, 'abrir_link'), pk = sum(p, 'copiar_cupom');
+  const ctr = pct(c, v), pctr = pct(pc, pv);
 
-  const byId = {};
-  r.filter(x => x.event === 'abrir_link').forEach(x => byId[x.id] = (byId[x.id] || 0) + x.n);
-  const list = Object.entries(byId).sort((a, b) => b[1] - a[1]);
-  const max = list[0]?.[1] || 1;
-  const cards = $('#cards');
-  cards.replaceChildren();
-  if (!list.length) { cards.innerHTML = '<p class="empty">Sem cliques no período.</p>'; }
-  list.forEach(([id, n]) => {
-    const row = document.createElement('div'); row.className = 'bar';
-    const a = document.createElement('span'); a.textContent = NOMES[id] || id;
-    const b = document.createElement('div'); const i = document.createElement('i'); i.style.width = (n / max * 100) + '%'; b.append(i);
-    const c = document.createElement('span'); c.textContent = n.toLocaleString('pt-BR');
-    row.append(a, b, c); cards.append(row);
-  });
+  $('#kpis').innerHTML = [
+    ['Visitas', nf(v), delta(v, pv)],
+    ['Cliques em links', nf(c), delta(c, pc)],
+    ['Taxa de clique', ctr.toFixed(1).replace('.', ',') + '%', delta(ctr, pctr)],
+    ['Cupons copiados', nf(k), delta(k, pk)]
+  ].map(([l, n, d]) => `<div class="box kpi"><h2>${l}</h2><b>${n}</b>${d}</div>`).join('');
 
-  const perDay = {};
-  r.filter(x => x.event === 'page_view').forEach(x => perDay[x.day] = (perDay[x.day] || 0) + x.n);
+  // por dia
   const seq = [];
-  for (let k = days - 1; k >= 0; k--) { const d = new Date(Date.now() - k * 864e5).toISOString().slice(0, 10); seq.push([d, perDay[d] || 0]); }
-  const m = Math.max(1, ...seq.map(s => s[1]));
-  const box = $('#days'); box.replaceChildren();
-  seq.forEach(([d, n]) => { const i = document.createElement('i'); i.style.height = (n / m * 100) + '%'; i.title = `${d.split('-').reverse().join('/')}: ${n}`; box.append(i); });
+  for (let i = days - 1; i >= 0; i--) { const d = dayOf(i); const rr = r.filter(x => x.day === d); seq.push({ d, v: sum(rr, 'page_view'), c: sum(rr, 'abrir_link') }); }
+  chart(seq);
+
+  // cards
+  const byCard = {}, copies = {};
+  r.forEach(x => {
+    if (x.event !== 'abrir_link' && x.event !== 'copiar_cupom') return;
+    const k = (site ? '' : x.site + '|') + x.id, t = x.event === 'abrir_link' ? byCard : copies;
+    t[k] = (t[k] || 0) + x.n;
+  });
+  const lab = k => { const [a, b] = k.includes('|') ? k.split('|') : [site, k]; return { n: cardName(a, b), c: site ? '' : (conf[a]?.nome || a) }; };
+  const list = Object.entries(byCard).sort((a, b) => b[1] - a[1]);
+  const mx = list[0]?.[1] || 1;
+  $('#cards').innerHTML = list.length
+    ? `<div class="scroll"><table><thead><tr><th>Card</th><th>Cliques</th><th>% do total</th><th>Cupons</th></tr></thead><tbody>${list.map(([id, n]) =>
+      `<tr><td>${esc(lab(id).n)}${lab(id).c ? ` <span class="mut" style="font-weight:500">· ${esc(lab(id).c)}</span>` : ''}<div class="bar"><i style="width:${n / mx * 100}%"></i></div></td><td>${nf(n)}</td><td>${pct(n, c).toFixed(0)}%</td><td>${copies[id] ? nf(copies[id]) : '–'}</td></tr>`).join('')}</tbody></table></div>`
+    : '<p class="empty">Sem cliques no período.</p>';
+
+  // origem
+  const NR = { instagram: 'Instagram', whatsapp: 'WhatsApp', direto: 'Direto', facebook: 'Facebook', google: 'Google', tiktok: 'TikTok', youtube: 'YouTube', outros: 'Outros' };
+  bars('#refs', group(r, 'ref'), id => NR[id] || id, 'Sem dados de origem ainda.');
+  bars('#devs', group(r, 'dev'), id => id === 'celular' ? 'Celular' : 'Computador', 'Sem dados ainda.');
+
+  // horas
+  const hr = group(r, 'hr'), hv = Array.from({ length: 24 }, (_, i) => hr[String(i).padStart(2, '0')] || 0), hm = Math.max(...hv);
+  $('#hours').innerHTML = hm
+    ? `<div class="hours">${hv.map((n, i) => `<i class="${n === hm ? 'max' : ''}" style="height:${n / hm * 100}%" title="${i}h: ${n}"></i>`).join('')}</div><div class="hl"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span></div>`
+    : '<p class="empty">Sem dados de horário ainda.</p>';
+
+  // dia da semana
+  const wd = Array(7).fill(0);
+  r.filter(x => x.event === 'page_view').forEach(x => { wd[new Date(x.day + 'T12:00:00Z').getUTCDay()] += x.n; });
+  const wm = Math.max(...wd);
+  $('#wk').innerHTML = wm
+    ? `<div class="wk">${['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((l, i) => `<div title="${nf(wd[i])}"><i style="background:rgba(139,124,255,${(0.12 + 0.88 * wd[i] / wm).toFixed(2)})"></i>${l}</div>`).join('')}</div>`
+    : '<p class="empty">Sem dados.</p>';
+
+  // clientes
+  $('#clientsBox').hidden = !!site || sites.length < 2;
+  if (!site) {
+    $('#clients').innerHTML = `<div class="scroll"><table><thead><tr><th>Cliente</th><th>Visitas</th><th>Cliques</th><th>CTR</th><th>Variação</th><th class="hide-s">Tendência</th></tr></thead><tbody>${sites.map(s => {
+      const rs = inRange(from, to, s), ps = inRange(pFrom, pTo, s);
+      const sv = sum(rs, 'page_view'), sc = sum(rs, 'abrir_link'), spv = sum(ps, 'page_view');
+      const d = spv ? (sv - spv) / spv * 100 : 0;
+      const pts = []; for (let i = days - 1; i >= 0; i--) pts.push(sum(rs.filter(x => x.day === dayOf(i)), 'page_view'));
+      return { s, sv, sc, d, spk: spark(pts), nome: conf[s]?.nome || s };
+    }).sort((a, b) => b.sv - a.sv).map(o => `<tr class="click" data-s="${esc(o.s)}"><td>${esc(o.nome)}</td><td>${nf(o.sv)}</td><td>${nf(o.sc)}</td><td>${pct(o.sc, o.sv).toFixed(1).replace('.', ',')}%</td><td class="${o.d > .5 ? 'up' : o.d < -.5 ? 'down' : 'flat'}">${o.d > .5 ? '▲' : o.d < -.5 ? '▼' : '●'} ${Math.abs(o.d).toFixed(0)}%</td><td class="hide-s">${o.spk}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+
+  // destaques
+  const top = list[0], bh = hm ? hv.indexOf(hm) : -1, bd = wm ? ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'][wd.indexOf(wm)] : '';
+  const best = seq.reduce((a, b) => (b.v > a.v ? b : a), { v: -1 });
+  const ins = [];
+  if (top) ins.push(`Card mais clicado: <b>${esc(lab(top[0]).n)}</b>${lab(top[0]).c ? ' · ' + esc(lab(top[0]).c) : ''}`);
+  if (bh >= 0) ins.push(`Melhor horário: <b>${bh}h</b>`);
+  if (bd) ins.push(`Melhor dia: <b>${bd}</b>`);
+  if (best.v > 0) ins.push(`Pico: <b>${best.d.split('-').reverse().slice(0, 2).join('/')}</b> com ${nf(best.v)} visitas`);
+  $('#insights').innerHTML = ins.map(t => `<span class="chip">${t}</span>`).join('');
 }
 
-async function enter(key) {
+function bars(sel, obj, label, empty) {
+  const l = Object.entries(obj).sort((a, b) => b[1] - a[1]), t = l.reduce((a, x) => a + x[1], 0);
+  $(sel).innerHTML = l.length ? l.map(([id, n]) => `<div class="row"><div class="top"><span>${esc(label(id))}</span><span>${pct(n, t).toFixed(0)}%</span></div><div class="bar"><i style="width:${pct(n, t)}%"></i></div></div>`).join('') : `<p class="empty">${empty}</p>`;
+}
+
+function spark(pts) {
+  const m = Math.max(1, ...pts), w = 84, h = 24;
+  const d = pts.map((n, i) => `${(i / Math.max(1, pts.length - 1) * w).toFixed(1)},${(h - 2 - n / m * (h - 4)).toFixed(1)}`).join(' ');
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}"><polyline points="${d}" fill="none" stroke="#8B7CFF" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+
+function chart(seq) {
+  const W = 800, H = 230, L = 34, B = 24, T = 10, R = 8;
+  const max = Math.max(1, ...seq.map(s => s.v)), nice = Math.pow(10, Math.floor(Math.log10(max))), top = Math.ceil(max / nice) * nice;
+  const x = i => L + (seq.length < 2 ? 0 : i / (seq.length - 1)) * (W - L - R), y = n => T + (1 - n / top) * (H - T - B);
+  const line = key => seq.map((s, i) => `${x(i).toFixed(1)},${y(s[key]).toFixed(1)}`).join(' ');
+  const grid = [0, .25, .5, .75, 1].map(f => { const yy = y(top * f); return `<line x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}" stroke="#2A2650" stroke-width="1"/><text x="${L - 6}" y="${yy + 4}" text-anchor="end" fill="#9a98b8" font-size="11">${nf(top * f)}</text>`; }).join('');
+  const step = Math.ceil(seq.length / 7);
+  const xl = seq.map((s, i) => (i % step === 0 || i === seq.length - 1) ? `<text x="${x(i)}" y="${H - 6}" text-anchor="middle" fill="#9a98b8" font-size="11">${s.d.split('-').reverse().slice(0, 2).join('/')}</text>` : '').join('');
+  const area = `${x(0)},${y(0)} ${line('v')} ${x(seq.length - 1)},${y(0)}`;
+  $('#chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Visitas e cliques por dia">
+    <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8B7CFF" stop-opacity=".35"/><stop offset="1" stop-color="#8B7CFF" stop-opacity="0"/></linearGradient></defs>
+    ${grid}${xl}<polygon points="${area}" fill="url(#ga)"/>
+    <polyline points="${line('v')}" fill="none" stroke="#8B7CFF" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${line('c')}" fill="none" stroke="#ffb547" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <line id="cur" y1="${T}" y2="${H - B}" stroke="#8B7CFF" stroke-width="1" stroke-dasharray="3 3" opacity="0"/>
+    <rect id="hit" x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent"/></svg><div class="tip" id="tip" hidden></div>`;
+  const hit = $('#hit'), svg = $('#chart svg'), tip = $('#tip'), cur = $('#cur');
+  const move = e => {
+    const b = svg.getBoundingClientRect(), px = ((e.clientX ?? e.touches?.[0]?.clientX) - b.left) / b.width * W;
+    const i = Math.max(0, Math.min(seq.length - 1, Math.round((px - L) / (W - L - R) * (seq.length - 1)))), s = seq[i];
+    cur.setAttribute('x1', x(i)); cur.setAttribute('x2', x(i)); cur.setAttribute('opacity', 1);
+    tip.hidden = false; tip.style.left = (x(i) / W * b.width) + 'px'; tip.style.top = (y(s.v) / H * b.height) + 'px';
+    tip.innerHTML = `<b>${s.d.split('-').reverse().join('/')}</b>${nf(s.v)} visitas<br>${nf(s.c)} cliques`;
+  };
+  hit.addEventListener('mousemove', move); hit.addEventListener('touchmove', move, { passive: true });
+  hit.addEventListener('mouseleave', () => { tip.hidden = true; cur.setAttribute('opacity', 0); });
+}
+
+/* ---------- ações ---------- */
+function exportCsv() {
+  const to = dayOf(0), from = dayOf(days - 1);
+  const lines = ['cliente;dia;evento;id;quantidade', ...inRange(from, to).sort((a, b) => a.day.localeCompare(b.day)).map(x => [x.site, x.day, x.event, x.id, x.n].join(';'))];
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = `blinkbio-${site || 'todos'}-${to}.csv`; a.click(); URL.revokeObjectURL(a.href);
+}
+
+async function refresh(silent) {
+  try { await load(); render(); } catch (e) { if (!silent) $('#upd').textContent = e.message || 'Erro ao carregar.'; }
+}
+
+async function enter(k) {
+  key = k;
   try {
-    rows = await load(key);
-    try { sessionStorage.setItem('k', key); } catch {}
+    await load();
+    try { sessionStorage.setItem('k', k); } catch {}
     $('#login').hidden = true; $('#app').hidden = false; render();
+    clearInterval(timer); if (!DEMO) timer = setInterval(() => document.hidden || refresh(true), 60000);
   } catch (e) { $('#err').textContent = e.message || 'Erro ao carregar.'; }
 }
 
-$('#site').onchange = e => { site = e.target.value; render(); };
 $('#enter').onclick = () => enter($('#key').value.trim());
 $('#key').onkeydown = e => { if (e.key === 'Enter') $('#enter').click(); };
+$('#site').onchange = e => { site = e.target.value; render(); };
+$('#refresh').onclick = () => refresh(false);
+$('#csv').onclick = exportCsv;
 $('#range').onclick = e => {
   const b = e.target.closest('button'); if (!b) return;
   days = +b.dataset.d;
   document.querySelectorAll('#range button').forEach(x => x.setAttribute('aria-pressed', x === b));
   render();
 };
+$('#clients').onclick = e => {
+  const tr = e.target.closest('tr[data-s]'); if (!tr) return;
+  site = tr.dataset.s; $('#site').value = site; render(); scrollTo({ top: 0, behavior: 'smooth' });
+};
 let saved = ''; try { saved = sessionStorage.getItem('k') || ''; } catch {}
-if (location.search.includes('demo')) enter(''); else if (saved) enter(saved);
+if (DEMO) enter(''); else if (saved) enter(saved);
 </script>
 </body>
 </html>
