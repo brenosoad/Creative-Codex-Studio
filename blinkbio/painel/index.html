@@ -9,35 +9,35 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--orange:#EE5A0C;--orange-2:#FF8A3D;--bg:#101214;--card:#141414;--line:#262626;--mut:#9a9a9a}
+:root{--brand:#4B32D9;--brand-2:#8B7CFF;--bg:#0D0B1A;--card:#17142B;--line:#2A2650;--mut:#9a98b8}
 *{box-sizing:border-box;margin:0}
 body{background:var(--bg);color:#fff;font:500 15px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;padding:24px 16px 56px}
 main{max-width:960px;margin:0 auto}
 header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:24px}
 h1{font:400 clamp(28px,5vw,40px)/1 Anton,sans-serif;letter-spacing:.02em;text-transform:uppercase}
-h1 em{color:var(--orange);font-style:normal}
+h1 em{color:var(--brand-2);font-style:normal}
 .range{display:flex;gap:6px}
 select{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px}
 .range button{background:none;border:1px solid var(--line);color:#fff;font:inherit;font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px;cursor:pointer}
-.range button[aria-pressed=true]{background:var(--orange);border-color:var(--orange)}
+.range button[aria-pressed=true]{background:var(--brand);border-color:var(--brand)}
 .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
 @media(min-width:720px){.kpis{grid-template-columns:repeat(4,1fr)}}
 .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
-.kpi b{display:block;font:400 clamp(30px,6vw,44px)/1 Anton,sans-serif;color:var(--orange-2)}
+.kpi b{display:block;font:400 clamp(30px,6vw,44px)/1 Anton,sans-serif;color:var(--brand-2)}
 .kpi span{color:var(--mut);font-size:13px}
 h2{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:14px}
 .grid{display:grid;gap:12px}
 @media(min-width:720px){.grid{grid-template-columns:3fr 2fr}}
 .bar{display:grid;grid-template-columns:110px 1fr 48px;gap:10px;align-items:center;margin:10px 0;font-size:14px}
-.bar i{display:block;height:10px;border-radius:6px;background:linear-gradient(90deg,var(--orange),var(--orange-2));min-width:2px}
+.bar i{display:block;height:10px;border-radius:6px;background:linear-gradient(90deg,var(--brand),var(--brand-2));min-width:2px}
 .bar span:last-child{text-align:right;font-weight:800}
 .days{display:flex;align-items:flex-end;gap:3px;height:120px}
-.days i{flex:1;background:var(--orange);border-radius:3px 3px 0 0;min-height:2px;opacity:.9}
-.days i:hover{opacity:1;background:var(--orange-2)}
+.days i{flex:1;background:var(--brand);border-radius:3px 3px 0 0;min-height:2px;opacity:.9}
+.days i:hover{opacity:1;background:var(--brand-2)}
 .empty{color:var(--mut)}
 #login{max-width:360px;margin:12vh auto;text-align:center}
 #login input{width:100%;margin:16px 0 10px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0b0b0b;color:#fff;font:inherit}
-#login button{width:100%;padding:12px;border:0;border-radius:12px;background:var(--orange);color:#fff;font:inherit;font-weight:800;cursor:pointer}
+#login button{width:100%;padding:12px;border:0;border-radius:12px;background:var(--brand);color:#fff;font:inherit;font-weight:800;cursor:pointer}
 #err{color:#ff7a7a;font-size:13px;min-height:20px;margin-top:8px}
 [hidden]{display:none!important}
 </style>
