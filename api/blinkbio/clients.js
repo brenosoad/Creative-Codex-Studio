@@ -41,7 +41,7 @@ function clean(c) {
     logo, favicon: imgRef(c.favicon) || undefined, iconeApple: imgRef(c.iconeApple) || undefined, og: imgRef(c.og) || undefined,
     numeros: (Array.isArray(c.numeros) ? c.numeros : []).slice(0, 4).map(n => ({ valor: str(n?.valor, 16), rotulo: str(n?.rotulo, 24) })).filter(n => n.valor),
     categorias: cats, botaoFlutuante: fab,
-    rodape: (() => { const r = c.rodape && cleanCard({ ...c.rodape, tipo: 'parceiro', id: 'rodape', cat: undefined }, 0); if (!r || !r.titulo || !r.link) return undefined; delete r.tipo; delete r.id; return r; })(),
+    rodape: (() => { if (c.rodape?.ocultar) return { ocultar: true }; const r = c.rodape && cleanCard({ ...c.rodape, tipo: 'parceiro', id: 'rodape', cat: undefined }, 0); if (!r || !r.titulo || !r.link) return undefined; delete r.tipo; delete r.id; return r; })(),
     cards: (Array.isArray(c.cards) ? c.cards : []).slice(0, 40).map(cleanCard).filter(Boolean)
   };
 }
