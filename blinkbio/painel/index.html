@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>BlinkBio | Painel do criador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--orange:#EE5A0C;--orange-2:#FF8A3D;--bg:#101214;--card:#141414;--line:#262626;--mut:#9a9a9a}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:#fff;font:500 15px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;padding:24px 16px 56px}
+main{max-width:960px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:24px}
+h1{font:400 clamp(28px,5vw,40px)/1 Anton,sans-serif;letter-spacing:.02em;text-transform:uppercase}
+h1 em{color:var(--orange);font-style:normal}
+.range{display:flex;gap:6px}
+select{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px}
+.range button{background:none;border:1px solid var(--line);color:#fff;font:inherit;font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px;cursor:pointer}
+.range button[aria-pressed=true]{background:var(--orange);border-color:var(--orange)}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
+@media(min-width:720px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.kpi b{display:block;font:400 clamp(30px,6vw,44px)/1 Anton,sans-serif;color:var(--orange-2)}
+.kpi span{color:var(--mut);font-size:13px}
+h2{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:14px}
+.grid{display:grid;gap:12px}
+@media(min-width:720px){.grid{grid-template-columns:3fr 2fr}}
+.bar{display:grid;grid-template-columns:110px 1fr 48px;gap:10px;align-items:center;margin:10px 0;font-size:14px}
+.bar i{display:block;height:10px;border-radius:6px;background:linear-gradient(90deg,var(--orange),var(--orange-2));min-width:2px}
+.bar span:last-child{text-align:right;font-weight:800}
+.days{display:flex;align-items:flex-end;gap:3px;height:120px}
+.days i{flex:1;background:var(--orange);border-radius:3px 3px 0 0;min-height:2px;opacity:.9}
+.days i:hover{opacity:1;background:var(--orange-2)}
+.empty{color:var(--mut)}
+#login{max-width:360px;margin:12vh auto;text-align:center}
+#login input{width:100%;margin:16px 0 10px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0b0b0b;color:#fff;font:inherit}
+#login button{width:100%;padding:12px;border:0;border-radius:12px;background:var(--orange);color:#fff;font:inherit;font-weight:800;cursor:pointer}
+#err{color:#ff7a7a;font-size:13px;min-height:20px;margin-top:8px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<section id="login">
+  <h1>Blink<em>Bio</em> · Painel</h1>
+  <input id="key" type="password" placeholder="Chave de acesso" autocomplete="current-password">
+  <button id="enter">Entrar</button>
+  <p id="err" role="alert"></p>
+</section>
+
+<main id="app" hidden>
+  <header>
+    <h1>Blink<em>Bio</em> · Painel</h1>
+    <select id="site" hidden aria-label="Cliente"></select>
+    <div class="range" id="range">
+      <button data-d="7" aria-pressed="false">7 dias</button>
+      <button data-d="30" aria-pressed="true">30 dias</button>
+      <button data-d="90" aria-pressed="false">90 dias</button>
+    </div>
+  </header>
+  <div class="kpis">
+    <div class="box kpi"><b id="k-views">0</b><span>Visitas</span></div>
+    <div class="box kpi"><b id="k-clicks">0</b><span>Cliques em links</span></div>
+    <div class="box kpi"><b id="k-copies">0</b><span>Cupons copiados</span></div>
+    <div class="box kpi"><b id="k-ctr">0%</b><span>Taxa de clique</span></div>
+  </div>
+  <div class="grid">
+    <div class="box"><h2>Por card</h2><div id="cards"></div></div>
+    <div class="box"><h2>Visitas por dia</h2><div class="days" id="days"></div></div>
+  </div>
+</main>
+
+<script>
+/* URL do Worker (Cloudflare). Use ?demo para ver com dados de exemplo. */
+const API = '/api/blinkbio/stats';
+const NOMES = {
+  'capa-anuncie':'Anuncie (capa)','growth':'Growth','letz':"Let'z",'petiko':'BOX Petiko',
+  'sorteio':'Sorteio','youtube':'YouTube','fab-anunciar':'Botão Anunciar'
+};
+const $ = s => document.querySelector(s);
+let rows = [], days = 30, site = '';
+
+const demo = () => {
+  const ids = Object.keys(NOMES), out = [];
+  for (let i = 0; i < 90; i++) {
+    const day = new Date(Date.now() - i * 864e5).toISOString().slice(0, 10);
+    const v = 80 + Math.floor(Math.random() * 120);
+    out.push({ site: 'sancaporai', day, event: 'page_view', id: '-', n: v });
+    ids.forEach((id, j) => {
+      out.push({ site: 'sancaporai', day, event: 'abrir_link', id, n: Math.floor(v * (0.22 - j * 0.025) * Math.random()) });
+      if (['growth', 'letz', 'petiko'].includes(id)) out.push({ site: 'sancaporai', day, event: 'copiar_cupom', id, n: Math.floor(v * 0.08 * Math.random()) });
+    });
+  }
+  return out;
+};
+
+async function load(key) {
+  if (location.search.includes('demo')) return demo();
+  const r = await fetch(API, { headers: { 'X-Key': key } });
+  if (!r.ok) throw new Error(r.status === 401 ? 'Chave inválida.' : 'Erro ao carregar.');
+  const j = await r.json();
+  const sel = $('#site');
+  if (j.sites.length) {
+    sel.replaceChildren(new Option('Todos os clientes', ''), ...j.sites.map(x => new Option(x, x)));
+    sel.hidden = false;
+  }
+  return j.rows;
+}
+
+function render() {
+  const from = new Date(Date.now() - (days - 1) * 864e5).toISOString().slice(0, 10);
+  const r = rows.filter(x => x.day >= from && (!site || x.site === site));
+  const sum = ev => r.filter(x => x.event === ev).reduce((a, x) => a + x.n, 0);
+  const views = sum('page_view'), clicks = sum('abrir_link');
+  $('#k-views').textContent = views.toLocaleString('pt-BR');
+  $('#k-clicks').textContent = clicks.toLocaleString('pt-BR');
+  $('#k-copies').textContent = sum('copiar_cupom').toLocaleString('pt-BR');
+  $('#k-ctr').textContent = (views ? Math.round(clicks / views * 100) : 0) + '%';
+
+  const byId = {};
+  r.filter(x => x.event === 'abrir_link').forEach(x => byId[x.id] = (byId[x.id] || 0) + x.n);
+  const list = Object.entries(byId).sort((a, b) => b[1] - a[1]);
+  const max = list[0]?.[1] || 1;
+  const cards = $('#cards');
+  cards.replaceChildren();
+  if (!list.length) { cards.innerHTML = '<p class="empty">Sem cliques no período.</p>'; }
+  list.forEach(([id, n]) => {
+    const row = document.createElement('div'); row.className = 'bar';
+    const a = document.createElement('span'); a.textContent = NOMES[id] || id;
+    const b = document.createElement('div'); const i = document.createElement('i'); i.style.width = (n / max * 100) + '%'; b.append(i);
+    const c = document.createElement('span'); c.textContent = n.toLocaleString('pt-BR');
+    row.append(a, b, c); cards.append(row);
+  });
+
+  const perDay = {};
+  r.filter(x => x.event === 'page_view').forEach(x => perDay[x.day] = (perDay[x.day] || 0) + x.n);
+  const seq = [];
+  for (let k = days - 1; k >= 0; k--) { const d = new Date(Date.now() - k * 864e5).toISOString().slice(0, 10); seq.push([d, perDay[d] || 0]); }
+  const m = Math.max(1, ...seq.map(s => s[1]));
+  const box = $('#days'); box.replaceChildren();
+  seq.forEach(([d, n]) => { const i = document.createElement('i'); i.style.height = (n / m * 100) + '%'; i.title = `${d.split('-').reverse().join('/')}: ${n}`; box.append(i); });
+}
+
+async function enter(key) {
+  try {
+    rows = await load(key);
+    try { sessionStorage.setItem('k', key); } catch {}
+    $('#login').hidden = true; $('#app').hidden = false; render();
+  } catch (e) { $('#err').textContent = e.message || 'Erro ao carregar.'; }
+}
+
+$('#site').onchange = e => { site = e.target.value; render(); };
+$('#enter').onclick = () => enter($('#key').value.trim());
+$('#key').onkeydown = e => { if (e.key === 'Enter') $('#enter').click(); };
+$('#range').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  days = +b.dataset.d;
+  document.querySelectorAll('#range button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  render();
+};
+let saved = ''; try { saved = sessionStorage.getItem('k') || ''; } catch {}
+if (location.search.includes('demo')) enter(''); else if (saved) enter(saved);
+</script>
+</body>
+</html>
