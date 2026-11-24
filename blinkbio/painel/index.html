@@ -153,6 +153,8 @@ tr.click:hover td{background:var(--card-2)}
 .st.ok{background:rgba(52,211,153,.15);border-color:#34d399;color:#34d399}
 .st.late{border-color:#ff8f8f;color:#ff8f8f}
 .backb{margin-bottom:12px}
+#back{margin-right:auto}
+@media(min-width:760px){.backb{display:none}}
 .exp-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .exp-form select{padding:8px 12px}
 .chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mut);white-space:nowrap}
@@ -175,6 +177,7 @@ tr.click:hover td{background:var(--card-2)}
 <main id="app" hidden>
   <header>
     <h1><img class="logo" src="../assets/logo-dark.png" alt="BlinkBio by Creative Codex" width="220" height="56"><span class="sr-only">Painel</span></h1>
+    <button class="btn" id="back" type="button" aria-label="Voltar">← Voltar</button>
     <div class="seg" id="tabs" role="group" aria-label="Seção">
       <button data-tab="stats" aria-pressed="true">Resultados</button>
       <button data-tab="edit" aria-pressed="false">Clientes</button>
@@ -721,7 +724,14 @@ const fileIn = Object.assign(document.createElement('input'), { type: 'file', ac
 fileIn.onchange = () => handleFile(fileIn.files[0]); document.body.append(fileIn);
 
 /* ---- abas ---- */
+let curTab = 'stats';
+$('#back').onclick = () => {
+  if (curTab === 'edit' && ed.cfg) return $('[data-act=back]').click();
+  if (curTab !== 'stats') return showTab('stats');
+  if (history.length > 1) history.back(); else location.href = '../';
+};
 function showTab(t) {
+  curTab = t;
   const edit = t === 'edit', fin = t === 'fin';
   $('#statsView').hidden = edit || fin; $('#statsTools').hidden = edit || fin; $('#editor').hidden = !edit; $('#finView').hidden = !fin;
   if (fin) loadFin();
