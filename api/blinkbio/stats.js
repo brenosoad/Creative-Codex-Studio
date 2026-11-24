@@ -1,7 +1,21 @@
 const { pipeline } = require('./_redis');
 const { isAdmin, clientFor } = require('./_auth');
 
+const SLUG = /^[a-z0-9-]{1,32}$/;
+
 module.exports = async (req, res) => {
+  if (req.method === 'DELETE') {
+    if (!isAdmin(req)) return res.status(401).json({ error: 'unauthorized' });
+    try {
+      const c = String(req.query.c || '');
+      if (c && !SLUG.test(c)) return res.status(400).json({ error: 'slug' });
+      const [keys] = await pipeline([['KEYS', c ? `bb:${c}:*` : 'bb:*']]);
+      if (keys.length) await pipeline(keys.map(k => ['DEL', k]));
+      return res.status(200).json({ ok: true, removed: keys.length });
+    } catch {
+      return res.status(500).json({ error: 'db' });
+    }
+  }
   try {
     const admin = isAdmin(req);
     const own = admin ? null : await clientFor(req);
