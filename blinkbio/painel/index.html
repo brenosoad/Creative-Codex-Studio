@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>BlinkBio | Painel do criador</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
@@ -14,8 +16,10 @@
 body{background:var(--bg);color:#fff;font:500 15px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;padding:24px 16px 56px}
 main{max-width:960px;margin:0 auto}
 header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:24px}
-h1{font:400 clamp(28px,5vw,40px)/1 Anton,sans-serif;letter-spacing:.02em;text-transform:uppercase}
-h1 em{color:var(--brand-2);font-style:normal}
+h1{line-height:0}
+h1 .logo{height:54px;width:auto;display:block}
+#login h1 .logo{height:64px;margin:0 auto}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .range{display:flex;gap:6px}
 select{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px}
 .range button{background:none;border:1px solid var(--line);color:#fff;font:inherit;font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px;cursor:pointer}
@@ -44,7 +48,7 @@ h2{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
 </head>
 <body>
 <section id="login">
-  <h1>Blink<em>Bio</em> · Painel</h1>
+  <h1><img class="logo" src="../assets/logo-dark.png" alt="BlinkBio by Creative Codex" width="220" height="56"><span class="sr-only">Painel</span></h1>
   <input id="key" type="password" placeholder="Chave de acesso" autocomplete="current-password">
   <button id="enter">Entrar</button>
   <p id="err" role="alert"></p>
@@ -52,7 +56,7 @@ h2{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
 
 <main id="app" hidden>
   <header>
-    <h1>Blink<em>Bio</em> · Painel</h1>
+    <h1><img class="logo" src="../assets/logo-dark.png" alt="BlinkBio by Creative Codex" width="220" height="56"><span class="sr-only">Painel</span></h1>
     <select id="site" hidden aria-label="Cliente"></select>
     <div class="range" id="range">
       <button data-d="7" aria-pressed="false">7 dias</button>
