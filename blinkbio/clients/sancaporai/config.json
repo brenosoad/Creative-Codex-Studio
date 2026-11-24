@@ -128,12 +128,14 @@
       "alt": "Câmera gravando São Carlos",
       "link": "#",
       "botao": "Assistir agora"
+    },
+    {
+      "tipo": "parceiro",
+      "id": "agencia",
+      "titulo": "Conheça nossa agência",
+      "texto": "Conheça a Sanca Mídias e veja como podemos ajudar o seu negócio.",
+      "botao": "Visitar site",
+      "link": "https://sancamidias.com.br/"
     }
-  ],
-  "rodape": {
-    "titulo": "Conheça nossa agência",
-    "texto": "Conheça a Sanca Mídias e veja como podemos ajudar o seu negócio.",
-    "botao": "Visitar site",
-    "link": "https://sancamidias.com.br/"
-  }
+  ]
 }

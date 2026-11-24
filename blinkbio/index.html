@@ -307,8 +307,6 @@
 
 <script>
 (async () => {
-  let PADRAO = {};
-  try { const r = await fetch('padrao.json', { cache: 'no-cache' }); if (r.ok) PADRAO = await r.json(); } catch {}
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -423,8 +421,7 @@
         ${usedCats.map(k => `<button class="chip" type="button" data-filter="${esc(k)}" aria-pressed="false">${esc(cats[k])}</button>`).join('')}
       </nav>` : ''}
       <section class="cards">${(() => {
-        const rod = cfg.rodape?.ocultar ? null : (cfg.rodape?.titulo && cfg.rodape?.link ? cfg.rodape : PADRAO.rodape);
-        const all = [...(cfg.cards || []), ...(rod?.titulo && rod?.link ? [{ ...rod, tipo: 'parceiro', id: 'rodape', cat: undefined }] : [])];
+        const all = [...(cfg.cards || [])];
         let last = -1; all.forEach((c, i) => { if (c.tipo === 'parceiro' && c.imagem) last = i; });
         if (last >= 0) all[last] = { ...all[last], _last: true };
         return all.map(card).join('');
