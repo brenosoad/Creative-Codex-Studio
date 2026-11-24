@@ -193,6 +193,8 @@ tr.click:hover td{background:var(--card-2)}
 .adv>.ed-body{padding-top:4px}
 .prev-bar{flex-wrap:wrap}
 .phone iframe{transform-origin:0 0}
+.cvhint{font-size:12.5px;margin:-2px 0 10px}
+.cardp.flash{box-shadow:0 0 0 2px var(--brand-2)}
 .phone.pc{max-width:none;border-radius:14px;height:min(78vh,720px)}
 @media(min-width:1180px){.ed.pcprev{grid-template-columns:minmax(0,5fr) minmax(0,7fr)!important}}
 /* clientes (galeria) */
@@ -369,7 +371,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </aside>
     <div class="box ed-form" id="edForm"><p class="empty">Escolha um cliente na lista ou crie um novo.</p></div>
     <aside class="ed-prev">
-      <div class="prev-bar"><h2>Prévia</h2><div class="seg" id="prevMode" role="group" aria-label="Tamanho da prévia"><button type="button" data-m="cel" aria-pressed="true">Celular</button><button type="button" data-m="pc" aria-pressed="false">PC</button></div><a class="btn" id="edOpen" href="#" target="_blank" rel="noopener" hidden>Abrir página ↗</a></div>
+      <div class="prev-bar"><h2>Prévia</h2><div class="seg" id="prevMode" role="group" aria-label="Tamanho da prévia"><button type="button" data-m="cel" aria-pressed="true">Celular</button><button type="button" data-m="pc" aria-pressed="false">PC</button></div><button type="button" class="btn sm" id="cvToggle" aria-pressed="false">Organizar na página</button><a class="btn" id="edOpen" href="#" target="_blank" rel="noopener" hidden>Abrir página ↗</a></div>
+      <p class="mut cvhint" id="cvHint" hidden>Arraste os cards para reordenar. Clique em um card para editar e escolher a largura (⅓, ½ ou total).</p>
       <div class="phone"><iframe id="edFrame" title="Prévia da página" src="about:blank"></iframe></div>
     </aside>
   </div>
@@ -670,7 +673,7 @@ function preview() {
   clearTimeout(preview.t);
   preview.t = setTimeout(() => {
     const w = $('#edFrame').contentWindow;
-    if (ed.ready && ed.cfg && w) w.postMessage({ type: 'bb-config', cfg: ed.cfg, slug: ed.slug }, location.origin);
+    if (ed.ready && ed.cfg && w) w.postMessage({ type: 'bb-config', cfg: ed.cfg, slug: ed.slug, canvas: prev.canvas, sel: ed.sel || '' }, location.origin);
   }, 120);
 }
 addEventListener('message', e => { if (e.origin === location.origin && e.data?.type === 'bb-ready') { ed.ready = true; preview(); } });
@@ -683,6 +686,7 @@ const T = (label, p, o = {}) => `<label class="f"><span>${label}</span>${o.area
   : `<input type="${o.type || 'text'}" data-p="${p}" maxlength="${o.max || 120}" value="${val(p)}" placeholder="${esc(o.ph || '')}">`}${o.hint ? `<small>${o.hint}</small>` : ''}</label>`;
 const CHK = (label, p) => `<label class="f" style="grid-template-columns:auto 1fr;align-items:center;gap:8px"><input type="checkbox" data-p="${p}" data-t="bool" ${getP(ed.cfg, p) ? 'checked' : ''}><span style="font-size:13px;color:#fff">${label}</span></label>`;
 const SEL = (label, p, opts) => `<label class="f"><span>${label}</span><select data-p="${p}">${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(getP(ed.cfg, p) ?? '') === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`;
+const LAR = [['', 'Automática'], ['terco', '1/3 da linha'], ['meia', '1/2 da linha'], ['cheia', 'Linha inteira']];
 const ALN = [['', 'Esquerda'], ['centro', 'Centro'], ['direita', 'Direita']];
 const POS = [['', 'Centro'], ['50% 0%', 'Topo'], ['50% 100%', 'Base'], ['0% 50%', 'Esquerda'], ['100% 50%', 'Direita']];
 const IMG = (label, p, kind, hint) => {
@@ -699,8 +703,8 @@ function cardHTML(c, i) {
   const LINK = (p, label = 'Link') => T(label, p, { type: 'url', max: 600, ph: 'https://…' });
   let f = '';
   if (t === 'capa') f = `${T('Título', base + 'titulo')}${IMG('Foto de capa', base + 'imagem', 'card', 'Foto horizontal. O texto aparece sobre ela.')}<div class="two">${T('Texto do botão', base + 'cta', { max: 40, ph: 'Saiba mais' })}${LINK(base + 'link', 'Link do botão')}</div>${adv(`${T('Etiqueta acima do título', base + 'kicker', { max: 40, ph: 'Ex.: Novidade' })}<div class="two">${SEL('Parte da foto em destaque', base + 'posicao', POS)}${SEL('Alinhamento do texto', base + 'alinhar', ALN)}</div>`)}`;
-  if (t === 'destaque') f = `${T('Marca', base + 'marca', { max: 60 })}<div class="two">${T('Valor grande (ex.: 10)', base + 'valor', { max: 12 })}${T('Sufixo (ex.: % OFF)', base + 'sufixo', { max: 20 })}</div>${T('Descrição', base + 'texto', { area: 1 })}<div class="two">${T('Cupom (opcional)', base + 'cupom', { max: 30 })}${T('Texto do botão', base + 'botao', { max: 30, ph: 'Ir à loja' })}</div>${LINK(base + 'link')}${adv(`<div class="two">${SEL('Aparece no filtro', base + 'cat', catOpts())}${SEL('Alinhamento do texto', base + 'alinhar', ALN)}</div>`)}`;
-  if (t === 'parceiro') f = `${T('Título', base + 'titulo')}${T('Descrição', base + 'texto', { area: 1 })}${IMG('Foto', base + 'imagem', 'card', 'Foto horizontal (2:1). Sem foto, o card fica só com texto.')}<div class="two">${T('Texto do botão', base + 'botao', { max: 30, ph: 'Ir à loja' })}${T('Cupom (opcional)', base + 'cupom', { max: 30 })}</div>${LINK(base + 'link')}${adv(`<div class="two">${T('Selo na foto (ex.: R$ 30 OFF)', base + 'selo', { max: 30 })}${SEL('Aparece no filtro', base + 'cat', catOpts())}</div><div class="two">${SEL('Parte da foto em destaque', base + 'posicao', POS)}${SEL('Alinhamento do texto', base + 'alinhar', ALN)}</div>${T('Descrição da foto (para leitores de tela)', base + 'alt', { max: 140 })}<div>${CHK('Card branco (claro)', base + 'claro')}${CHK('Botão na cor de destaque', base + 'destaqueBotao')}</div>`)}`;
+  if (t === 'destaque') f = `${T('Marca', base + 'marca', { max: 60 })}<div class="two">${T('Valor grande (ex.: 10)', base + 'valor', { max: 12 })}${T('Sufixo (ex.: % OFF)', base + 'sufixo', { max: 20 })}</div>${T('Descrição', base + 'texto', { area: 1 })}<div class="two">${T('Cupom (opcional)', base + 'cupom', { max: 30 })}${T('Texto do botão', base + 'botao', { max: 30, ph: 'Ir à loja' })}</div>${LINK(base + 'link')}${adv(`<div class="two">${SEL('Aparece no filtro', base + 'cat', catOpts())}${SEL('Alinhamento do texto', base + 'alinhar', ALN)}</div>${SEL('Largura no computador', base + 'largura', LAR)}`)}`;
+  if (t === 'parceiro') f = `${T('Título', base + 'titulo')}${T('Descrição', base + 'texto', { area: 1 })}${IMG('Foto', base + 'imagem', 'card', 'Foto horizontal (2:1). Sem foto, o card fica só com texto.')}<div class="two">${T('Texto do botão', base + 'botao', { max: 30, ph: 'Ir à loja' })}${T('Cupom (opcional)', base + 'cupom', { max: 30 })}</div>${LINK(base + 'link')}${adv(`<div class="two">${T('Selo na foto (ex.: R$ 30 OFF)', base + 'selo', { max: 30 })}${SEL('Aparece no filtro', base + 'cat', catOpts())}</div><div class="two">${SEL('Parte da foto em destaque', base + 'posicao', POS)}${SEL('Alinhamento do texto', base + 'alinhar', ALN)}</div>${SEL('Largura no computador', base + 'largura', LAR)}${T('Descrição da foto (para leitores de tela)', base + 'alt', { max: 140 })}<div>${CHK('Card branco (claro)', base + 'claro')}${CHK('Botão na cor de destaque', base + 'destaqueBotao')}</div>`)}`;
   const nome = { capa: 'Capa', destaque: 'Destaque', parceiro: 'Card' }[t], u = c.imagem ? imgUrl(c.imagem) : '';
   return `<details class="cardp" data-cid="${esc(c.id)}" ${ed.open.has(c.id) ? 'open' : ''}><summary>${u ? `<span class="cth" style="background-image:url('${esc(u)}')"></span>` : ''}<span class="tag">${nome}</span><b data-ttl>${esc(c.titulo || c.marca || '(sem título)')}</b>
     <button type="button" class="ibtn" data-act="up" data-i="${i}" ${i === 0 ? 'disabled' : ''} title="Subir" aria-label="Subir">↑</button><button type="button" class="ibtn" data-act="down" data-i="${i}" ${i === n - 1 ? 'disabled' : ''} title="Descer" aria-label="Descer">↓</button><button type="button" class="ibtn" data-act="dupcard" data-i="${i}" title="Duplicar" aria-label="Duplicar">⧉</button><button type="button" class="ibtn" data-act="delcard" data-i="${i}" title="Remover" aria-label="Remover">✕</button></summary><div class="ed-body">${f}</div></details>`;
@@ -901,7 +905,7 @@ function onAct(e) {
 }
 edForm.addEventListener('click', onAct);
 $('#edList').addEventListener('click', onAct);
-const prev = { mode: 'cel' };
+const prev = { mode: 'cel', canvas: false };
 function fitPrev() {
   const ph = document.querySelector('#editor .phone'), fr = $('#edFrame'); if (!ph) return;
   ph.classList.toggle('pc', prev.mode === 'pc'); document.querySelector('#editor .ed').classList.toggle('pcprev', prev.mode === 'pc');
@@ -910,6 +914,35 @@ function fitPrev() {
     fr.style.width = W + 'px'; fr.style.height = (ph.clientHeight / k) + 'px'; fr.style.transform = `scale(${k})`;
   } else { fr.style.width = fr.style.height = fr.style.transform = ''; }
 }
+$('#cvToggle').onclick = () => {
+  prev.canvas = !prev.canvas; $('#cvToggle').setAttribute('aria-pressed', prev.canvas); $('#cvToggle').classList.toggle('pri', prev.canvas);
+  $('#cvHint').hidden = !prev.canvas;
+  if (prev.canvas && prev.mode !== 'pc') $('#prevMode [data-m=pc]').click();
+  preview();
+};
+function selectCard(id) {
+  if (!ed.cfg) return;
+  ed.sel = id; ed.sec.add('cards'); ed.open = new Set([id]); renderForm(); preview();
+  const el = document.querySelector(`[data-cid="${id}"]`);
+  if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1200); }
+}
+addEventListener('message', e => {
+  if (e.origin !== location.origin || e.source !== $('#edFrame').contentWindow || !ed.cfg) return;
+  const d = e.data || {}, c = ed.cfg, i = c.cards.findIndex(x => x.id === d.id);
+  if (d.type === 'bb-select') return selectCard(d.id);
+  if (d.type === 'bb-order') {
+    const m = new Map(c.cards.map(x => [x.id, x])), next = (d.ids || []).map(k => m.get(k)).filter(Boolean);
+    if (next.length === c.cards.length) { c.cards = next; markDirty(); renderForm(); preview(); }
+    return;
+  }
+  if (d.type !== 'bb-act' || i < 0) return;
+  if (d.act === 'w') { if (d.v === 'auto') delete c.cards[i].largura; else c.cards[i].largura = d.v; }
+  else if (d.act === 'mv') { const j = i + (+d.v || 0); if (j < 0 || j >= c.cards.length) return; [c.cards[i], c.cards[j]] = [c.cards[j], c.cards[i]]; }
+  else if (d.act === 'dup') { const o = JSON.parse(JSON.stringify(c.cards[i])); o.id = o.tipo + '-' + rid(); if (o.titulo) o.titulo += ' (cópia)'; c.cards.splice(i + 1, 0, o); ed.sel = o.id; }
+  else if (d.act === 'del') { if (!confirm('Remover este card?')) return; c.cards.splice(i, 1); ed.sel = ''; }
+  else return;
+  markDirty(); renderForm(); preview();
+});
 $('#prevMode').onclick = e => {
   const b = e.target.closest('button'); if (!b) return;
   prev.mode = b.dataset.m; document.querySelectorAll('#prevMode button').forEach(x => x.setAttribute('aria-pressed', x === b)); fitPrev();

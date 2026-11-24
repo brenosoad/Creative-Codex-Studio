@@ -275,22 +275,44 @@
     .cards > .partner.lastp .body { justify-content: center; padding: 24px; }
     .cards > .partner.lastp .body p { margin-bottom: 0; }
     .cards > .partner.lastp .actions { margin-top: 18px; }
+    .cards > .card[data-w=cheia] { grid-column: 1 / -1; }
+    .cards > .partner[data-w=cheia] { flex-direction: row; }
+    .cards > .partner[data-w=cheia] .img { flex: 0 0 50%; aspect-ratio: auto; min-height: 230px; }
+    .cards > .partner[data-w=cheia] .body { justify-content: center; padding: 24px; }
+    .cards > .partner[data-w=cheia] .body p { margin-bottom: 0; }
+    .cards > .partner[data-w=cheia] .actions { margin-top: 18px; }
   }
   @media (min-width: 1100px) {
     main { max-width: 1180px; }
     .cards { grid-template-columns: repeat(6, 1fr); }
     .cards > .card { grid-column: span 2; }
     .cards > .hero { grid-column: 1 / -1; }
-    .cards > .partner:nth-last-child(-n+2) { grid-column: span 3; flex-direction: column; }
-    .cards > .partner.noimg { grid-column: 1 / -1; }
-    .cards:has(> .partner.noimg:last-child) > .partner:nth-last-child(3) { grid-column: span 3; flex-direction: column; }
+    .cards:not(.manual) > .partner:nth-last-child(-n+2) { grid-column: span 3; flex-direction: column; }
+    .cards > .partner.noimg:not([data-w]) { grid-column: 1 / -1; }
+    .cards:not(.manual):has(> .partner.noimg:last-child) > .partner:nth-last-child(3) { grid-column: span 3; flex-direction: column; }
     .cards > .partner.lastp .img { flex: none; aspect-ratio: 2 / 1; min-height: 0; }
     .cards > .partner.lastp .body { justify-content: flex-start; padding: 16px; }
     .cards > .partner.lastp .body p { margin-bottom: 14px; }
     .cards > .partner.lastp .actions { margin-top: auto; }
+    .cards > article.card[data-w=terco] { grid-column: span 2; }
+    .cards > article.card[data-w=meia] { grid-column: span 3; }
+    .cards > article.card[data-w=cheia] { grid-column: 1 / -1; }
     .hero { min-height: 430px; }
     .growth .big { font-size: 104px; }
   }
+
+  /* Modo organizar (prévia do editor) */
+  .cv .card { cursor: grab; user-select: none; }
+  .cv .card .link { pointer-events: none; }
+  .cv .card.sel { outline: 3px solid var(--orange-2); outline-offset: 2px; }
+  .cv .card.dragging { opacity: .45; }
+  .cv .card.dt-before { box-shadow: -8px 0 0 var(--orange-2); }
+  .cv .card.dt-after { box-shadow: 8px 0 0 var(--orange-2); }
+  .cv-bar { position: absolute; top: 8px; right: 8px; z-index: 6; display: flex; gap: 4px; padding: 4px; border-radius: 10px; background: rgba(0,0,0,.78); backdrop-filter: blur(6px); }
+  .cv-bar button { all: unset; cursor: pointer; font: 700 12px/1 system-ui, sans-serif; color: #fff; padding: 7px 9px; border-radius: 7px; min-width: 28px; text-align: center; }
+  .cv-bar button:hover { background: rgba(255,255,255,.18); }
+  .cv-bar button.on { background: var(--orange); color: #111; }
+  .cv-bar i { width: 1px; background: rgba(255,255,255,.25); margin: 2px 2px; }
 
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -375,6 +397,7 @@
     const go = (c, extra = '') => c.link
       ? `<a class="go ${extra}" href="${esc(url(c.link))}" target="_blank" rel="noopener">${esc(c.botao || 'Abrir')}</a>` : '';
 
+    const wa = c => (['terco', 'meia', 'cheia'].includes(c.largura) ? ` data-w="${c.largura}"` : '');
     const al = c => (c.alinhar === 'centro' || c.alinhar === 'direita' ? ' al-' + c.alinhar : '');
     const card = c => {
       const id = esc(c.id), cat = c.cat ? ` data-cat="${esc(c.cat)}"` : '';
@@ -389,14 +412,14 @@
           <a class="link" target="_blank" rel="noopener" aria-label="${esc(c.aria || c.cta || c.titulo)}" href="${esc(url(c.link))}"></a>
         </article>`;
       if (c.tipo === 'destaque') return `
-        <article class="card growth${al(c)} reveal"${cat} data-id="${id}">
+        <article class="card growth${al(c)} reveal"${cat}${wa(c)} data-id="${id}">
           <div class="brand">${esc(c.marca)}</div>
           <div class="big">${esc(c.valor)}<small>${esc(c.sufixo)}</small></div>
           <p>${esc(c.texto)}</p>
           <div class="actions">${code(c)}${go(c)}</div>
         </article>`;
       return `
-        <article class="card partner${c.claro ? ' light' : ''}${c.imagem ? '' : ' noimg'}${c._last ? ' lastp' : ''}${al(c)} reveal"${cat} data-id="${id}">
+        <article class="card partner${c.claro ? ' light' : ''}${c.imagem ? '' : ' noimg'}${c._last ? ' lastp' : ''}${al(c)} reveal"${cat}${wa(c)} data-id="${id}">
           <div class="img">${img(c, true)}${c.selo ? `<span class="badge">${esc(c.selo)}</span>` : ''}</div>
           <div class="body">
             <h3>${esc(c.titulo)}</h3>
@@ -420,10 +443,11 @@
         <button class="chip" type="button" data-filter="todos" aria-pressed="true">Todos</button>
         ${usedCats.map(k => `<button class="chip" type="button" data-filter="${esc(k)}" aria-pressed="false">${esc(cats[k])}</button>`).join('')}
       </nav>` : ''}
-      <section class="cards">${(() => {
+      <section class="cards${(cfg.cards || []).some(c => c.largura) ? ' manual' : ''}">${(() => {
         const all = [...(cfg.cards || [])];
+        const manual = all.some(c => c.largura);
         let last = -1; all.forEach((c, i) => { if (c.tipo === 'parceiro' && c.imagem) last = i; });
-        if (last >= 0) all[last] = { ...all[last], _last: true };
+        if (last >= 0 && !manual) all[last] = { ...all[last], _last: true };
         return all.map(card).join('');
       })()}</section>
       <footer>
@@ -472,7 +496,7 @@
       });
     });
     $$('a.go[href="#"]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); show('Link em breve'); }));
-    if (EMBED) $$('a[target=_blank]').forEach(a => a.addEventListener('click', e => e.preventDefault()));
+    if (EMBED) { $$('a[target=_blank]').forEach(a => a.addEventListener('click', e => e.preventDefault())); applyCanvas(); }
 
     /* Revelar ao rolar */
     const reveals = $$('.reveal');
@@ -525,12 +549,66 @@
     }
   }
 
+  /* Modo organizar: arrastar, escolher largura e selecionar cards na prévia */
+  let CANVAS = false, SEL = '';
+  const post = m => parent.postMessage(m, location.origin);
+  function applyCanvas() {
+    document.body.classList.toggle('cv', CANVAS);
+    $$('.cv-bar').forEach(x => x.remove());
+    $$('.cards > .card').forEach(c => {
+      c.draggable = CANVAS;
+      c.classList.toggle('sel', CANVAS && c.dataset.id === SEL);
+      if (CANVAS && c.dataset.id === SEL) {
+        const w = c.dataset.w || '', hero = c.classList.contains('hero');
+        const b = (a, t, on, title) => `<button type="button" data-cv="${a}" title="${title}" aria-label="${title}"${on ? ' class="on"' : ''}>${t}</button>`;
+        c.insertAdjacentHTML('beforeend', `<div class="cv-bar">${hero ? '' : b('w:terco', '⅓', w === 'terco', 'Largura 1/3') + b('w:meia', '½', w === 'meia', 'Largura 1/2') + b('w:cheia', '▭', w === 'cheia', 'Largura total') + b('w:auto', 'Auto', !w, 'Largura automática') + '<i></i>'}${b('mv:-1', '←', 0, 'Mover para antes')}${b('mv:1', '→', 0, 'Mover para depois')}${b('dup', '⧉', 0, 'Duplicar')}${b('del', '✕', 0, 'Remover')}</div>`);
+      }
+    });
+    $$('.cards img').forEach(i => (i.draggable = false));
+  }
+  function initCanvas() {
+    let drag = null, drop = null;
+    const clear = () => $$('.dt-before,.dt-after,.dragging').forEach(x => x.classList.remove('dt-before', 'dt-after', 'dragging'));
+    document.addEventListener('click', e => {
+      if (!CANVAS) return;
+      const bt = e.target.closest('[data-cv]'), card = e.target.closest('.cards > .card');
+      if (!card) return;
+      e.preventDefault(); e.stopPropagation();
+      if (bt) { const [act, v] = bt.dataset.cv.split(':'); post({ type: 'bb-act', act, id: card.dataset.id, v }); return; }
+      SEL = card.dataset.id; applyCanvas(); post({ type: 'bb-select', id: SEL });
+    }, true);
+    document.addEventListener('dragstart', e => {
+      const card = CANVAS && e.target.closest?.('.cards > .card'); if (!card) return;
+      drag = card.dataset.id; card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', drag);
+    });
+    document.addEventListener('dragover', e => {
+      if (!drag) return;
+      const t = e.target.closest?.('.cards > .card'); if (!t || t.dataset.id === drag) return;
+      e.preventDefault();
+      const r = t.getBoundingClientRect(), wide = r.width > t.parentElement.clientWidth * .9;
+      const before = wide ? e.clientY < r.top + r.height / 2 : e.clientX < r.left + r.width / 2;
+      $$('.dt-before,.dt-after').forEach(x => x.classList.remove('dt-before', 'dt-after'));
+      t.classList.add(before ? 'dt-before' : 'dt-after'); drop = { id: t.dataset.id, before };
+    });
+    document.addEventListener('drop', e => {
+      if (!drag || !drop) return; e.preventDefault();
+      const ids = $$('.cards > .card').map(c => c.dataset.id).filter(i => i !== drag);
+      const at = ids.indexOf(drop.id) + (drop.before ? 0 : 1); ids.splice(at, 0, drag);
+      post({ type: 'bb-order', ids });
+    });
+    document.addEventListener('dragend', () => { drag = drop = null; clear(); });
+  }
+
   /* Início */
   if (EMBED) {
     addEventListener('message', e => {
-      if (e.origin !== location.origin || e.data?.type !== 'bb-config') return;
-      mount(e.data.cfg, e.data.slug);
+      if (e.origin !== location.origin) return;
+      const d = e.data || {};
+      if (d.type === 'bb-config') { CANVAS = !!d.canvas; SEL = d.sel || ''; mount(d.cfg, d.slug); }
+      else if (d.type === 'bb-canvas') { CANVAS = !!d.on; SEL = d.sel || ''; applyCanvas(); }
     });
+    initCanvas();
     parent.postMessage({ type: 'bb-ready' }, location.origin);
     return;
   }
