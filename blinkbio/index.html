@@ -201,8 +201,8 @@
   .cards > .partner.noimg .body { padding: 22px; }
   footer .agency { display: inline-flex; align-items: center; gap: 8px; margin: 14px 0 2px; padding: 11px 20px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: #fff; font-weight: 700; font-size: 13.5px; transition: .2s var(--ease); }
   footer .agency:hover { border-color: var(--orange); color: var(--orange-2); }
-  footer .credit { display: inline-block; margin-top: 12px; opacity: .8; transition: opacity .2s; }
-  footer .credit img { display: block; height: 30px; width: auto; }
+  footer .credit { display: inline-block; margin-top: 16px; opacity: .9; transition: opacity .2s; }
+  footer .credit img { display: block; height: 52px; width: auto; }
   footer .credit:hover { opacity: 1; }
 
   /* Botão flutuante */
@@ -452,7 +452,7 @@
       })()}</section>
       <footer>
         <strong>© ${esc(cfg.nome)}</strong><br>
-        <a class="credit" href="https://www.creativecodex.com.br/" target="_blank" rel="noopener" aria-label="Desenvolvido por BlinkBio, Creative Codex Studio"><img src="assets/logo-dark.png" width="120" height="30" alt="BlinkBio by Creative Codex" loading="lazy" decoding="async"></a>
+        <a class="credit" href="https://www.creativecodex.com.br/" target="_blank" rel="noopener" aria-label="Desenvolvido por BlinkBio, Creative Codex Studio"><img src="assets/logo-dark.png" width="208" height="52" alt="BlinkBio by Creative Codex" loading="lazy" decoding="async"></a>
       </footer>`;
     $('#fab-slot').innerHTML = fabC?.texto ? `<a class="fab" id="fab" data-id="${esc(fabC.id || 'fab')}" target="_blank" rel="noopener" aria-label="${esc(fabC.aria || fabC.texto)}" href="${esc(url(fabC.link))}">${esc(fabC.texto)} ${ARROW}</a>` : '';
 
