@@ -187,6 +187,25 @@ tr.click:hover td{background:var(--card-2)}
 .socio .ln span:last-child{color:#fff;font-weight:700}
 .acerto{grid-column:1/-1;font-weight:700;font-size:14px;color:var(--brand-2);text-align:center;padding:4px 0 0}
 
+/* clientes (galeria) */
+.cbar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.cbar input{flex:1 1 220px;max-width:360px;background:var(--card);color:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit}
+.cbar input:focus{outline:2px solid var(--brand);border-color:transparent}
+.cbar .mut{margin-right:auto;font-size:13px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.ccard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;display:grid;gap:14px;transition:border-color .15s,transform .15s}
+.ccard:hover{border-color:var(--brand-2);transform:translateY(-1px)}
+.cc-h{display:flex;gap:12px;align-items:center;min-width:0}
+.cc-av{width:46px;height:46px;border-radius:12px;flex:none;display:grid;place-items:center;font-weight:800;font-size:16px;color:#fff;border:1px solid var(--line);background-size:70%;background-position:center;background-repeat:no-repeat}
+.cc-h b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-h small{color:var(--mut);font-size:12px}
+.cc-st{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cc-st div{min-width:0}.cc-st span{display:block;font-size:11px;color:var(--mut);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.cc-st b{font-size:18px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cc-act{display:flex;gap:8px;flex-wrap:wrap}
+.cc-act .btn{flex:none}
+.ed-list{display:none}
+@media(min-width:1180px){.ed{grid-template-columns:minmax(0,1fr) 400px!important}}
 /* ===== acabamento profissional ===== */
 .who{padding:0 8px 10px;line-height:1.3}.who b{display:block;font-size:13px}.who span{font-size:12px;color:var(--mut)}
 :root{--r:12px;--side:#0f0d20}
@@ -321,7 +340,11 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 </section>
 
 <section id="editor" hidden>
-  <div class="ed">
+  <div id="cliGrid">
+    <div class="cbar"><input type="search" id="cSearch" placeholder="Buscar cliente…" aria-label="Buscar cliente" autocomplete="off"><span class="mut" id="cCount"></span><button class="btn pri" id="gNew" type="button">+ Novo cliente</button></div>
+    <div class="cgrid" id="cgrid"></div>
+  </div>
+  <div class="ed" hidden>
     <aside class="box ed-list">
       <h2>Clientes</h2>
       <div id="edList"></div>
@@ -668,6 +691,29 @@ async function loadList() {
 }
 function drawList() {
   $('#edList').innerHTML = ed.list.length ? ed.list.map(c => `<button type="button" class="it" data-act="open" data-s="${esc(c.slug)}" ${c.slug === ed.slug ? 'aria-current="true"' : ''}><span>${esc(c.nome)}</span><small>${c.src === 'arquivo' ? 'arquivo' : 'editor'}</small></button>`).join('') : '<p class="mut" style="margin-top:8px">Nenhum cliente ainda.</p>';
+  drawGrid(); syncView();
+}
+const imgFor = (slug, ref) => !ref ? '' : /^img:/.test(ref) ? `${EAPI}/img?c=${slug}&f=${encodeURIComponent(ref.slice(4))}` : /^(https?:)?\/\/|^(data|blob):|^\//.test(ref) ? ref : `../clients/${slug}/${ref}`;
+function drawGrid() {
+  const q = ($('#cSearch').value || '').trim().toLowerCase(), from = dayOf(29), to = dayOf(0);
+  const L = ed.list.filter(c => !q || c.nome.toLowerCase().includes(q) || c.slug.includes(q));
+  $('#cCount').textContent = `${ed.list.length} cliente${ed.list.length === 1 ? '' : 's'}`;
+  $('#cgrid').innerHTML = L.map(c => {
+    const cf = conf[c.slug] || {}, rs = rows.filter(x => x.site === c.slug && x.day >= from && x.day <= to);
+    const v = sum(rs, 'page_view'), k = sum(rs, 'abrir_link'), u = imgFor(c.slug, cf.logo?.arquivo);
+    const ini = c.nome.trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+    return `<article class="ccard" data-act="open" data-s="${esc(c.slug)}"><div class="cc-h"><div class="cc-av" style="background-color:${esc(cf.tema?.fundo || '#17142B')};${u ? `background-image:url('${esc(u)}')` : `background-color:${esc(cf.tema?.cor || '#4B32D9')}`}">${u ? '' : esc(ini)}</div><div style="min-width:0"><b>${esc(c.nome)}</b><small>/${esc(c.slug)} · ${c.src === 'arquivo' ? 'arquivo' : 'editor'}</small></div></div>
+      <div class="cc-st"><div><span>Visitas</span><b>${nf(v)}</b></div><div><span>Cliques</span><b>${nf(k)}</b></div><div><span>CTR</span><b>${v ? (k / v * 100).toFixed(1).replace('.', ',') + '%' : '–'}</b></div></div>
+      <div class="cc-act"><button type="button" class="btn sm pri" data-act="open" data-s="${esc(c.slug)}">Editar</button><a class="btn sm" href="${esc(SITE_BASE)}?c=${esc(c.slug)}" target="_blank" rel="noopener">Abrir ↗</a><button type="button" class="btn sm" data-act="glink" data-s="${esc(c.slug)}">Copiar link</button></div></article>`;
+  }).join('') || `<p class="empty" style="grid-column:1/-1">${ed.list.length ? 'Nenhum cliente encontrado.' : 'Nenhum cliente ainda. Crie o primeiro.'}</p>`;
+}
+function syncView() {
+  const editing = !!ed.cfg || !!ed.creating;
+  $('#cliGrid').hidden = editing; document.querySelector('#editor .ed').hidden = !editing;
+}
+function edBack() {
+  if (!okLeave()) return;
+  Object.assign(ed, { slug: '', cfg: null, dirty: false, ckey: null, creating: false }); drawList(); renderForm(); $('#edOpen').hidden = true; scrollTo({ top: 0, behavior: 'smooth' });
 }
 const okLeave = () => !ed.dirty || confirm('Descartar as alterações não salvas?');
 async function openClient(slug) {
@@ -684,7 +730,7 @@ async function openClient(slug) {
 }
 function renderNew() {
   if (!okLeave()) return;
-  Object.assign(ed, { slug: '', cfg: null, dirty: false }); drawList(); $('#edOpen').hidden = true;
+  Object.assign(ed, { slug: '', cfg: null, dirty: false, creating: true }); drawList(); $('#edOpen').hidden = true;
   $('#edForm').innerHTML = `<h2 style="font-size:15px;color:#fff;letter-spacing:0;text-transform:none;margin-bottom:14px">Novo cliente</h2><div class="ed-body" style="padding:0"><label class="f"><span>Nome do cliente</span><input type="text" id="nwNome" maxlength="80" placeholder="Academia Forte"></label><label class="f"><span>Endereço (slug)</span><input type="text" id="nwSlug" maxlength="32" placeholder="academia-forte"><small>Ficará em <b>${esc(location.origin + SITE_BASE)}?c=<span id="nwPrev">…</span></b></small></label><div><button type="button" class="btn pri" data-act="create">Criar cliente</button></div></div>`;
   $('#nwNome').addEventListener('input', e => { const s = $('#nwSlug'); if (!s.dataset.m) { s.value = slugify(e.target.value); $('#nwPrev').textContent = s.value; } });
   $('#nwSlug').addEventListener('input', e => { e.target.dataset.m = 1; e.target.value = slugify(e.target.value); $('#nwPrev').textContent = e.target.value; });
@@ -744,7 +790,7 @@ async function save() {
 async function delClient() {
   if (!confirm(`Excluir "${ed.cfg.nome}" do editor? A página deixa de abrir pelo editor (fotos enviadas também serão apagadas).`)) return;
   if (!DEMO) { const r = await fetch(`${EAPI}/clients?c=${ed.slug}`, { method: 'DELETE', headers: { 'X-Key': key } }); if (!r.ok) return ptoast('Não consegui excluir.', true); }
-  Object.assign(ed, { slug: '', cfg: null, dirty: false }); ptoast('Cliente excluído.'); await loadList(); renderForm(); $('#edOpen').hidden = true;
+  Object.assign(ed, { slug: '', cfg: null, dirty: false, creating: false }); ptoast('Cliente excluído.'); await loadList(); renderForm(); $('#edOpen').hidden = true;
 }
 
 /* ---- eventos ---- */
@@ -770,13 +816,15 @@ function onAct(e) {
   const b = e.target.closest('[data-act]'); if (!b) return;
   const a = b.dataset.act, i = +b.dataset.i, c = ed.cfg;
   if (b.closest('summary')) e.preventDefault();
+  if (e.target.closest('a[href]')) return;
+  if (a === 'glink') { e.stopPropagation(); return navigator.clipboard.writeText(`${location.origin}${SITE_BASE}?c=${b.dataset.s}`).then(() => ptoast('Link copiado.'), () => ptoast('Não consegui copiar.', true)); }
   if (a === 'open') return openClient(b.dataset.s);
   if (a === 'create') {
     const nome = $('#nwNome').value.trim(), slug = $('#nwSlug').value;
     if (!nome || !slug) return ptoast('Preencha nome e endereço.', true);
     if (ed.list.some(x => x.slug === slug)) return ptoast('Já existe um cliente com esse endereço.', true);
     const cfg = newCfg(); cfg.nome = nome; cfg.titulo = nome;
-    Object.assign(ed, { slug, cfg, src: 'novo', dirty: true, open: new Set(), sec: new Set(['geral', 'cards']) });
+    Object.assign(ed, { slug, cfg, creating: false, src: 'novo', dirty: true, open: new Set(), sec: new Set(['geral', 'cards']) });
     renderForm(); preview(); return;
   }
   if (!c) return;
@@ -795,10 +843,7 @@ function onAct(e) {
   if (a === 'delcat') { delete c.categorias[b.dataset.k]; c.cards.forEach(x => { if (x.cat === b.dataset.k) delete x.cat; }); renderForm(); return markDirty(); }
   if (a === 'save') return save();
   if (a === 'delclient') return delClient();
-  if (a === 'back') {
-    if (!okLeave()) return;
-    Object.assign(ed, { slug: '', cfg: null, dirty: false, ckey: null }); drawList(); renderForm(); $('#edOpen').hidden = true; scrollTo({ top: 0, behavior: 'smooth' }); return;
-  }
+  if (a === 'back') return edBack();
   if (a === 'genkey') {
     if (ed.ckey && !confirm('Gerar nova chave? A anterior deixa de funcionar.')) return;
     return fetch(`${EAPI}/clients?c=${ed.slug}&action=key`, { method: 'POST', headers: { 'X-Key': key } }).then(r => r.ok ? r.json() : Promise.reject()).then(j => { ed.ckey = j.key; ed.sec.add('acesso'); renderForm(); ptoast('Chave gerada.'); }, () => ptoast('Não consegui gerar a chave.', true));
@@ -808,7 +853,7 @@ function onAct(e) {
 }
 edForm.addEventListener('click', onAct);
 $('#edList').addEventListener('click', onAct);
-$('#edNew').onclick = renderNew;
+$('#edNew').onclick = renderNew; $('#gNew').onclick = renderNew; $('#cgrid').addEventListener('click', onAct); $('#cSearch').addEventListener('input', drawGrid);
 const fileIn = Object.assign(document.createElement('input'), { type: 'file', accept: 'image/*', id: 'edFile', hidden: true });
 fileIn.onchange = () => handleFile(fileIn.files[0]); document.body.append(fileIn);
 
@@ -816,7 +861,7 @@ fileIn.onchange = () => handleFile(fileIn.files[0]); document.body.append(fileIn
 let curTab = 'stats';
 $('#logout').onclick = () => { try { sessionStorage.removeItem('k'); } catch {} location.reload(); };
 $('#back').onclick = () => {
-  if (curTab === 'edit' && ed.cfg) return $('[data-act=back]').click();
+  if (curTab === 'edit' && (ed.cfg || ed.creating)) return edBack();
   if (curTab !== 'stats') return showTab('stats');
 };
 function showTab(t) {
