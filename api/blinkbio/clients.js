@@ -22,6 +22,7 @@ function cleanCard(c, i) {
     marca: str(c.marca, 60), valor: str(c.valor, 12), sufixo: str(c.sufixo, 20),
     cupom: str(c.cupom, 30), link: link(c.link), botao: str(c.botao, 30),
     imagem: imgRef(c.imagem), alt: str(c.alt, 140), posicao: /^[\d.%a-z\s-]{1,30}$/i.test(c.posicao || '') ? c.posicao : undefined,
+    alinhar: c.alinhar === 'centro' || c.alinhar === 'direita' ? c.alinhar : undefined,
     w: num(c.w), h: num(c.h),
     claro: c.claro ? true : undefined, destaqueBotao: c.destaqueBotao ? true : undefined
   };

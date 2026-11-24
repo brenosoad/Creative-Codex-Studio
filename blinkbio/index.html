@@ -154,6 +154,12 @@
     transition: .2s var(--ease);
   }
   .hero:hover .cta { background: var(--orange); }
+  .al-centro { text-align: center; }
+  .al-direita { text-align: right; }
+  .hero.al-centro h2 { margin-inline: auto; }
+  .hero.al-direita h2 { margin-left: auto; }
+  .al-centro .actions { justify-content: center; }
+  .al-direita .actions { justify-content: flex-end; }
   .link { position: absolute; inset: 0; z-index: 2; }
 
   /* Growth (laranja) */
@@ -251,6 +257,12 @@
     .hero .content { position: absolute; inset: 0 auto 0 0; max-width: 56%; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 40px 44px; }
     .hero h2 { font-size: clamp(40px, 5vw, 62px); max-width: 14ch; text-shadow: 0 2px 14px rgba(0,0,0,.45); }
     .hero .cta { font-size: 16px; padding: 15px 24px; }
+    .hero.al-centro .content { inset: 0; max-width: none; align-items: center; }
+    .hero.al-centro .img::after { background: rgba(0,0,0,.42); }
+    .hero.al-direita .content { inset: 0 0 0 auto; align-items: flex-end; }
+    .hero.al-direita .img::after { background: linear-gradient(270deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,.22) 42%, transparent 66%); }
+    .hero.al-centro h2, .hero.al-direita h2 { margin-inline: 0; }
+    .hero.al-centro h2 { margin-inline: auto; }
     .growth .big { font-size: 120px; }
     .body h3 { font-size: 23px; }
     .cards > .partner:last-child { grid-column: 1 / -1; flex-direction: row; }
@@ -356,10 +368,11 @@
     const go = (c, extra = '') => c.link
       ? `<a class="go ${extra}" href="${esc(url(c.link))}" target="_blank" rel="noopener">${esc(c.botao || 'Abrir')}</a>` : '';
 
+    const al = c => (c.alinhar === 'centro' || c.alinhar === 'direita' ? ' al-' + c.alinhar : '');
     const card = c => {
       const id = esc(c.id), cat = c.cat ? ` data-cat="${esc(c.cat)}"` : '';
       if (c.tipo === 'capa') return `
-        <article class="card hero reveal" id="hero" data-id="${id}">
+        <article class="card hero${al(c)} reveal" id="hero" data-id="${id}">
           <div class="img">${img(c, false)}</div>
           <div class="content">
             ${c.kicker ? `<span class="kicker">${esc(c.kicker)}</span>` : ''}
@@ -369,14 +382,14 @@
           <a class="link" target="_blank" rel="noopener" aria-label="${esc(c.aria || c.cta || c.titulo)}" href="${esc(url(c.link))}"></a>
         </article>`;
       if (c.tipo === 'destaque') return `
-        <article class="card growth reveal"${cat} data-id="${id}">
+        <article class="card growth${al(c)} reveal"${cat} data-id="${id}">
           <div class="brand">${esc(c.marca)}</div>
           <div class="big">${esc(c.valor)}<small>${esc(c.sufixo)}</small></div>
           <p>${esc(c.texto)}</p>
           <div class="actions">${code(c)}${go(c)}</div>
         </article>`;
       return `
-        <article class="card partner${c.claro ? ' light' : ''} reveal"${cat} data-id="${id}">
+        <article class="card partner${c.claro ? ' light' : ''}${al(c)} reveal"${cat} data-id="${id}">
           <div class="img">${img(c, true)}${c.selo ? `<span class="badge">${esc(c.selo)}</span>` : ''}</div>
           <div class="body">
             <h3>${esc(c.titulo)}</h3>
