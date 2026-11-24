@@ -38,7 +38,7 @@ select,.btn{background:var(--card);color:#fff;border:1px solid var(--line);borde
 .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
 @media(min-width:760px){.kpis{grid-template-columns:repeat(4,1fr)}}
 .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
-.kpi b{display:block;font:400 clamp(30px,5vw,42px)/1.05 Anton,sans-serif;color:var(--brand-2);margin:6px 0 4px}
+.kpi b{display:block;font:400 clamp(26px,5vw,42px)/1.05 Anton,sans-serif;color:var(--brand-2);margin:6px 0 4px}
 .kpi small{font-size:12px;font-weight:700}
 .up{color:var(--ok)}.down{color:var(--bad)}.flat{color:var(--mut)}
 
@@ -145,6 +145,14 @@ tr.click:hover td{background:var(--card-2)}
 .ptoast.err{border-color:var(--bad);color:#ffb4b4}
 #newCat{min-width:0}
 .busy{opacity:.6;pointer-events:none}
+
+.fin-head{display:flex;justify-content:center;margin:0 0 14px}
+.fin-in{background:var(--card);color:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:13px;width:90px}
+.fin-in.sm{width:56px}
+.st{border:1px solid var(--line);background:var(--card);color:#fff;border-radius:999px;padding:6px 12px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap}
+.st.ok{background:rgba(52,211,153,.15);border-color:#34d399;color:#34d399}
+.st.late{border-color:#ff8f8f;color:#ff8f8f}
+.backb{margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -161,6 +169,7 @@ tr.click:hover td{background:var(--card-2)}
     <div class="seg" id="tabs" role="group" aria-label="Seção">
       <button data-tab="stats" aria-pressed="true">Resultados</button>
       <button data-tab="edit" aria-pressed="false">Clientes</button>
+      <button data-tab="fin" aria-pressed="false">Financeiro</button>
     </div>
     <div class="tools" id="statsTools">
       <select id="site" aria-label="Cliente"></select>
@@ -201,6 +210,14 @@ tr.click:hover td{background:var(--card-2)}
     <div class="box"><h2>Dia da semana</h2><div id="wk"></div></div>
   </div>
 </div>
+
+<section id="finView" hidden>
+  <div class="fin-head">
+    <div class="seg" id="finMes" role="group" aria-label="Mês"><button type="button" data-m="-1" aria-label="Mês anterior">‹</button><button type="button" id="finLbl" disabled style="min-width:150px"></button><button type="button" data-m="1" aria-label="Próximo mês">›</button></div>
+  </div>
+  <div class="kpis" id="finKpis"></div>
+  <div class="box"><h2>Mensalidades</h2><div class="scroll"><table id="finTbl"></table></div></div>
+</section>
 
 <section id="editor" hidden>
   <div class="ed">
@@ -513,6 +530,7 @@ function renderForm() {
   const nums = (c.numeros || []).map((n, i) => `<div class="rowx"><label class="f"><span>Valor</span><input type="text" data-p="numeros.${i}.valor" maxlength="16" value="${esc(n.valor)}" placeholder="+97 mil"></label><label class="f"><span>Rótulo</span><input type="text" data-p="numeros.${i}.rotulo" maxlength="24" value="${esc(n.rotulo)}" placeholder="Seguidores"></label><button type="button" class="ibtn" data-act="delnum" data-i="${i}">✕</button></div>`).join('');
   const cats = Object.entries(c.categorias || {}).map(([k, v]) => `<div class="rowx" style="grid-template-columns:1fr 34px"><label class="f"><span>Nome do filtro</span><input type="text" data-p="categorias.${k}" maxlength="30" value="${esc(v)}"></label><button type="button" class="ibtn" data-act="delcat" data-k="${esc(k)}">✕</button></div>`).join('');
   box.innerHTML = `
+    <button type="button" class="btn sm backb" data-act="back">← Voltar</button>
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap"><h2 style="font-size:15px;color:#fff;letter-spacing:0;text-transform:none">${esc(c.nome || 'Novo cliente')} <span class="mut" style="font-weight:500">/${esc(ed.slug)}</span></h2><span class="dirty" id="edDirty" ${ed.dirty ? '' : 'hidden'}>● alterações não salvas</span></div>
     ${SEC('geral', 'Geral', `${T('Nome do cliente', 'nome', { max: 80 })}${T('Título da aba do navegador', 'titulo', { max: 120 })}${T('Descrição (compartilhamento)', 'descricao', { area: 1, max: 300 })}${T('Frase de destaque', 'tagline', { max: 160, hint: 'Use {chaves} para destacar uma palavra com a cor da marca. Ex.: Mostrando o que há de {melhor}.' })}`)}
     ${SEC('visual', 'Visual', `<div class="f"><span>Cores</span><div class="colors"><label class="f"><span>Destaque</span><input type="color" data-p="tema.cor" value="${esc(c.tema?.cor || '#6C4DF6')}"></label><label class="f"><span>Destaque 2</span><input type="color" data-p="tema.cor2" value="${esc(c.tema?.cor2 || '#8B7CFF')}"></label><label class="f"><span>Fundo</span><input type="color" data-p="tema.fundo" value="${esc(c.tema?.fundo || '#0D0B1A')}"></label></div></div>${IMG('Logo', 'logo.arquivo', 'logo', 'PNG com fundo transparente, de preferência branca ou clara.')}${IMG('Ícone da aba (favicon)', 'favicon', 'favicon', 'Imagem quadrada. Vira PNG 192×192.')}${IMG('Imagem de compartilhamento', 'og', 'og', '1200×630. Aparece quando o link é enviado no WhatsApp.')}`)}
@@ -664,6 +682,10 @@ function onAct(e) {
   if (a === 'delcat') { delete c.categorias[b.dataset.k]; c.cards.forEach(x => { if (x.cat === b.dataset.k) delete x.cat; }); renderForm(); return markDirty(); }
   if (a === 'save') return save();
   if (a === 'delclient') return delClient();
+  if (a === 'back') {
+    if (!okLeave()) return;
+    Object.assign(ed, { slug: '', cfg: null, dirty: false, ckey: null }); drawList(); renderForm(); $('#edOpen').hidden = true; scrollTo({ top: 0, behavior: 'smooth' }); return;
+  }
   if (a === 'genkey') {
     if (ed.ckey && !confirm('Gerar nova chave? A anterior deixa de funcionar.')) return;
     return fetch(`${EAPI}/clients?c=${ed.slug}&action=key`, { method: 'POST', headers: { 'X-Key': key } }).then(r => r.ok ? r.json() : Promise.reject()).then(j => { ed.ckey = j.key; ed.sec.add('acesso'); renderForm(); ptoast('Chave gerada.'); }, () => ptoast('Não consegui gerar a chave.', true));
@@ -679,12 +701,58 @@ fileIn.onchange = () => handleFile(fileIn.files[0]); document.body.append(fileIn
 
 /* ---- abas ---- */
 function showTab(t) {
-  const edit = t === 'edit';
-  $('#statsView').hidden = edit; $('#statsTools').hidden = edit; $('#editor').hidden = !edit;
+  const edit = t === 'edit', fin = t === 'fin';
+  $('#statsView').hidden = edit || fin; $('#statsTools').hidden = edit || fin; $('#editor').hidden = !edit; $('#finView').hidden = !fin;
+  if (fin) loadFin();
   document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab === t));
   if (edit && !showTab.done) { showTab.done = true; $('#edFrame').src = `${SITE_BASE}?embed=1`; loadList(); }
 }
 $('#tabs').onclick = e => { const b = e.target.closest('button'); if (b) showTab(b.dataset.tab); };
+
+/* ---- financeiro ---- */
+const fin = { items: {}, ym: '' };
+const brl = n => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const ymOf = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+fin.ym = ymOf(new Date());
+async function loadFin() {
+  if (!ed.list.length) await loadList();
+  if (!DEMO) { try { const r = await fetch(`${EAPI}/finance`, { headers: { 'X-Key': key }, cache: 'no-store' }); if (r.ok) fin.items = (await r.json()).items; } catch {} }
+  drawFin();
+}
+function drawFin() {
+  const [y, m] = fin.ym.split('-').map(Number), now = new Date(), today = ymOf(now);
+  $('#finLbl').textContent = new Date(y, m - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(/^./, c => c.toUpperCase());
+  const L = ed.list.map(c => ({ slug: c.slug, nome: c.nome, f: fin.items[c.slug] || { valor: 0, venc: 10, obs: '', pagos: {} } }));
+  let prev = 0, rec = 0, pay = 0;
+  L.forEach(c => { prev += c.f.valor; if (c.f.pagos[fin.ym]) { rec += c.f.valor; pay++; } });
+  $('#finKpis').innerHTML = [['Previsto', brl(prev), 'no mês'], ['Recebido', brl(rec), `${pay} de ${L.length} clientes`], ['Pendente', brl(prev - rec), `${L.length - pay} em aberto`], ['Clientes', String(L.length), 'cadastrados']]
+    .map(([a, b, c]) => `<div class="box kpi"><h2>${a}</h2><b>${b}</b><small class="flat">${c}</small></div>`).join('');
+  const late = c => !c.f.pagos[fin.ym] && c.f.valor > 0 && (fin.ym < today || (fin.ym === today && now.getDate() > c.f.venc));
+  $('#finTbl').innerHTML = L.length ? `<thead><tr><th>Cliente</th><th>Valor (R$)</th><th>Vence dia</th><th>Obs.</th><th>${esc('Status')}</th></tr></thead><tbody>${L.map(c => `<tr data-s="${esc(c.slug)}"><td>${esc(c.nome)}</td><td><input class="fin-in" data-f="valor" type="number" min="0" step="0.01" inputmode="decimal" value="${c.f.valor || ''}" placeholder="0,00"></td><td><input class="fin-in sm" data-f="venc" type="number" min="1" max="31" inputmode="numeric" value="${c.f.venc}"></td><td><input class="fin-in" style="width:140px" data-f="obs" type="text" maxlength="200" value="${esc(c.f.obs)}" placeholder="—"></td><td><button type="button" class="st ${c.f.pagos[fin.ym] ? 'ok' : late(c) ? 'late' : ''}" data-f="pago">${c.f.pagos[fin.ym] ? 'Pago' : late(c) ? 'Atrasado' : 'Pendente'}</button></td></tr>`).join('')}</tbody>` : '<tbody><tr><td class="empty">Nenhum cliente cadastrado.</td></tr></tbody>';
+}
+async function saveFin(slug) {
+  if (DEMO) return;
+  try {
+    const r = await fetch(`${EAPI}/finance?c=${slug}`, { method: 'POST', headers: { 'X-Key': key, 'Content-Type': 'application/json' }, body: JSON.stringify(fin.items[slug]) });
+    if (!r.ok) throw 0; fin.items[slug] = (await r.json()).fin;
+  } catch { ptoast('Não consegui salvar.', true); }
+}
+$('#finMes').onclick = e => {
+  const b = e.target.closest('[data-m]'); if (!b) return;
+  const [y, m] = fin.ym.split('-').map(Number); fin.ym = ymOf(new Date(y, m - 1 + +b.dataset.m, 1)); drawFin();
+};
+$('#finTbl').addEventListener('click', async e => {
+  const b = e.target.closest('[data-f=pago]'); if (!b) return;
+  const slug = b.closest('tr').dataset.s, f = (fin.items[slug] ||= { valor: 0, venc: 10, obs: '', pagos: {} });
+  if (f.pagos[fin.ym]) delete f.pagos[fin.ym]; else f.pagos[fin.ym] = 1;
+  drawFin(); await saveFin(slug); drawFin();
+});
+$('#finTbl').addEventListener('change', async e => {
+  const el = e.target.closest('input[data-f]'); if (!el) return;
+  const slug = el.closest('tr').dataset.s, f = (fin.items[slug] ||= { valor: 0, venc: 10, obs: '', pagos: {} });
+  f[el.dataset.f] = el.type === 'number' ? +el.value : el.value;
+  await saveFin(slug); drawFin();
+});
 </script>
 </body>
 </html>

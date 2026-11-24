@@ -89,7 +89,7 @@ module.exports = async (req, res) => {
     if (req.method === 'DELETE') {
       const [imgs] = await pipeline([['KEYS', `bbimg:${slug}:*`]]);
       const [cur] = await pipeline([['GET', `bbkey:${slug}`]]);
-      await pipeline([['DEL', `bbcfg:${slug}`], ['SREM', 'bbidx:clients', slug], ['DEL', `bbkey:${slug}`], ...(cur ? [['DEL', `bbkeyidx:${cur}`]] : []), ...imgs.map(k => ['DEL', k])]);
+      await pipeline([['DEL', `bbcfg:${slug}`], ['SREM', 'bbidx:clients', slug], ['DEL', `bbkey:${slug}`], ['DEL', `bbfin:${slug}`], ...(cur ? [['DEL', `bbkeyidx:${cur}`]] : []), ...imgs.map(k => ['DEL', k])]);
       return res.status(200).json({ ok: true });
     }
     res.status(405).end();
