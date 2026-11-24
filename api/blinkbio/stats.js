@@ -1,10 +1,12 @@
 const { pipeline } = require('./_redis');
-const { isAdmin } = require('./_auth');
+const { isAdmin, clientFor } = require('./_auth');
 
 module.exports = async (req, res) => {
-  if (!isAdmin(req)) return res.status(401).json({ error: 'unauthorized' });
   try {
-    const [keys] = await pipeline([['KEYS', 'bb:*']]);
+    const admin = isAdmin(req);
+    const own = admin ? null : await clientFor(req);
+    if (!admin && !own) return res.status(401).json({ error: 'unauthorized' });
+    const [keys] = await pipeline([['KEYS', admin ? 'bb:*' : `bb:${own}:*`]]);
     const hashes = keys.length ? await pipeline(keys.map(k => ['HGETALL', k])) : [];
     const rows = [];
     keys.forEach((k, i) => {
@@ -16,7 +18,9 @@ module.exports = async (req, res) => {
       }
     });
     res.setHeader('Cache-Control', 'no-store');
-    res.status(200).json({ sites: [...new Set(rows.map(r => r.site))].sort(), rows });
+    let nome;
+    if (own) { const [c] = await pipeline([['GET', `bbcfg:${own}`]]); try { nome = JSON.parse(c).nome; } catch {} }
+    res.status(200).json({ client: !!own, nome, sites: own ? [own] : [...new Set(rows.map(r => r.site))].sort(), rows });
   } catch {
     res.status(500).json({ error: 'db' });
   }

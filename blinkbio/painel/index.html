@@ -221,7 +221,7 @@ tr.click:hover td{background:var(--card-2)}
 
 <script>
 /* URL da API. Use ?demo para ver com dados de exemplo. */
-const API = '/api/blinkbio/stats';
+const API = '/api/blinkbio/stats', EAPI = '/api/blinkbio';
 const NOMES = { 'capa-anuncie': 'Anuncie (capa)', 'fab-anunciar': 'Botão Anunciar' };
 const $ = s => document.querySelector(s);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -230,7 +230,7 @@ const DEMO = location.search.includes('demo');
 const brt = t => new Date(t - 3 * 3600e3).toISOString().slice(0, 10);
 const dayOf = off => brt(Date.now() - off * 864e5);
 
-let rows = [], sites = [], conf = {}, days = 30, site = '', key = '', timer = 0;
+let rows = [], sites = [], conf = {}, days = 30, site = '', key = '', timer = 0, isClient = false;
 
 /* ---------- dados ---------- */
 function demoRows() {
@@ -265,14 +265,18 @@ async function load() {
     if (!r.ok) throw new Error(r.status === 401 ? 'Chave inválida.' : 'Erro ao carregar.');
     data = await r.json();
   }
-  rows = data.rows; sites = data.sites;
+  rows = data.rows; sites = data.sites; isClient = !!data.client;
   await Promise.all(sites.filter(s => !(s in conf)).map(async s => {
     conf[s] = null;
-    try { const r = await fetch(`../clients/${s}/config.json`); if (r.ok) conf[s] = await r.json(); } catch {}
+    try { const r = await fetch(`${EAPI}/clients?c=${s}`); if (r.ok) conf[s] = await r.json(); } catch {}
+    if (!conf[s]) try { const r = await fetch(`../clients/${s}/config.json`); if (r.ok) conf[s] = await r.json(); } catch {}
   }));
+  if (isClient) { site = sites[0] || ''; document.title = `${data.nome || site} · BlinkBio`; }
+  $('#tabs').hidden = isClient; $('#site').hidden = isClient;
   const sel = $('#site'), cur = sel.value || site;
   sel.replaceChildren(new Option('Todos os clientes', ''), ...sites.map(s => new Option(conf[s]?.nome || s, s)));
-  sel.value = sites.includes(cur) ? cur : ''; site = sel.value;
+  if (isClient) sel.replaceChildren(new Option(conf[site]?.nome || site, site));
+  sel.value = sites.includes(cur) ? cur : (isClient ? site : ''); site = sel.value;
   $('#upd').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ' · atualiza sozinho a cada minuto';
 }
 
@@ -449,9 +453,8 @@ let saved = ''; try { saved = sessionStorage.getItem('k') || ''; } catch {}
 if (DEMO) enter(''); else if (saved) enter(saved);
 
 /* ================= EDITOR DE CLIENTES ================= */
-const EAPI = '/api/blinkbio';
 const SITE_BASE = location.pathname.replace(/painel\/?(index\.html)?$/, '');
-const ed = { slug: '', cfg: null, src: '', dirty: false, list: [], open: new Set(), sec: new Set(['geral']), ready: false, target: null };
+const ed = { slug: '', cfg: null, src: '', dirty: false, list: [], open: new Set(), sec: new Set(['geral']), ready: false, target: null, ckey: null };
 const slugify = t => String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 32);
 const rid = () => Math.random().toString(36).slice(2, 5);
 const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
@@ -517,6 +520,7 @@ function renderForm() {
     ${SEC('filtros', 'Filtros', `${cats || '<p class="mut">Sem filtros. Crie filtros (Cupons, Vídeos…) para separar os cards.</p>'}${Object.keys(c.categorias || {}).length < 8 ? '<div style="display:flex;gap:8px"><input type="text" id="newCat" maxlength="30" placeholder="Novo filtro (ex.: Cupons)" style="flex:1;background:var(--card);color:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit"><button type="button" class="btn sm" data-act="addcat">Adicionar</button></div>' : ''}`)}
     ${SEC('fab', 'Botão flutuante', `<div class="two">${T('Texto', 'botaoFlutuante.texto', { max: 24, ph: 'Anunciar' })}${T('Link', 'botaoFlutuante.link', { type: 'url', max: 600, ph: 'https://wa.me/55…' })}</div><small class="mut">Deixe o texto vazio para esconder o botão.</small>`)}
     ${SEC('cards', `Cards (${(c.cards || []).length})`, `${(c.cards || []).map(cardHTML).join('')}<div style="display:flex;gap:8px;flex-wrap:wrap">${(c.cards || []).some(x => x.tipo === 'capa') ? '' : '<button type="button" class="btn sm" data-act="addcard" data-t="capa">+ Capa</button>'}<button type="button" class="btn sm" data-act="addcard" data-t="parceiro">+ Card com foto</button><button type="button" class="btn sm" data-act="addcard" data-t="destaque">+ Card de destaque</button></div>`)}
+    ${ed.src === 'editor' ? SEC('acesso', 'Acesso do cliente', `<p class="mut" style="margin:0 0 10px">O cliente entra em <b>${esc(location.origin)}${esc(location.pathname)}</b> com esta chave e vê só os resultados dele.</p>${ed.ckey ? `<div class="two" style="grid-template-columns:minmax(0,1fr) auto"><input type="text" readonly id="ckey" value="${esc(ed.ckey)}" style="background:var(--card);color:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit;min-width:0"><button type="button" class="btn sm" data-act="copykey">Copiar</button></div>` : '<p class="mut" style="margin:0 0 10px">Nenhuma chave criada.</p>'}<div style="margin-top:10px"><button type="button" class="btn sm" data-act="genkey">${ed.ckey ? 'Gerar nova chave' : 'Gerar chave'}</button></div>${ed.ckey ? '<small class="mut">Gerar nova chave desativa a anterior.</small>' : ''}`) : ''}
     <div class="savebar"><div class="l"><button type="button" class="btn pri" data-act="save">Salvar e publicar</button><button type="button" class="btn" data-act="copylink">Copiar link</button></div>${ed.src === 'novo' ? '' : '<button type="button" class="btn danger" data-act="delclient">Excluir</button>'}</div>`;
   scrollTo(0, y);
   const o = $('#edOpen'); o.hidden = false; o.href = `${SITE_BASE}?c=${ed.slug}`;
@@ -543,7 +547,8 @@ async function openClient(slug) {
   if (!cfg) return ptoast('Não consegui abrir esse cliente.', true);
   cfg.cards = cfg.cards || []; cfg.numeros = cfg.numeros || []; cfg.categorias = cfg.categorias || {};
   cfg.botaoFlutuante = cfg.botaoFlutuante || { texto: '', link: '' };
-  Object.assign(ed, { slug, cfg, src, dirty: false, open: new Set(), sec: new Set(['geral']) });
+  Object.assign(ed, { slug, cfg, src, dirty: false, open: new Set(), sec: new Set(['geral']), ckey: null });
+  if (src === 'editor' && !DEMO) { try { const r = await fetch(`${EAPI}/clients?c=${slug}&action=key`, { headers: { 'X-Key': key }, cache: 'no-store' }); if (r.ok) ed.ckey = (await r.json()).key; } catch {} }
   drawList(); renderForm(); preview();
 }
 function renderNew() {
@@ -659,6 +664,11 @@ function onAct(e) {
   if (a === 'delcat') { delete c.categorias[b.dataset.k]; c.cards.forEach(x => { if (x.cat === b.dataset.k) delete x.cat; }); renderForm(); return markDirty(); }
   if (a === 'save') return save();
   if (a === 'delclient') return delClient();
+  if (a === 'genkey') {
+    if (ed.ckey && !confirm('Gerar nova chave? A anterior deixa de funcionar.')) return;
+    return fetch(`${EAPI}/clients?c=${ed.slug}&action=key`, { method: 'POST', headers: { 'X-Key': key } }).then(r => r.ok ? r.json() : Promise.reject()).then(j => { ed.ckey = j.key; ed.sec.add('acesso'); renderForm(); ptoast('Chave gerada.'); }, () => ptoast('Não consegui gerar a chave.', true));
+  }
+  if (a === 'copykey') return navigator.clipboard.writeText(ed.ckey).then(() => ptoast('Chave copiada.'), () => ptoast('Não consegui copiar.', true));
   if (a === 'copylink') return navigator.clipboard.writeText(`${location.origin}${SITE_BASE}?c=${ed.slug}`).then(() => ptoast('Link copiado.'), () => ptoast('Não consegui copiar.', true));
 }
 edForm.addEventListener('click', onAct);

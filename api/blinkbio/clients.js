@@ -1,5 +1,5 @@
 const { pipeline } = require('./_redis');
-const { isAdmin } = require('./_auth');
+const { isAdmin, newKey } = require('./_auth');
 
 const SLUG = /^[a-z0-9-]{1,32}$/;
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -57,6 +57,16 @@ module.exports = async (req, res) => {
     }
     if (!SLUG.test(slug)) return res.status(400).json({ error: 'slug' });
 
+    if (req.query.action === 'key') {
+      if (!isAdmin(req)) return res.status(401).json({ error: 'unauthorized' });
+      const [cur] = await pipeline([['GET', `bbkey:${slug}`]]);
+      if (req.method === 'GET') return res.status(200).json({ key: cur || null });
+      if (req.method !== 'POST') return res.status(405).end();
+      const key = newKey();
+      await pipeline([...(cur ? [['DEL', `bbkeyidx:${cur}`]] : []), ['SET', `bbkey:${slug}`, key], ['SET', `bbkeyidx:${key}`, slug]]);
+      return res.status(200).json({ key });
+    }
+
     if (req.method === 'GET') {
       const [v] = await pipeline([['GET', `bbcfg:${slug}`]]);
       if (!v) return res.status(404).json({ error: 'not_found' });
@@ -78,7 +88,8 @@ module.exports = async (req, res) => {
     }
     if (req.method === 'DELETE') {
       const [imgs] = await pipeline([['KEYS', `bbimg:${slug}:*`]]);
-      await pipeline([['DEL', `bbcfg:${slug}`], ['SREM', 'bbidx:clients', slug], ...imgs.map(k => ['DEL', k])]);
+      const [cur] = await pipeline([['GET', `bbkey:${slug}`]]);
+      await pipeline([['DEL', `bbcfg:${slug}`], ['SREM', 'bbidx:clients', slug], ['DEL', `bbkey:${slug}`], ...(cur ? [['DEL', `bbkeyidx:${cur}`]] : []), ...imgs.map(k => ['DEL', k])]);
       return res.status(200).json({ ok: true });
     }
     res.status(405).end();
