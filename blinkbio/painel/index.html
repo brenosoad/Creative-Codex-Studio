@@ -89,6 +89,62 @@ tr.click:hover td{background:var(--card-2)}
 #login input:focus{outline:2px solid var(--brand);border-color:transparent}
 #login button{width:100%;padding:12px;border:0;border-radius:12px;background:var(--brand);color:#fff;font-weight:800;cursor:pointer}
 #err{color:#ff7a7a;font-size:13px;min-height:20px;margin-top:8px}
+/* abas e editor */
+#tabs{order:0}
+.ed{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start}
+.ed>*,.ed-body>*{min-width:0}
+@media(min-width:1180px){.ed{grid-template-columns:230px minmax(0,1fr) 400px}.ed-prev{position:sticky;top:16px}}
+.ed-list .it{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;background:none;border:1px solid transparent;color:#fff;border-radius:12px;padding:10px 12px;cursor:pointer;margin-top:6px}
+.ed-list .it:hover{background:var(--card-2)}
+.ed-list .it[aria-current=true]{background:var(--card-2);border-color:var(--brand)}
+.ed-list .it small{color:var(--mut);font-size:11px;font-weight:700}
+.prev-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px}
+.phone{width:100%;max-width:400px;margin:0 auto;height:min(78vh,780px);border:1px solid var(--line);border-radius:28px;overflow:hidden;background:#000}
+.phone iframe{width:100%;height:100%;border:0;display:block}
+.ed-form details{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:var(--bg)}
+.ed-form summary{cursor:pointer;padding:13px 16px;font-weight:800;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.ed-form summary::-webkit-details-marker{display:none}
+.ed-form summary::after{content:'＋';color:var(--brand-2)}
+.ed-form details[open]>summary::after{content:'－'}
+.ed-body{padding:2px 16px 16px;display:grid;gap:12px}
+.f{display:grid;gap:5px}
+.f>span{font-size:12px;font-weight:700;color:var(--mut)}
+.f input[type=text],.f input[type=url],.f textarea,.f select{width:100%;background:var(--card);color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-weight:500}
+.f textarea{min-height:64px;resize:vertical}
+.f input:focus,.f textarea:focus,.f select:focus{outline:2px solid var(--brand);border-color:transparent}
+.f small{font-size:11.5px;color:var(--mut)}
+.two{display:grid;gap:12px}
+@media(min-width:560px){.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:repeat(3,1fr)}}
+.colors{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.colors input[type=color]{width:100%;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:3px;cursor:pointer}
+.imgf{display:flex;gap:12px;align-items:center}
+.imgf .th{width:96px;height:56px;border-radius:10px;background:var(--card) center/cover no-repeat;border:1px solid var(--line);flex:none;display:grid;place-items:center;color:var(--mut);font-size:11px}
+.imgf .th.contain{background-size:contain}
+.imgf .acts{display:flex;gap:8px;flex-wrap:wrap}
+.btn.sm{padding:7px 12px;font-size:12px}
+.btn.pri{background:var(--brand);border-color:var(--brand)}
+.btn.danger{color:#ff8f8f}
+.cardp{border:1px solid var(--line);border-radius:14px;background:var(--card);margin-bottom:10px}
+.cardp>header{display:flex;align-items:center;gap:8px;padding:10px 12px;margin:0;cursor:pointer}
+.cardp>header b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cardp>header .tag{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--brand-2);background:var(--card-2);border-radius:999px;padding:3px 9px}
+.cardp .ed-body{border-top:1px solid var(--line);padding-top:14px}
+.cardp>summary{display:flex;align-items:center;gap:8px;padding:10px 12px}
+.cardp>summary b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cardp>summary .tag{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--brand-2);background:var(--card-2);border-radius:999px;padding:3px 9px;flex:none}
+.cardp>summary::after{margin-left:2px}
+.ibtn:disabled{opacity:.35;cursor:default}
+.ibtn{background:none;border:1px solid var(--line);color:#fff;width:30px;height:30px;border-radius:8px;cursor:pointer;display:grid;place-items:center;font-size:13px}
+.ibtn:hover{border-color:var(--brand-2)}
+.rowx{display:grid;grid-template-columns:1fr 1fr 34px;gap:8px;align-items:end}
+.savebar{position:sticky;bottom:0;margin:14px -18px -18px;padding:12px 18px;background:linear-gradient(180deg,transparent,var(--card) 30%);display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;border-radius:0 0 16px 16px}
+.savebar .l{display:flex;gap:8px;flex-wrap:wrap}
+.dirty{font-size:12px;color:var(--amber);font-weight:700}
+.ptoast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:#0b0918;border:1px solid var(--line);padding:11px 18px;border-radius:999px;font-weight:700;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:20}
+.ptoast.show{opacity:1;transform:translate(-50%,0)}
+.ptoast.err{border-color:var(--bad);color:#ffb4b4}
+#newCat{min-width:0}
+.busy{opacity:.6;pointer-events:none}
 </style>
 </head>
 <body>
@@ -102,7 +158,11 @@ tr.click:hover td{background:var(--card-2)}
 <main id="app" hidden>
   <header>
     <h1><img class="logo" src="../assets/logo-dark.png" alt="BlinkBio by Creative Codex" width="220" height="56"><span class="sr-only">Painel</span></h1>
-    <div class="tools">
+    <div class="seg" id="tabs" role="group" aria-label="Seção">
+      <button data-tab="stats" aria-pressed="true">Resultados</button>
+      <button data-tab="edit" aria-pressed="false">Clientes</button>
+    </div>
+    <div class="tools" id="statsTools">
       <select id="site" aria-label="Cliente"></select>
       <div class="seg" id="range" role="group" aria-label="Período">
         <button data-d="1" aria-pressed="false">Hoje</button>
@@ -114,7 +174,8 @@ tr.click:hover td{background:var(--card-2)}
       <button class="btn" id="csv" type="button">CSV</button>
     </div>
   </header>
-  <p class="upd" id="upd" style="margin:-6px 0 14px"></p>
+  <div id="statsView">
+<p class="upd" id="upd" style="margin:-6px 0 14px"></p>
 
   <div class="kpis" id="kpis"></div>
   <div class="insights" id="insights"></div>
@@ -139,7 +200,24 @@ tr.click:hover td{background:var(--card-2)}
     <div class="box"><h2>Horário das visitas</h2><div id="hours"></div></div>
     <div class="box"><h2>Dia da semana</h2><div id="wk"></div></div>
   </div>
+</div>
+
+<section id="editor" hidden>
+  <div class="ed">
+    <aside class="box ed-list">
+      <h2>Clientes</h2>
+      <div id="edList"></div>
+      <button class="btn" id="edNew" type="button" style="width:100%;margin-top:12px">+ Novo cliente</button>
+    </aside>
+    <div class="box ed-form" id="edForm"><p class="empty">Escolha um cliente na lista ou crie um novo.</p></div>
+    <aside class="ed-prev">
+      <div class="prev-bar"><h2>Prévia</h2><a class="btn" id="edOpen" href="#" target="_blank" rel="noopener" hidden>Abrir página ↗</a></div>
+      <div class="phone"><iframe id="edFrame" title="Prévia da página" src="about:blank"></iframe></div>
+    </aside>
+  </div>
+</section>
 </main>
+<div class="ptoast" id="ptoast" role="status" aria-live="polite"></div>
 
 <script>
 /* URL da API. Use ?demo para ver com dados de exemplo. */
@@ -369,6 +447,234 @@ $('#clients').onclick = e => {
 };
 let saved = ''; try { saved = sessionStorage.getItem('k') || ''; } catch {}
 if (DEMO) enter(''); else if (saved) enter(saved);
+
+/* ================= EDITOR DE CLIENTES ================= */
+const EAPI = '/api/blinkbio';
+const SITE_BASE = location.pathname.replace(/painel\/?(index\.html)?$/, '');
+const ed = { slug: '', cfg: null, src: '', dirty: false, list: [], open: new Set(), sec: new Set(['geral']), ready: false, target: null };
+const slugify = t => String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 32);
+const rid = () => Math.random().toString(36).slice(2, 5);
+const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
+const setP = (o, p, v) => { const ks = p.split('.'); const last = ks.pop(); const t = ks.reduce((a, k) => (a[k] ??= {}), o); if (v === '' || v === undefined) delete t[last]; else t[last] = v; };
+const ptoast = (m, err) => { const t = $('#ptoast'); t.textContent = m; t.classList.toggle('err', !!err); t.classList.add('show'); clearTimeout(ptoast.t); ptoast.t = setTimeout(() => t.classList.remove('show'), 2600); };
+const imgUrl = ref => !ref ? '' : /^img:/.test(ref) ? `${EAPI}/img?c=${ed.slug}&f=${encodeURIComponent(ref.slice(4))}` : /^(https?:)?\/\/|^(data|blob):|^\//.test(ref) ? ref : `../clients/${ed.slug}/${ref}`;
+const newCfg = () => ({
+  nome: '', titulo: '', descricao: '', tagline: '', tema: { cor: '#6C4DF6', cor2: '#8B7CFF', fundo: '#0D0B1A' },
+  numeros: [], categorias: {}, botaoFlutuante: { texto: '', link: '' },
+  cards: [{ tipo: 'capa', id: 'capa', kicker: '', titulo: 'Título da capa', cta: 'Saiba mais', link: '' },
+          { tipo: 'parceiro', id: 'card-' + rid(), titulo: 'Novo card', texto: '', botao: 'Abrir', link: '' }]
+});
+
+function markDirty() { ed.dirty = true; const d = $('#edDirty'); if (d) d.hidden = false; preview(); }
+function preview() {
+  clearTimeout(preview.t);
+  preview.t = setTimeout(() => {
+    const w = $('#edFrame').contentWindow;
+    if (ed.ready && ed.cfg && w) w.postMessage({ type: 'bb-config', cfg: ed.cfg, slug: ed.slug }, location.origin);
+  }, 120);
+}
+addEventListener('message', e => { if (e.origin === location.origin && e.data?.type === 'bb-ready') { ed.ready = true; preview(); } });
+addEventListener('beforeunload', e => { if (ed.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ---- construtores de campo ---- */
+const val = p => esc(getP(ed.cfg, p) ?? '');
+const T = (label, p, o = {}) => `<label class="f"><span>${label}</span>${o.area
+  ? `<textarea data-p="${p}" maxlength="${o.max || 280}" placeholder="${esc(o.ph || '')}">${val(p)}</textarea>`
+  : `<input type="${o.type || 'text'}" data-p="${p}" maxlength="${o.max || 120}" value="${val(p)}" placeholder="${esc(o.ph || '')}">`}${o.hint ? `<small>${o.hint}</small>` : ''}</label>`;
+const CHK = (label, p) => `<label class="f" style="grid-template-columns:auto 1fr;align-items:center;gap:8px"><input type="checkbox" data-p="${p}" data-t="bool" ${getP(ed.cfg, p) ? 'checked' : ''}><span style="font-size:13px;color:#fff">${label}</span></label>`;
+const SEL = (label, p, opts) => `<label class="f"><span>${label}</span><select data-p="${p}">${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(getP(ed.cfg, p) ?? '') === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`;
+const POS = [['', 'Centro'], ['50% 0%', 'Topo'], ['50% 100%', 'Base'], ['0% 50%', 'Esquerda'], ['100% 50%', 'Direita']];
+const IMG = (label, p, kind, hint) => {
+  const r = getP(ed.cfg, p), u = imgUrl(r);
+  return `<div class="f"><span>${label}</span><div class="imgf"><div class="th ${kind === 'logo' || kind === 'favicon' ? 'contain' : ''}" style="${u ? `background-image:url('${esc(u)}')` : ''}">${u ? '' : 'sem foto'}</div>
+    <div class="acts"><button type="button" class="btn sm" data-act="pick" data-p="${p}" data-k="${kind}">${u ? 'Trocar' : 'Enviar foto'}</button>${u ? `<button type="button" class="btn sm" data-act="clearimg" data-p="${p}">Remover</button>` : ''}</div></div>${hint ? `<small>${hint}</small>` : ''}</div>`;
+};
+const SEC = (key, title, body) => `<details data-sec="${key}" ${ed.sec.has(key) ? 'open' : ''}><summary>${title}</summary><div class="ed-body">${body}</div></details>`;
+const catOpts = () => [['', 'Sem filtro'], ...Object.entries(ed.cfg.categorias || {}).map(([k, v]) => [k, v])];
+
+function cardHTML(c, i) {
+  const base = `cards.${i}.`, t = c.tipo, n = ed.cfg.cards.length;
+  let f = '';
+  if (t === 'capa') f = `<div class="two">${T('Etiqueta (kicker)', base + 'kicker', { max: 40 })}${T('Texto do botão', base + 'cta', { max: 40 })}</div>${T('Título', base + 'titulo')}${T('Link do botão', base + 'link', { type: 'url', max: 600, ph: 'https://…' })}${IMG('Foto de capa', base + 'imagem', 'card', 'Use foto horizontal. O texto fica à esquerda.')}${SEL('Enquadramento da foto', base + 'posicao', POS)}`;
+  if (t === 'destaque') f = `${T('Marca', base + 'marca', { max: 60 })}<div class="two">${T('Valor grande (ex.: 10)', base + 'valor', { max: 12 })}${T('Sufixo (ex.: % OFF)', base + 'sufixo', { max: 20 })}</div>${T('Descrição', base + 'texto', { area: 1 })}<div class="two">${T('Cupom', base + 'cupom', { max: 30 })}${T('Texto do botão', base + 'botao', { max: 30, ph: 'Ir à loja' })}</div>${T('Link', base + 'link', { type: 'url', max: 600, ph: 'https://…' })}${SEL('Filtro', base + 'cat', catOpts())}`;
+  if (t === 'parceiro') f = `<div class="two">${T('Título', base + 'titulo')}${T('Selo (ex.: R$ 30 OFF)', base + 'selo', { max: 30 })}</div>${T('Descrição', base + 'texto', { area: 1 })}${IMG('Foto', base + 'imagem', 'card', 'Formato horizontal 2:1 funciona melhor.')}<div class="two">${SEL('Enquadramento da foto', base + 'posicao', POS)}${T('Texto alternativo da foto', base + 'alt', { max: 140 })}</div><div class="two">${T('Cupom (opcional)', base + 'cupom', { max: 30 })}${T('Texto do botão', base + 'botao', { max: 30, ph: 'Ir à loja' })}</div>${T('Link', base + 'link', { type: 'url', max: 600, ph: 'https://…' })}<div class="two">${SEL('Filtro', base + 'cat', catOpts())}<div>${CHK('Card branco (claro)', base + 'claro')}${CHK('Botão na cor de destaque', base + 'destaqueBotao')}</div></div>`;
+  const nome = { capa: 'Capa', destaque: 'Destaque', parceiro: 'Parceiro' }[t];
+  return `<details class="cardp" data-cid="${esc(c.id)}" ${ed.open.has(c.id) ? 'open' : ''}><summary><span class="tag">${nome}</span><b data-ttl>${esc(c.titulo || c.marca || '(sem título)')}</b>
+    <button type="button" class="ibtn" data-act="up" data-i="${i}" ${i === 0 ? 'disabled' : ''} title="Subir">↑</button><button type="button" class="ibtn" data-act="down" data-i="${i}" ${i === n - 1 ? 'disabled' : ''} title="Descer">↓</button><button type="button" class="ibtn" data-act="delcard" data-i="${i}" title="Remover">✕</button></summary><div class="ed-body">${f}</div></details>`;
+}
+
+function renderForm() {
+  const box = $('#edForm');
+  if (!ed.cfg) { box.innerHTML = '<p class="empty">Escolha um cliente na lista ou crie um novo.</p>'; return; }
+  const c = ed.cfg, y = scrollY;
+  const nums = (c.numeros || []).map((n, i) => `<div class="rowx"><label class="f"><span>Valor</span><input type="text" data-p="numeros.${i}.valor" maxlength="16" value="${esc(n.valor)}" placeholder="+97 mil"></label><label class="f"><span>Rótulo</span><input type="text" data-p="numeros.${i}.rotulo" maxlength="24" value="${esc(n.rotulo)}" placeholder="Seguidores"></label><button type="button" class="ibtn" data-act="delnum" data-i="${i}">✕</button></div>`).join('');
+  const cats = Object.entries(c.categorias || {}).map(([k, v]) => `<div class="rowx" style="grid-template-columns:1fr 34px"><label class="f"><span>Nome do filtro</span><input type="text" data-p="categorias.${k}" maxlength="30" value="${esc(v)}"></label><button type="button" class="ibtn" data-act="delcat" data-k="${esc(k)}">✕</button></div>`).join('');
+  box.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap"><h2 style="font-size:15px;color:#fff;letter-spacing:0;text-transform:none">${esc(c.nome || 'Novo cliente')} <span class="mut" style="font-weight:500">/${esc(ed.slug)}</span></h2><span class="dirty" id="edDirty" ${ed.dirty ? '' : 'hidden'}>● alterações não salvas</span></div>
+    ${SEC('geral', 'Geral', `${T('Nome do cliente', 'nome', { max: 80 })}${T('Título da aba do navegador', 'titulo', { max: 120 })}${T('Descrição (compartilhamento)', 'descricao', { area: 1, max: 300 })}${T('Frase de destaque', 'tagline', { max: 160, hint: 'Use {chaves} para destacar uma palavra com a cor da marca. Ex.: Mostrando o que há de {melhor}.' })}`)}
+    ${SEC('visual', 'Visual', `<div class="f"><span>Cores</span><div class="colors"><label class="f"><span>Destaque</span><input type="color" data-p="tema.cor" value="${esc(c.tema?.cor || '#6C4DF6')}"></label><label class="f"><span>Destaque 2</span><input type="color" data-p="tema.cor2" value="${esc(c.tema?.cor2 || '#8B7CFF')}"></label><label class="f"><span>Fundo</span><input type="color" data-p="tema.fundo" value="${esc(c.tema?.fundo || '#0D0B1A')}"></label></div></div>${IMG('Logo', 'logo.arquivo', 'logo', 'PNG com fundo transparente, de preferência branca ou clara.')}${IMG('Ícone da aba (favicon)', 'favicon', 'favicon', 'Imagem quadrada. Vira PNG 192×192.')}${IMG('Imagem de compartilhamento', 'og', 'og', '1200×630. Aparece quando o link é enviado no WhatsApp.')}`)}
+    ${SEC('numeros', 'Números do perfil', `${nums || '<p class="mut">Nenhum número. Exemplo: +97 mil / Seguidores.</p>'}${(c.numeros || []).length < 4 ? '<button type="button" class="btn sm" data-act="addnum" style="justify-self:start">+ Adicionar número</button>' : ''}`)}
+    ${SEC('filtros', 'Filtros', `${cats || '<p class="mut">Sem filtros. Crie filtros (Cupons, Vídeos…) para separar os cards.</p>'}${Object.keys(c.categorias || {}).length < 8 ? '<div style="display:flex;gap:8px"><input type="text" id="newCat" maxlength="30" placeholder="Novo filtro (ex.: Cupons)" style="flex:1;background:var(--card);color:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit"><button type="button" class="btn sm" data-act="addcat">Adicionar</button></div>' : ''}`)}
+    ${SEC('fab', 'Botão flutuante', `<div class="two">${T('Texto', 'botaoFlutuante.texto', { max: 24, ph: 'Anunciar' })}${T('Link', 'botaoFlutuante.link', { type: 'url', max: 600, ph: 'https://wa.me/55…' })}</div><small class="mut">Deixe o texto vazio para esconder o botão.</small>`)}
+    ${SEC('cards', `Cards (${(c.cards || []).length})`, `${(c.cards || []).map(cardHTML).join('')}<div style="display:flex;gap:8px;flex-wrap:wrap">${(c.cards || []).some(x => x.tipo === 'capa') ? '' : '<button type="button" class="btn sm" data-act="addcard" data-t="capa">+ Capa</button>'}<button type="button" class="btn sm" data-act="addcard" data-t="parceiro">+ Card com foto</button><button type="button" class="btn sm" data-act="addcard" data-t="destaque">+ Card de destaque</button></div>`)}
+    <div class="savebar"><div class="l"><button type="button" class="btn pri" data-act="save">Salvar e publicar</button><button type="button" class="btn" data-act="copylink">Copiar link</button></div>${ed.src === 'novo' ? '' : '<button type="button" class="btn danger" data-act="delclient">Excluir</button>'}</div>`;
+  scrollTo(0, y);
+  const o = $('#edOpen'); o.hidden = false; o.href = `${SITE_BASE}?c=${ed.slug}`;
+}
+
+/* ---- lista e abertura ---- */
+async function loadList() {
+  const map = {};
+  try { const r = await fetch('../clients/index.json', { cache: 'no-store' }); if (r.ok) for (const s of await r.json()) map[s] = { slug: s, nome: s, src: 'arquivo' }; } catch {}
+  await Promise.all(Object.keys(map).map(async s => { try { const r = await fetch(`../clients/${s}/config.json`); if (r.ok) map[s].nome = (await r.json()).nome || s; } catch {} }));
+  if (!DEMO) { try { const r = await fetch(`${EAPI}/clients?list=1`, { headers: { 'X-Key': key } }); if (r.ok) (await r.json()).clients.forEach(c => (map[c.slug] = { slug: c.slug, nome: c.nome, src: 'editor' })); } catch {} }
+  ed.list = Object.values(map).sort((a, b) => a.nome.localeCompare(b.nome));
+  drawList();
+}
+function drawList() {
+  $('#edList').innerHTML = ed.list.length ? ed.list.map(c => `<button type="button" class="it" data-act="open" data-s="${esc(c.slug)}" ${c.slug === ed.slug ? 'aria-current="true"' : ''}><span>${esc(c.nome)}</span><small>${c.src === 'arquivo' ? 'arquivo' : 'editor'}</small></button>`).join('') : '<p class="mut" style="margin-top:8px">Nenhum cliente ainda.</p>';
+}
+const okLeave = () => !ed.dirty || confirm('Descartar as alterações não salvas?');
+async function openClient(slug) {
+  if (!okLeave()) return;
+  let cfg = null, src = '';
+  if (!DEMO) { try { const r = await fetch(`${EAPI}/clients?c=${slug}`, { cache: 'no-store' }); if (r.ok) { cfg = await r.json(); src = 'editor'; } } catch {} }
+  if (!cfg) { try { const r = await fetch(`../clients/${slug}/config.json`, { cache: 'no-store' }); if (r.ok) { cfg = await r.json(); src = 'arquivo'; } } catch {} }
+  if (!cfg) return ptoast('Não consegui abrir esse cliente.', true);
+  cfg.cards = cfg.cards || []; cfg.numeros = cfg.numeros || []; cfg.categorias = cfg.categorias || {};
+  cfg.botaoFlutuante = cfg.botaoFlutuante || { texto: '', link: '' };
+  Object.assign(ed, { slug, cfg, src, dirty: false, open: new Set(), sec: new Set(['geral']) });
+  drawList(); renderForm(); preview();
+}
+function renderNew() {
+  if (!okLeave()) return;
+  Object.assign(ed, { slug: '', cfg: null, dirty: false }); drawList(); $('#edOpen').hidden = true;
+  $('#edForm').innerHTML = `<h2 style="font-size:15px;color:#fff;letter-spacing:0;text-transform:none;margin-bottom:14px">Novo cliente</h2><div class="ed-body" style="padding:0"><label class="f"><span>Nome do cliente</span><input type="text" id="nwNome" maxlength="80" placeholder="Academia Forte"></label><label class="f"><span>Endereço (slug)</span><input type="text" id="nwSlug" maxlength="32" placeholder="academia-forte"><small>Ficará em <b>${esc(location.origin + SITE_BASE)}?c=<span id="nwPrev">…</span></b></small></label><div><button type="button" class="btn pri" data-act="create">Criar cliente</button></div></div>`;
+  $('#nwNome').addEventListener('input', e => { const s = $('#nwSlug'); if (!s.dataset.m) { s.value = slugify(e.target.value); $('#nwPrev').textContent = s.value; } });
+  $('#nwSlug').addEventListener('input', e => { e.target.dataset.m = 1; e.target.value = slugify(e.target.value); $('#nwPrev').textContent = e.target.value; });
+}
+
+/* ---- imagens ---- */
+function canvasBlob(cv, type, q) { return new Promise(r => cv.toBlob(r, type, q)); }
+async function prepImage(file, kind) {
+  const bmp = await createImageBitmap(file), sw = bmp.width, sh = bmp.height;
+  const draw = (w, h, cover, bg) => { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const x = cv.getContext('2d'); x.imageSmoothingQuality = 'high'; if (bg) { x.fillStyle = bg; x.fillRect(0, 0, w, h); } if (cover) { const k = Math.max(w / sw, h / sh), dw = sw * k, dh = sh * k; x.drawImage(bmp, (w - dw) / 2, (h - dh) / 2, dw, dh); } else x.drawImage(bmp, 0, 0, w, h); return cv; };
+  if (kind === 'favicon') { const b = await canvasBlob(draw(192, 192, true), 'image/png'); return { blob: b, w: 192, h: 192 }; }
+  if (kind === 'og') { const b = await canvasBlob(draw(1200, 630, true, '#ffffff'), 'image/jpeg', .85); return { blob: b, w: 1200, h: 630 }; }
+  let maxW = kind === 'logo' ? 900 : 1600, q = .86;
+  for (let i = 0; i < 8; i++) {
+    const k = Math.min(1, maxW / sw), w = Math.round(sw * k), h = Math.round(sh * k);
+    const b = await canvasBlob(draw(w, h, false), 'image/webp', q);
+    if (b.size <= 380 * 1024 || i === 7) return { blob: b, w, h };
+    if (q > .55) q -= .1; else maxW = Math.round(maxW * .85);
+  }
+}
+const toDataUrl = b => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b); });
+async function handleFile(file) {
+  const tg = ed.target; if (!file || !tg) return;
+  const box = $('#edForm'); box.classList.add('busy'); ptoast('Enviando foto…');
+  try {
+    const { blob, w, h } = await prepImage(file, tg.k);
+    let ref;
+    if (DEMO) ref = URL.createObjectURL(blob);
+    else {
+      const r = await fetch(`${EAPI}/img`, { method: 'POST', headers: { 'X-Key': key, 'Content-Type': 'application/json' }, body: JSON.stringify({ c: ed.slug, data: await toDataUrl(blob) }) });
+      if (!r.ok) throw new Error(r.status === 413 ? 'Foto muito pesada.' : r.status === 401 ? 'Chave inválida.' : 'Falha no envio.');
+      ref = (await r.json()).ref;
+    }
+    setP(ed.cfg, tg.p, ref);
+    if (tg.k === 'card') { const b = tg.p.replace(/imagem$/, ''); setP(ed.cfg, b + 'w', w); setP(ed.cfg, b + 'h', h); }
+    if (tg.k === 'logo') { setP(ed.cfg, 'logo.w', w); setP(ed.cfg, 'logo.h', h); }
+    if (tg.k === 'favicon') setP(ed.cfg, 'iconeApple', ref);
+    ed.dirty = true; renderForm(); preview(); ptoast('Foto enviada. Clique em Salvar para publicar.');
+  } catch (e) { ptoast(e.message || 'Não consegui enviar a foto.', true); }
+  box.classList.remove('busy');
+}
+
+/* ---- salvar / excluir ---- */
+async function save() {
+  const c = ed.cfg;
+  if (!c.nome?.trim()) { ptoast('Preencha o nome do cliente.', true); return; }
+  if (c.favicon && !c.iconeApple) c.iconeApple = c.favicon;
+  if (DEMO) { ptoast('Modo demonstração: nada é salvo.'); return; }
+  const btn = $('[data-act=save]'); btn.disabled = true; btn.textContent = 'Salvando…';
+  try {
+    const r = await fetch(`${EAPI}/clients?c=${ed.slug}`, { method: 'POST', headers: { 'X-Key': key, 'Content-Type': 'application/json' }, body: JSON.stringify(c) });
+    if (!r.ok) throw new Error(r.status === 401 ? 'Chave inválida.' : r.status === 413 ? 'Conteúdo grande demais.' : 'Não consegui salvar.');
+    ed.cfg = (await r.json()).cfg; ed.dirty = false; ed.src = 'editor';
+    ptoast('Salvo. A página já está atualizada.'); await loadList(); renderForm(); preview();
+  } catch (e) { ptoast(e.message, true); btn.disabled = false; btn.textContent = 'Salvar e publicar'; }
+}
+async function delClient() {
+  if (!confirm(`Excluir "${ed.cfg.nome}" do editor? A página deixa de abrir pelo editor (fotos enviadas também serão apagadas).`)) return;
+  if (!DEMO) { const r = await fetch(`${EAPI}/clients?c=${ed.slug}`, { method: 'DELETE', headers: { 'X-Key': key } }); if (!r.ok) return ptoast('Não consegui excluir.', true); }
+  Object.assign(ed, { slug: '', cfg: null, dirty: false }); ptoast('Cliente excluído.'); await loadList(); renderForm(); $('#edOpen').hidden = true;
+}
+
+/* ---- eventos ---- */
+const edForm = $('#edForm');
+edForm.addEventListener('input', e => {
+  const el = e.target.closest('[data-p]'); if (!el || !ed.cfg) return;
+  if (el.dataset.t === 'bool') return;
+  setP(ed.cfg, el.dataset.p, el.value);
+  const m = el.dataset.p.match(/^cards\.(\d+)\.(titulo|marca)$/);
+  if (m) { const b = el.closest('.cardp')?.querySelector('[data-ttl]'); if (b) b.textContent = el.value || '(sem título)'; }
+  markDirty();
+});
+edForm.addEventListener('change', e => {
+  const el = e.target.closest('[data-p]'); if (!el || !ed.cfg) return;
+  if (el.dataset.t === 'bool') { setP(ed.cfg, el.dataset.p, el.checked ? true : ''); markDirty(); }
+  else if (el.tagName === 'SELECT' || el.type === 'color') { setP(ed.cfg, el.dataset.p, el.value); markDirty(); }
+});
+edForm.addEventListener('toggle', e => {
+  const d = e.target; if (d.dataset.sec) d.open ? ed.sec.add(d.dataset.sec) : ed.sec.delete(d.dataset.sec);
+  if (d.dataset.cid) d.open ? ed.open.add(d.dataset.cid) : ed.open.delete(d.dataset.cid);
+}, true);
+function onAct(e) {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act, i = +b.dataset.i, c = ed.cfg;
+  if (b.closest('summary')) e.preventDefault();
+  if (a === 'open') return openClient(b.dataset.s);
+  if (a === 'create') {
+    const nome = $('#nwNome').value.trim(), slug = $('#nwSlug').value;
+    if (!nome || !slug) return ptoast('Preencha nome e endereço.', true);
+    if (ed.list.some(x => x.slug === slug)) return ptoast('Já existe um cliente com esse endereço.', true);
+    const cfg = newCfg(); cfg.nome = nome; cfg.titulo = nome;
+    Object.assign(ed, { slug, cfg, src: 'novo', dirty: true, open: new Set(), sec: new Set(['geral', 'cards']) });
+    renderForm(); preview(); return;
+  }
+  if (!c) return;
+  if (a === 'pick') { ed.target = { p: b.dataset.p, k: b.dataset.k }; $('#edFile').value = ''; return $('#edFile').click(); }
+  if (a === 'clearimg') { const p = b.dataset.p; setP(c, p, ''); if (p.endsWith('imagem')) { const base = p.replace(/imagem$/, ''); setP(c, base + 'w', ''); setP(c, base + 'h', ''); } renderForm(); return markDirty(); }
+  if (a === 'up' || a === 'down') { const j = a === 'up' ? i - 1 : i + 1; if (j < 0 || j >= c.cards.length) return; [c.cards[i], c.cards[j]] = [c.cards[j], c.cards[i]]; renderForm(); return markDirty(); }
+  if (a === 'delcard') { if (!confirm('Remover este card?')) return; c.cards.splice(i, 1); renderForm(); return markDirty(); }
+  if (a === 'addcard') {
+    const t = b.dataset.t, id = (t === 'capa' ? 'capa' : t) + '-' + rid();
+    const n = { capa: { tipo: 'capa', id, titulo: 'Título da capa', cta: 'Saiba mais', link: '' }, parceiro: { tipo: 'parceiro', id, titulo: 'Novo card', texto: '', botao: 'Abrir', link: '' }, destaque: { tipo: 'destaque', id, marca: 'Marca', valor: '10', sufixo: '% OFF', texto: '', botao: 'Ir à loja', link: '' } }[t];
+    t === 'capa' ? c.cards.unshift(n) : c.cards.push(n); ed.open.add(id); renderForm(); return markDirty();
+  }
+  if (a === 'addnum') { c.numeros.push({ valor: '', rotulo: '' }); renderForm(); return markDirty(); }
+  if (a === 'delnum') { c.numeros.splice(i, 1); renderForm(); return markDirty(); }
+  if (a === 'addcat') { const inp = $('#newCat'), k = slugify(inp.value); if (!k) return; c.categorias[k] = inp.value.trim(); renderForm(); return markDirty(); }
+  if (a === 'delcat') { delete c.categorias[b.dataset.k]; c.cards.forEach(x => { if (x.cat === b.dataset.k) delete x.cat; }); renderForm(); return markDirty(); }
+  if (a === 'save') return save();
+  if (a === 'delclient') return delClient();
+  if (a === 'copylink') return navigator.clipboard.writeText(`${location.origin}${SITE_BASE}?c=${ed.slug}`).then(() => ptoast('Link copiado.'), () => ptoast('Não consegui copiar.', true));
+}
+edForm.addEventListener('click', onAct);
+$('#edList').addEventListener('click', onAct);
+$('#edNew').onclick = renderNew;
+const fileIn = Object.assign(document.createElement('input'), { type: 'file', accept: 'image/*', id: 'edFile', hidden: true });
+fileIn.onchange = () => handleFile(fileIn.files[0]); document.body.append(fileIn);
+
+/* ---- abas ---- */
+function showTab(t) {
+  const edit = t === 'edit';
+  $('#statsView').hidden = edit; $('#statsTools').hidden = edit; $('#editor').hidden = !edit;
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab === t));
+  if (edit && !showTab.done) { showTab.done = true; $('#edFrame').src = `${SITE_BASE}?embed=1`; loadList(); }
+}
+$('#tabs').onclick = e => { const b = e.target.closest('button'); if (b) showTab(b.dataset.tab); };
 </script>
 </body>
 </html>

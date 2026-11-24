@@ -293,201 +293,229 @@
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const url = v => (/^(https?:\/\/|#)/i.test(v || '') ? v : '#');
   const ARROW = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
-
-  /* Cliente: ?c=slug (padrão: data-default do <html>) */
-  const slug = (new URLSearchParams(location.search).get('c') || document.documentElement.dataset.default || '').toLowerCase();
-  const base = `clients/${slug}/`;
+  const API = '/api/blinkbio';
+  const params = new URLSearchParams(location.search);
+  const EMBED = params.has('embed');           // modo prévia do editor (sem rastreio)
   const app = $('#app');
-  let cfg;
+  let ac = null, io = null, bgOn = false;
+
+  /* Config: banco (editor) primeiro; arquivo clients/<slug>/config.json como reserva */
+  async function loadConfig(slug) {
+    try {
+      const r = await fetch(`${API}/clients?c=${slug}`, { cache: 'no-store' });
+      if (r.ok) return await r.json();
+    } catch {}
+    const r = await fetch(`clients/${slug}/config.json`, { cache: 'no-cache' });
+    if (!r.ok) throw 0;
+    return r.json();
+  }
+
+  function mount(cfg, slug) {
+    ac?.abort(); io?.disconnect();
+    ac = new AbortController();
+    const sig = { signal: ac.signal };
+    const keepY = scrollY;
+    $$('[data-bb]', document.head).forEach(n => n.remove());
+
+    const asset = p => /^img:/.test(p) ? `${API}/img?c=${slug}&f=${encodeURIComponent(p.slice(4))}`
+      : /^(https?:)?\/\/|^(data|blob):/.test(p) || p.startsWith('/') ? p : `clients/${slug}/${p}`;
+
+    /* Tema e metadados */
+    const t = cfg.tema || {};
+    const root = document.documentElement.style;
+    const hex = /^#[0-9a-f]{6}$/i;
+    if (hex.test(t.cor)) { root.setProperty('--orange', t.cor); root.setProperty('--o-rgb', [1, 3, 5].map(i => parseInt(t.cor.slice(i, i + 2), 16)).join(', ')); }
+    if (hex.test(t.cor2)) root.setProperty('--orange-2', t.cor2);
+    if (hex.test(t.fundo)) { root.setProperty('--bg', t.fundo); $('meta[name=theme-color]').content = t.fundo; }
+    document.title = cfg.titulo || cfg.nome;
+    const meta = (attr, key, val) => { if (!val) return; const m = document.createElement('meta'); m.setAttribute(attr, key); m.content = val; m.dataset.bb = ''; document.head.append(m); };
+    meta('name', 'description', cfg.descricao);
+    meta('property', 'og:title', cfg.titulo || cfg.nome);
+    meta('property', 'og:description', cfg.descricao);
+    if (cfg.og) meta('property', 'og:image', new URL(asset(cfg.og), location.href).href);
+    const link = (rel, href, extra = {}) => { if (!href) return; const l = document.createElement('link'); l.rel = rel; l.href = href; l.dataset.bb = ''; Object.assign(l, extra); document.head.append(l); };
+    link('icon', asset(cfg.favicon || ''), { type: 'image/png' });
+    link('apple-touch-icon', asset(cfg.iconeApple || ''));
+
+    /* Rastreio (painel do criador). Cada evento leva ?s=slug */
+    const analytics = cfg.analytics ?? `${API}/track`;
+    const ENDPOINT = !EMBED && analytics ? analytics + (analytics.includes('?') ? '&' : '?') + 's=' + slug : '';
+    function track(name, data = {}) {
+      if (EMBED) return;
+      const evt = { event: name, ...data, site: slug, page: location.pathname, ts: Date.now() };
+      (window.dataLayer = window.dataLayer || []).push(evt);
+      if (ENDPOINT) { try { navigator.sendBeacon(ENDPOINT, JSON.stringify(evt)); } catch {} }
+    }
+
+    /* Render */
+    const img = (c, lazy) => c.imagem
+      ? `<img src="${esc(asset(c.imagem))}"${c.w ? ` width="${+c.w}" height="${+c.h}"` : ''} ${lazy ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async" alt="${esc(c.alt)}"${c.posicao ? ` style="object-position:${esc(c.posicao)}"` : ''} onerror="this.remove()">`
+      : '';
+    const code = c => c.cupom
+      ? `<button class="code" type="button" data-code="${esc(c.cupom)}"><span>${esc(c.cupom)}</span><span class="lbl">Copiar</span></button>` : '';
+    const go = (c, extra = '') => c.link
+      ? `<a class="go ${extra}" href="${esc(url(c.link))}" target="_blank" rel="noopener">${esc(c.botao || 'Abrir')}</a>` : '';
+
+    const card = c => {
+      const id = esc(c.id), cat = c.cat ? ` data-cat="${esc(c.cat)}"` : '';
+      if (c.tipo === 'capa') return `
+        <article class="card hero reveal" id="hero" data-id="${id}">
+          <div class="img">${img(c, false)}</div>
+          <div class="content">
+            ${c.kicker ? `<span class="kicker">${esc(c.kicker)}</span>` : ''}
+            <h2>${esc(c.titulo)}</h2>
+            ${c.cta ? `<span class="cta">${esc(c.cta)} ${ARROW}</span>` : ''}
+          </div>
+          <a class="link" target="_blank" rel="noopener" aria-label="${esc(c.aria || c.cta || c.titulo)}" href="${esc(url(c.link))}"></a>
+        </article>`;
+      if (c.tipo === 'destaque') return `
+        <article class="card growth reveal"${cat} data-id="${id}">
+          <div class="brand">${esc(c.marca)}</div>
+          <div class="big">${esc(c.valor)}<small>${esc(c.sufixo)}</small></div>
+          <p>${esc(c.texto)}</p>
+          <div class="actions">${code(c)}${go(c)}</div>
+        </article>`;
+      return `
+        <article class="card partner${c.claro ? ' light' : ''} reveal"${cat} data-id="${id}">
+          <div class="img">${img(c, true)}${c.selo ? `<span class="badge">${esc(c.selo)}</span>` : ''}</div>
+          <div class="body">
+            <h3>${esc(c.titulo)}</h3>
+            <p>${esc(c.texto)}</p>
+            <div class="actions">${code(c)}${go(c, c.cupom ? '' : 'full' + (c.destaqueBotao ? ' accent' : ''))}</div>
+          </div>
+        </article>`;
+    };
+
+    const cats = cfg.categorias || {};
+    const usedCats = Object.keys(cats).filter(k => (cfg.cards || []).some(c => c.cat === k));
+    const fabC = cfg.botaoFlutuante;
+    app.innerHTML = `
+      <header class="top reveal">
+        <h1 class="sr-only">${esc(cfg.nome)}</h1>
+        ${cfg.logo?.arquivo ? `<div class="logo"><img src="${esc(asset(cfg.logo.arquivo))}"${cfg.logo.w ? ` width="${+cfg.logo.w}" height="${+cfg.logo.h}"` : ''} alt="${esc(cfg.nome)}" decoding="async"></div>` : ''}
+        ${cfg.tagline ? `<p class="tagline">${esc(cfg.tagline).replace(/\{([^}]+)\}/g, '<em>$1</em>')}</p>` : ''}
+        ${cfg.numeros?.length ? `<div class="stats" aria-label="Números do perfil">${cfg.numeros.map(n => `<div class="stat"><b>${esc(n.valor)}</b><span>${esc(n.rotulo)}</span></div>`).join('')}</div>` : ''}
+      </header>
+      ${usedCats.length > 1 ? `<nav class="filters reveal" aria-label="Filtrar">
+        <button class="chip" type="button" data-filter="todos" aria-pressed="true">Todos</button>
+        ${usedCats.map(k => `<button class="chip" type="button" data-filter="${esc(k)}" aria-pressed="false">${esc(cats[k])}</button>`).join('')}
+      </nav>` : ''}
+      <section class="cards">${(cfg.cards || []).map(card).join('')}</section>
+      <footer>
+        <strong>© ${esc(cfg.nome)}</strong><br>
+        <a class="credit" href="https://www.creativecodex.com.br/" target="_blank" rel="noopener" aria-label="Desenvolvido por BlinkBio, Creative Codex Studio"><img src="assets/logo-dark.png" width="120" height="30" alt="BlinkBio by Creative Codex" loading="lazy" decoding="async"></a>
+      </footer>`;
+    $('#fab-slot').innerHTML = fabC?.texto ? `<a class="fab" id="fab" data-id="${esc(fabC.id || 'fab')}" target="_blank" rel="noopener" aria-label="${esc(fabC.aria || fabC.texto)}" href="${esc(url(fabC.link))}">${esc(fabC.texto)} ${ARROW}</a>` : '';
+
+    /* Interações */
+    track('page_view', { ref: document.referrer });
+    document.addEventListener('click', e => {
+      const el = e.target.closest('a, button');
+      if (!el) return;
+      const owner = el.closest('[data-id]');
+      if (!owner) return;
+      const kind = el.dataset.code ? 'copiar_cupom' : el.matches('.chip') ? 'filtro' : 'abrir_link';
+      track(kind, { id: owner.dataset.id, cupom: el.dataset.code || undefined });
+    }, sig);
+
+    const toast = $('#toast');
+    const show = msg => {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(show.t);
+      show.t = setTimeout(() => toast.classList.remove('show'), 1900);
+    };
+    async function copy(text) {
+      try { await navigator.clipboard.writeText(text); }
+      catch {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch {}
+        ta.remove();
+      }
+    }
+    $$('[data-code]').forEach(btn => {
+      const lbl = $('.lbl', btn);
+      btn.addEventListener('click', async () => {
+        await copy(btn.dataset.code);
+        btn.classList.add('done');
+        lbl.textContent = 'Copiado ✓';
+        show(`Cupom ${btn.dataset.code} copiado`);
+        try { navigator.vibrate && navigator.vibrate(20); } catch {}
+        setTimeout(() => { btn.classList.remove('done'); lbl.textContent = 'Copiar'; }, 2000);
+      });
+    });
+    $$('a.go[href="#"]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); show('Link em breve'); }));
+    if (EMBED) $$('a[target=_blank]').forEach(a => a.addEventListener('click', e => e.preventDefault()));
+
+    /* Revelar ao rolar */
+    const reveals = $$('.reveal');
+    if ('IntersectionObserver' in window && !EMBED) {
+      io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: .12 });
+      reveals.forEach((el, i) => { el.style.transitionDelay = Math.min(i, 4) * 60 + 'ms'; io.observe(el); });
+    } else {
+      reveals.forEach(el => el.classList.add('in'));
+    }
+
+    /* Filtros */
+    const chips = $$('.chip');
+    const items = $$('[data-cat]');
+    chips.forEach(chip => chip.addEventListener('click', () => {
+      const f = chip.dataset.filter;
+      chips.forEach(c => c.setAttribute('aria-pressed', String(c === chip)));
+      items.forEach(el => { el.hidden = !(f === 'todos' || el.dataset.cat === f); if (!el.hidden) el.classList.add('in'); });
+    }));
+
+    /* Botão flutuante após a capa */
+    const fab = $('#fab'), hero = $('#hero');
+    if (fab) {
+      const onScroll = () => fab.classList.toggle('show', hero ? hero.getBoundingClientRect().bottom < 0 : scrollY > 400);
+      addEventListener('scroll', onScroll, { passive: true, signal: ac.signal });
+      onScroll();
+    }
+    if (keepY) scrollTo(0, keepY);
+
+    /* Fundo em movimento (uma vez) */
+    const bg = $('.bg');
+    if (!bgOn && bg && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      bgOn = true;
+      let tx = 0, ty = 0, ts = 0, cx = 0, cy = 0, cs = 0, raf = 0;
+      const loop = () => {
+        cx += (tx - cx) * .08; cy += (ty - cy) * .08; cs += (ts - cs) * .1;
+        bg.style.setProperty('--mx', cx.toFixed(3));
+        bg.style.setProperty('--my', cy.toFixed(3));
+        bg.style.setProperty('--sp', cs.toFixed(3));
+        const moving = Math.abs(tx - cx) > .001 || Math.abs(ty - cy) > .001 || Math.abs(ts - cs) > .001;
+        raf = moving ? requestAnimationFrame(loop) : 0;
+      };
+      const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
+      addEventListener('scroll', () => { ts = Math.min(scrollY, 900) / 900; kick(); }, { passive: true });
+      addEventListener('pointermove', e => {
+        if (e.pointerType !== 'mouse') return;
+        tx = e.clientX / innerWidth * 2 - 1; ty = e.clientY / innerHeight * 2 - 1; kick();
+      }, { passive: true });
+    }
+  }
+
+  /* Início */
+  if (EMBED) {
+    addEventListener('message', e => {
+      if (e.origin !== location.origin || e.data?.type !== 'bb-config') return;
+      mount(e.data.cfg, e.data.slug);
+    });
+    parent.postMessage({ type: 'bb-ready' }, location.origin);
+    return;
+  }
+  const slug = (params.get('c') || document.documentElement.dataset.default || '').toLowerCase();
   try {
     if (!/^[a-z0-9-]{1,32}$/.test(slug)) throw 0;
-    const r = await fetch(base + 'config.json', { cache: 'no-cache' });
-    if (!r.ok) throw 0;
-    cfg = await r.json();
+    mount(await loadConfig(slug), slug);
   } catch {
     document.title = 'Página não encontrada';
     app.innerHTML = '<header class="top"><p class="tagline">Página não encontrada.</p></header>';
-    return;
-  }
-  const asset = p => (/^https?:\/\//i.test(p) ? p : base + p);
-
-  /* Tema e metadados */
-  const t = cfg.tema || {};
-  const root = document.documentElement.style;
-  const hex = /^#[0-9a-f]{6}$/i;
-  if (hex.test(t.cor)) { root.setProperty('--orange', t.cor); root.setProperty('--o-rgb', [1, 3, 5].map(i => parseInt(t.cor.slice(i, i + 2), 16)).join(', ')); }
-  if (hex.test(t.cor2)) root.setProperty('--orange-2', t.cor2);
-  if (hex.test(t.fundo)) { root.setProperty('--bg', t.fundo); $('meta[name=theme-color]').content = t.fundo; }
-  document.title = cfg.titulo || cfg.nome;
-  const meta = (attr, key, val) => { if (!val) return; const m = document.createElement('meta'); m.setAttribute(attr, key); m.content = val; document.head.append(m); };
-  meta('name', 'description', cfg.descricao);
-  meta('property', 'og:title', cfg.titulo || cfg.nome);
-  meta('property', 'og:description', cfg.descricao);
-  if (cfg.og) meta('property', 'og:image', new URL(asset(cfg.og), location.href).href);
-  const link = (rel, href, extra = {}) => { if (!href) return; const l = document.createElement('link'); l.rel = rel; l.href = href; Object.assign(l, extra); document.head.append(l); };
-  link('icon', asset(cfg.favicon || ''), { type: 'image/png' });
-  link('apple-touch-icon', asset(cfg.iconeApple || ''));
-
-  /* Rastreio de cliques (painel do criador). Cada evento leva ?s=slug */
-  const ENDPOINT = cfg.analytics ? cfg.analytics + (cfg.analytics.includes('?') ? '&' : '?') + 's=' + slug : '';
-  function track(name, data = {}) {
-    const evt = { event: name, ...data, site: slug, page: location.pathname, ts: Date.now() };
-    (window.dataLayer = window.dataLayer || []).push(evt);
-    if (ENDPOINT) { try { navigator.sendBeacon(ENDPOINT, JSON.stringify(evt)); } catch {} }
-  }
-
-  /* Render */
-  const img = (c, lazy) => c.imagem
-    ? `<img src="${esc(asset(c.imagem))}"${c.w ? ` width="${+c.w}" height="${+c.h}"` : ''} ${lazy ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async" alt="${esc(c.alt)}"${c.posicao ? ` style="object-position:${esc(c.posicao)}"` : ''} onerror="this.remove()">`
-    : '';
-  const code = c => c.cupom
-    ? `<button class="code" type="button" data-code="${esc(c.cupom)}"><span>${esc(c.cupom)}</span><span class="lbl">Copiar</span></button>` : '';
-  const go = (c, extra = '') => c.link
-    ? `<a class="go ${extra}" href="${esc(url(c.link))}" target="_blank" rel="noopener">${esc(c.botao || 'Abrir')}</a>` : '';
-
-  const card = c => {
-    const id = esc(c.id), cat = c.cat ? ` data-cat="${esc(c.cat)}"` : '';
-    if (c.tipo === 'capa') return `
-      <article class="card hero reveal" id="hero" data-id="${id}">
-        <div class="img">${img(c, false)}</div>
-        <div class="content">
-          ${c.kicker ? `<span class="kicker">${esc(c.kicker)}</span>` : ''}
-          <h2>${esc(c.titulo)}</h2>
-          ${c.cta ? `<span class="cta">${esc(c.cta)} ${ARROW}</span>` : ''}
-        </div>
-        <a class="link" target="_blank" rel="noopener" aria-label="${esc(c.aria || c.cta || c.titulo)}" href="${esc(url(c.link))}"></a>
-      </article>`;
-    if (c.tipo === 'destaque') return `
-      <article class="card growth reveal"${cat} data-id="${id}">
-        <div class="brand">${esc(c.marca)}</div>
-        <div class="big">${esc(c.valor)}<small>${esc(c.sufixo)}</small></div>
-        <p>${esc(c.texto)}</p>
-        <div class="actions">${code(c)}${go(c)}</div>
-      </article>`;
-    return `
-      <article class="card partner${c.claro ? ' light' : ''} reveal"${cat} data-id="${id}">
-        <div class="img">${img(c, true)}${c.selo ? `<span class="badge">${esc(c.selo)}</span>` : ''}</div>
-        <div class="body">
-          <h3>${esc(c.titulo)}</h3>
-          <p>${esc(c.texto)}</p>
-          <div class="actions">${code(c)}${go(c, c.cupom ? '' : 'full' + (c.destaqueBotao ? ' accent' : ''))}</div>
-        </div>
-      </article>`;
-  };
-
-  const cats = cfg.categorias || {};
-  const usedCats = Object.keys(cats).filter(k => (cfg.cards || []).some(c => c.cat === k));
-  const fabC = cfg.botaoFlutuante;
-  app.innerHTML = `
-    <header class="top reveal">
-      <h1 class="sr-only">${esc(cfg.nome)}</h1>
-      ${cfg.logo ? `<div class="logo"><img src="${esc(asset(cfg.logo.arquivo))}" width="${+cfg.logo.w}" height="${+cfg.logo.h}" alt="${esc(cfg.nome)}" decoding="async"></div>` : ''}
-      ${cfg.tagline ? `<p class="tagline">${esc(cfg.tagline).replace(/\{([^}]+)\}/g, '<em>$1</em>')}</p>` : ''}
-      ${cfg.numeros?.length ? `<div class="stats" aria-label="Números do perfil">${cfg.numeros.map(n => `<div class="stat"><b>${esc(n.valor)}</b><span>${esc(n.rotulo)}</span></div>`).join('')}</div>` : ''}
-    </header>
-    ${usedCats.length > 1 ? `<nav class="filters reveal" aria-label="Filtrar">
-      <button class="chip" type="button" data-filter="todos" aria-pressed="true">Todos</button>
-      ${usedCats.map(k => `<button class="chip" type="button" data-filter="${esc(k)}" aria-pressed="false">${esc(cats[k])}</button>`).join('')}
-    </nav>` : ''}
-    <section class="cards">${(cfg.cards || []).map(card).join('')}</section>
-    <footer>
-      <strong>© ${esc(cfg.nome)}</strong><br>
-      <a class="credit" href="https://www.creativecodex.com.br/" target="_blank" rel="noopener" aria-label="Desenvolvido por BlinkBio, Creative Codex Studio"><img src="assets/logo-dark.png" width="120" height="30" alt="BlinkBio by Creative Codex" loading="lazy" decoding="async"></a>
-    </footer>`;
-  if (fabC) $('#fab-slot').innerHTML = `<a class="fab" id="fab" data-id="${esc(fabC.id || 'fab')}" target="_blank" rel="noopener" aria-label="${esc(fabC.aria || fabC.texto)}" href="${esc(url(fabC.link))}">${esc(fabC.texto)} ${ARROW}</a>`;
-
-  /* Interações */
-  track('page_view', { ref: document.referrer });
-  document.addEventListener('click', e => {
-    const el = e.target.closest('a, button');
-    if (!el) return;
-    const owner = el.closest('[data-id]');
-    if (!owner) return;
-    const kind = el.dataset.code ? 'copiar_cupom' : el.matches('.chip') ? 'filtro' : 'abrir_link';
-    track(kind, { id: owner.dataset.id, cupom: el.dataset.code || undefined });
-  });
-
-  const toast = $('#toast');
-  let tt;
-  const show = msg => {
-    toast.textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(tt);
-    tt = setTimeout(() => toast.classList.remove('show'), 1900);
-  };
-
-  async function copy(text) {
-    try { await navigator.clipboard.writeText(text); }
-    catch {
-      const ta = document.createElement('textarea');
-      ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
-      document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); } catch {}
-      ta.remove();
-    }
-  }
-  $$('[data-code]').forEach(btn => {
-    const lbl = $('.lbl', btn);
-    btn.addEventListener('click', async () => {
-      await copy(btn.dataset.code);
-      btn.classList.add('done');
-      lbl.textContent = 'Copiado ✓';
-      show(`Cupom ${btn.dataset.code} copiado`);
-      try { navigator.vibrate && navigator.vibrate(20); } catch {}
-      setTimeout(() => { btn.classList.remove('done'); lbl.textContent = 'Copiar'; }, 2000);
-    });
-  });
-
-  /* Link ainda sem URL */
-  $$('a.go[href="#"]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); show('Link em breve'); }));
-
-  /* Revelar ao rolar */
-  const reveals = $$('.reveal');
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-    }, { threshold: .12 });
-    reveals.forEach((el, i) => { el.style.transitionDelay = Math.min(i, 4) * 60 + 'ms'; io.observe(el); });
-  } else {
-    reveals.forEach(el => el.classList.add('in'));
-  }
-
-  /* Filtros */
-  const chips = $$('.chip');
-  const items = $$('[data-cat]');
-  chips.forEach(chip => chip.addEventListener('click', () => {
-    const f = chip.dataset.filter;
-    chips.forEach(c => c.setAttribute('aria-pressed', String(c === chip)));
-    items.forEach(el => { el.hidden = !(f === 'todos' || el.dataset.cat === f); if (!el.hidden) el.classList.add('in'); });
-  }));
-
-  /* Botão flutuante após a capa */
-  const fab = $('#fab');
-  const hero = $('#hero');
-  if (fab) {
-    const onScroll = () => fab.classList.toggle('show', hero ? hero.getBoundingClientRect().bottom < 0 : scrollY > 400);
-    addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-  }
-
-  /* Fundo em movimento: parallax com o scroll e com o mouse (suavizado) */
-  const bg = $('.bg');
-  if (bg && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    let tx = 0, ty = 0, ts = 0, cx = 0, cy = 0, cs = 0, raf = 0;
-    const loop = () => {
-      cx += (tx - cx) * .08; cy += (ty - cy) * .08; cs += (ts - cs) * .1;
-      bg.style.setProperty('--mx', cx.toFixed(3));
-      bg.style.setProperty('--my', cy.toFixed(3));
-      bg.style.setProperty('--sp', cs.toFixed(3));
-      const moving = Math.abs(tx - cx) > .001 || Math.abs(ty - cy) > .001 || Math.abs(ts - cs) > .001;
-      raf = moving ? requestAnimationFrame(loop) : 0;
-    };
-    const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
-    addEventListener('scroll', () => { ts = Math.min(scrollY, 900) / 900; kick(); }, { passive: true });
-    addEventListener('pointermove', e => {
-      if (e.pointerType !== 'mouse') return;
-      tx = e.clientX / innerWidth * 2 - 1; ty = e.clientY / innerHeight * 2 - 1; kick();
-    }, { passive: true });
   }
 })();
 </script>

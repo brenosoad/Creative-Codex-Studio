@@ -1,19 +1,15 @@
 # BlinkBio
 _by Creative Codex_
 
-Plataforma de link na bio com imagem: um template, uma pasta por cliente e painel do criador.
+Plataforma de link na bio com imagem: um template, uma página por cliente, editor e painel de resultados.
 
-- `index.html`: template único. `?c=<slug>` carrega `clients/<slug>/config.json`.
-- `clients/<slug>/`: config e imagens de cada cliente.
-- `painel/`: painel do criador (acesso com `BLINKBIO_ADMIN_KEY`).
-- `api/track.js`, `api/stats.js`: contagem de cliques (Upstash Redis).
+- `index.html`: template único. `?c=<slug>` carrega o cliente (banco primeiro, `clients/<slug>/config.json` como reserva).
+- `painel/`: painel do criador. Aba **Resultados** (cliques, origem, horários) e aba **Clientes** (editor com prévia, upload de fotos e publicação na hora).
+- `api/blinkbio/`: `track` (cliques), `stats` (resultados), `clients` (config dos clientes), `img` (fotos). Banco: Redis (`KV_REST_API_*` ou `UPSTASH_REDIS_REST_*`).
+- `clients/`: clientes antigos em arquivo. Ao salvar no editor, a versão do banco passa a valer.
 
-## Variáveis de ambiente (Vercel)
-- `KV_REST_API_URL` e `KV_REST_API_TOKEN` (já existem no projeto do site) (Marketplace → Upstash Redis, geradas sozinhas)
-- `BLINKBIO_ADMIN_KEY` (sua chave do painel)
+## Chave do painel
+`BLINKBIO_ADMIN_KEY` (variável de ambiente). Sem ela, vale a chave definida em `api/blinkbio/_auth.js`.
 
 ## Novo cliente
-Copie `clients/sancaporai`, edite `config.json` e as imagens. Cada cliente usa `"analytics": "/api/blinkbio/track"`.
-
-## Teste local
-`npx vercel dev` (variáveis em `.env.local`).
+Painel → Clientes → Novo cliente → preencher → Salvar e publicar.

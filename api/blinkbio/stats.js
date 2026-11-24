@@ -1,17 +1,8 @@
 const { pipeline } = require('./_redis');
-const crypto = require('crypto');
-
-// Chave do painel. A variável de ambiente, se existir, tem prioridade.
-const ADMIN_KEY = process.env.BLINKBIO_ADMIN_KEY || 'blink-f5reRTAMyXbHjBXO';
-
-const same = (a, b) => {
-  const x = Buffer.from(String(a)), y = Buffer.from(String(b));
-  return x.length === y.length && crypto.timingSafeEqual(x, y);
-};
+const { isAdmin } = require('./_auth');
 
 module.exports = async (req, res) => {
-  const key = req.headers['x-key'] || '';
-  if (!ADMIN_KEY || !same(key, ADMIN_KEY)) return res.status(401).json({ error: 'unauthorized' });
+  if (!isAdmin(req)) return res.status(401).json({ error: 'unauthorized' });
   try {
     const [keys] = await pipeline([['KEYS', 'bb:*']]);
     const hashes = keys.length ? await pipeline(keys.map(k => ['HGETALL', k])) : [];
