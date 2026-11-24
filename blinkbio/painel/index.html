@@ -14,7 +14,7 @@
 :root{--brand:#4B32D9;--brand-2:#8B7CFF;--bg:#0D0B1A;--card:#17142B;--card-2:#1d1938;--line:#2A2650;--mut:#9a98b8;--ok:#34d399;--bad:#f87171;--amber:#ffb547}
 *{box-sizing:border-box;margin:0}
 body{background:var(--bg);color:#fff;font:500 14px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;padding:20px 16px 64px}
-main{max-width:1120px;margin:0 auto}
+main{max-width:1500px;margin:0 auto}
 button,select{font:inherit}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 h1{line-height:0}
@@ -27,6 +27,28 @@ h2{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
 /* topo */
 header{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:space-between;margin-bottom:18px}
 .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.shell{display:grid;grid-template-columns:216px minmax(0,1fr);gap:24px;align-items:start}
+.side{position:sticky;top:20px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 12px;display:flex;flex-direction:column;gap:22px;min-height:calc(100vh - 40px)}
+.side h1{padding:0 6px}.side h1 .logo{height:42px}
+#tabs{display:flex;flex-direction:column;gap:4px}
+#tabs button,.nav-out{display:flex;align-items:center;gap:11px;background:none;border:0;color:var(--mut);font-weight:700;font-size:14px;padding:11px 12px;border-radius:12px;cursor:pointer;text-align:left;width:100%}
+#tabs button:hover,.nav-out:hover{color:#fff;background:var(--card-2)}
+#tabs button[aria-pressed=true]{background:var(--brand);color:#fff}
+#tabs svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.side-foot{margin-top:auto}
+.content{min-width:0}
+.topbar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:space-between;margin-bottom:18px;min-height:40px}
+.tb-l{display:flex;align-items:center;gap:12px}
+.ptitle{font-size:20px;letter-spacing:0;text-transform:none;color:#fff;font-weight:800}
+@media(max-width:860px){
+  body{padding-bottom:92px}
+  .shell{grid-template-columns:minmax(0,1fr);gap:14px}
+  .side{display:contents}
+  .side h1{padding:0}.side h1 .logo{height:40px}
+  .side-foot{display:none}
+  #tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;flex-direction:row;gap:0;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+  #tabs button{flex:1;flex-direction:column;gap:3px;font-size:11px;padding:8px 4px;text-align:center;justify-content:center}
+}
 .seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px}
 .seg button{background:none;border:0;color:var(--mut);font-weight:700;font-size:13px;padding:7px 13px;border-radius:999px;cursor:pointer}
 .seg button[aria-pressed=true]{background:var(--brand);color:#fff}
@@ -175,14 +197,19 @@ tr.click:hover td{background:var(--card-2)}
 </section>
 
 <main id="app" hidden>
-  <header>
+<div class="shell">
+  <aside class="side">
     <h1><img class="logo" src="../assets/logo-dark.png" alt="BlinkBio by Creative Codex" width="220" height="56"><span class="sr-only">Painel</span></h1>
-    <button class="btn" id="back" type="button" aria-label="Voltar" hidden>← Voltar</button>
-    <div class="seg" id="tabs" role="group" aria-label="Seção">
-      <button data-tab="stats" aria-pressed="true">Resultados</button>
-      <button data-tab="edit" aria-pressed="false">Clientes</button>
-      <button data-tab="fin" aria-pressed="false">Financeiro</button>
-    </div>
+    <nav id="tabs" aria-label="Seções">
+      <button data-tab="stats" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Resultados</span></button>
+      <button data-tab="edit" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Clientes</span></button>
+      <button data-tab="fin" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Financeiro</span></button>
+    </nav>
+    <div class="side-foot"><button class="nav-out" id="logout" type="button">Sair</button></div>
+  </aside>
+  <div class="content">
+  <div class="topbar">
+    <div class="tb-l"><button class="btn" id="back" type="button" aria-label="Voltar" hidden>← Voltar</button><h2 class="ptitle" id="pageTitle">Resultados</h2></div>
     <div class="tools" id="statsTools">
       <select id="site" aria-label="Cliente"></select>
       <div class="seg" id="range" role="group" aria-label="Período">
@@ -194,7 +221,8 @@ tr.click:hover td{background:var(--card-2)}
       <button class="btn" id="refresh" type="button">Atualizar</button>
       <button class="btn" id="csv" type="button">CSV</button>
     </div>
-  </header>
+  
+  </div>
   <div id="statsView">
 <p class="upd" id="upd" style="margin:-6px 0 14px"></p>
 
@@ -256,6 +284,8 @@ tr.click:hover td{background:var(--card-2)}
     </aside>
   </div>
 </section>
+  </div>
+</div>
 </main>
 <div class="ptoast" id="ptoast" role="status" aria-live="polite"></div>
 
@@ -317,8 +347,8 @@ async function load() {
     try { const r = await fetch(`${EAPI}/clients?c=${s}`); if (r.ok) conf[s] = await r.json(); } catch {}
     if (!conf[s]) try { const r = await fetch(`../clients/${s}/config.json`); if (r.ok) conf[s] = await r.json(); } catch {}
   }));
-  if (isClient) { site = sites[0] || ''; document.title = `${data.nome || site} · BlinkBio`; }
-  $('#tabs').hidden = isClient; $('#site').hidden = isClient;
+  if (isClient) { site = sites[0] || ''; document.title = `${data.nome || site} · BlinkBio`; $('#pageTitle').textContent = data.nome || site; }
+  document.querySelectorAll('#tabs [data-tab=edit], #tabs [data-tab=fin]').forEach(b => (b.hidden = isClient)); $('#site').hidden = isClient;
   const sel = $('#site'), cur = sel.value || site;
   sel.replaceChildren(new Option('Todos os clientes', ''), ...sites.map(s => new Option(conf[s]?.nome || ed.list.find(c => c.slug === s)?.nome || s, s)));
   if (isClient) sel.replaceChildren(new Option(conf[site]?.nome || site, site));
@@ -734,12 +764,13 @@ fileIn.onchange = () => handleFile(fileIn.files[0]); document.body.append(fileIn
 
 /* ---- abas ---- */
 let curTab = 'stats';
+$('#logout').onclick = () => { try { sessionStorage.removeItem('k'); } catch {} location.reload(); };
 $('#back').onclick = () => {
   if (curTab === 'edit' && ed.cfg) return $('[data-act=back]').click();
   if (curTab !== 'stats') return showTab('stats');
 };
 function showTab(t) {
-  curTab = t; $('#back').hidden = t === 'stats';
+  curTab = t; $('#back').hidden = t === 'stats'; $('#pageTitle').textContent = { stats: isClient ? (conf[site]?.nome || 'Resultados') : 'Resultados', edit: 'Clientes', fin: 'Financeiro' }[t];
   const edit = t === 'edit', fin = t === 'fin';
   $('#statsView').hidden = edit || fin; $('#statsTools').hidden = edit || fin; $('#editor').hidden = !edit; $('#finView').hidden = !fin;
   if (fin) loadFin();
