@@ -10,10 +10,10 @@ module.exports = async (req, res) => {
       const c = String(req.query.c || '');
       if (c && !SLUG.test(c)) return res.status(400).json({ error: 'slug' });
       const [keys] = await pipeline([['KEYS', c ? `bb:${c}:*` : 'bb:*']]);
-      if (keys.length) await pipeline(keys.map(k => ['DEL', k]));
+      for (let i = 0; i < keys.length; i += 100) await pipeline(keys.slice(i, i + 100).map(k => ['DEL', k]));
       return res.status(200).json({ ok: true, removed: keys.length });
-    } catch {
-      return res.status(500).json({ error: 'db' });
+    } catch (e) {
+      return res.status(500).json({ error: 'db', detail: String(e && e.message || e).slice(0, 120) });
     }
   }
   try {

@@ -624,9 +624,10 @@ $('#wipe').onclick = async () => {
   if (!ok) return;
   try {
     const r = await fetch(`${API}${site ? `?c=${site}` : ''}`, { method: 'DELETE', headers: { 'X-Key': key } });
-    if (!r.ok) throw 0;
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.ok) throw new Error(r.ok ? 'servidor desatualizado, tente em 1 min' : `erro ${r.status}${j.detail ? ': ' + j.detail : ''}`);
     load.sig = ''; ptoast(todos ? 'Dados de todos os clientes apagados.' : `Dados de ${nome} apagados.`); await refresh(false);
-  } catch { ptoast('Não consegui apagar os dados.', true); }
+  } catch (e) { ptoast(`Não consegui apagar os dados (${e.message || 'sem conexão'}).`, true); }
 };
 $('#range').onclick = e => {
   const b = e.target.closest('button'); if (!b) return;
