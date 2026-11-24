@@ -196,6 +196,8 @@
 
   footer { text-align: center; font-size: 12px; color: #6f6f6f; margin-top: 26px; line-height: 1.7; }
   footer strong { color: #fff; font-size: 14.5px; }
+  footer .agency { display: inline-flex; align-items: center; gap: 8px; margin: 14px 0 2px; padding: 11px 20px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: #fff; font-weight: 700; font-size: 13.5px; transition: .2s var(--ease); }
+  footer .agency:hover { border-color: var(--orange); color: var(--orange-2); }
   footer .credit { display: inline-block; margin-top: 12px; opacity: .8; transition: opacity .2s; }
   footer .credit img { display: block; height: 30px; width: auto; }
   footer .credit:hover { opacity: 1; }
@@ -416,6 +418,7 @@
       <section class="cards">${(cfg.cards || []).map(card).join('')}</section>
       <footer>
         <strong>© ${esc(cfg.nome)}</strong><br>
+        ${cfg.rodape?.texto && cfg.rodape?.link ? `<a class="agency" data-id="rodape" href="${esc(url(cfg.rodape.link))}" target="_blank" rel="noopener">${esc(cfg.rodape.texto)} ${ARROW}</a><br>` : ''}
         <a class="credit" href="https://www.creativecodex.com.br/" target="_blank" rel="noopener" aria-label="Desenvolvido por BlinkBio, Creative Codex Studio"><img src="assets/logo-dark.png" width="120" height="30" alt="BlinkBio by Creative Codex" loading="lazy" decoding="async"></a>
       </footer>`;
     $('#fab-slot').innerHTML = fabC?.texto ? `<a class="fab" id="fab" data-id="${esc(fabC.id || 'fab')}" target="_blank" rel="noopener" aria-label="${esc(fabC.aria || fabC.texto)}" href="${esc(url(fabC.link))}">${esc(fabC.texto)} ${ARROW}</a>` : '';

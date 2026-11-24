@@ -3,18 +3,39 @@
   "titulo": "Sanca Por Aí | Cupons e parcerias",
   "descricao": "Mostrando o que há de melhor em São Carlos e Região! Cupons de desconto e parcerias.",
   "tagline": "Mostrando o que há de {melhor} em São Carlos e Região",
-  "tema": { "cor": "#EE5A0C", "cor2": "#FF8A3D", "fundo": "#101214" },
-  "logo": { "arquivo": "img/logo-white.png", "w": 419, "h": 224 },
+  "tema": {
+    "cor": "#EE5A0C",
+    "cor2": "#FF8A3D",
+    "fundo": "#101214"
+  },
+  "logo": {
+    "arquivo": "img/logo-white.png",
+    "w": 419,
+    "h": 224
+  },
   "favicon": "img/favicon.png",
   "iconeApple": "img/apple-touch-icon.png",
   "og": "img/og.jpg",
   "analytics": "/api/blinkbio/track",
   "numeros": [
-    { "valor": "+97 mil", "rotulo": "Seguidores" },
-    { "valor": "+300 mil", "rotulo": "Contas/mês" },
-    { "valor": "+2,5 mi", "rotulo": "Impressões/mês" }
+    {
+      "valor": "+97 mil",
+      "rotulo": "Seguidores"
+    },
+    {
+      "valor": "+300 mil",
+      "rotulo": "Contas/mês"
+    },
+    {
+      "valor": "+2,5 mi",
+      "rotulo": "Impressões/mês"
+    }
   ],
-  "categorias": { "cupons": "Cupons", "sorteio": "Sorteio", "video": "Vídeos" },
+  "categorias": {
+    "cupons": "Cupons",
+    "sorteio": "Sorteio",
+    "video": "Vídeos"
+  },
   "botaoFlutuante": {
     "texto": "Anunciar",
     "id": "fab-anunciar",
@@ -23,51 +44,94 @@
   },
   "cards": [
     {
-      "tipo": "capa", "id": "capa-anuncie",
+      "tipo": "capa",
+      "id": "capa-anuncie",
       "kicker": "Anuncie",
       "titulo": "Seu negócio em vídeo para quem ama São Carlos.",
       "cta": "Chamar no WhatsApp",
       "aria": "Chamar no WhatsApp para produzir um vídeo",
       "link": "https://api.whatsapp.com/send?phone=5516992312494&text=Ol%C3%A1%2C%20vim%20pelo%20link%20da%20bio%20e%20quero%20anunciar%20com%20voc%C3%AAs!",
-      "imagem": "img/hero.webp", "w": 1774, "h": 887, "posicao": "100% 50%", "alt": ""
+      "imagem": "img/hero.webp",
+      "w": 1774,
+      "h": 887,
+      "posicao": "100% 50%",
+      "alt": ""
     },
     {
-      "tipo": "destaque", "id": "growth", "cat": "cupons",
+      "tipo": "destaque",
+      "id": "growth",
+      "cat": "cupons",
       "marca": "Growth Supplements",
-      "valor": "10", "sufixo": "% OFF",
+      "valor": "10",
+      "sufixo": "% OFF",
       "texto": "No Pix ou boleto. Ou parcele em até 6x sem juros no cartão.",
       "cupom": "SANCA",
-      "link": "https://www.gsuplementos.com.br/", "botao": "Ir à loja"
+      "link": "https://www.gsuplementos.com.br/",
+      "botao": "Ir à loja"
     },
     {
-      "tipo": "parceiro", "id": "letz", "cat": "cupons",
-      "titulo": "Let'z", "selo": "Cupom",
+      "tipo": "parceiro",
+      "id": "letz",
+      "cat": "cupons",
+      "titulo": "Let'z",
+      "selo": "Cupom",
       "texto": "Chiclete energético. Use o cupom na compra.",
-      "imagem": "img/letz.webp", "w": 1200, "h": 600, "alt": "Chiclete energético Let'z",
+      "imagem": "img/letz.webp",
+      "w": 1200,
+      "h": 600,
+      "alt": "Chiclete energético Let'z",
       "cupom": "SANCA",
-      "link": "https://www.letzgum.com.br", "botao": "Ir à loja"
+      "link": "https://www.letzgum.com.br",
+      "botao": "Ir à loja"
     },
     {
-      "tipo": "parceiro", "id": "petiko", "cat": "cupons",
-      "titulo": "BOX Petiko", "selo": "R$ 30 OFF",
+      "tipo": "parceiro",
+      "id": "petiko",
+      "cat": "cupons",
+      "titulo": "BOX Petiko",
+      "selo": "R$ 30 OFF",
       "texto": "R$ 30 de desconto na box para o seu pet.",
-      "imagem": "img/petiko.webp", "w": 428, "h": 214, "alt": "BOX Petiko",
+      "imagem": "img/petiko.webp",
+      "w": 428,
+      "h": 214,
+      "alt": "BOX Petiko",
       "cupom": "SANCAPORAI",
-      "link": "http://box.petiko.com.br/cupom/sancaporai", "botao": "Resgatar"
+      "link": "http://box.petiko.com.br/cupom/sancaporai",
+      "botao": "Resgatar"
     },
     {
-      "tipo": "parceiro", "id": "sorteio", "cat": "sorteio", "claro": true,
-      "titulo": "Sorteio mensal", "selo": "Todo mês",
+      "tipo": "parceiro",
+      "id": "sorteio",
+      "cat": "sorteio",
+      "claro": true,
+      "titulo": "Sorteio mensal",
+      "selo": "Todo mês",
       "texto": "Prêmios da Growth Supplements. Participe pelo formulário.",
-      "imagem": "img/sorteio.webp", "w": 1000, "h": 500, "alt": "Produtos Growth Supplements: pote de whey e shaker",
-      "link": "https://forms.gle/RxA47ewzTGAeEDx27", "botao": "Quero participar"
+      "imagem": "img/sorteio.webp",
+      "w": 1000,
+      "h": 500,
+      "alt": "Produtos Growth Supplements: pote de whey e shaker",
+      "link": "https://forms.gle/RxA47ewzTGAeEDx27",
+      "botao": "Quero participar"
     },
     {
-      "tipo": "parceiro", "id": "youtube", "cat": "video", "destaqueBotao": true,
+      "tipo": "parceiro",
+      "id": "youtube",
+      "cat": "video",
+      "destaqueBotao": true,
       "titulo": "Nosso YouTube",
       "texto": "Os vídeos completos de São Carlos e Região.",
-      "imagem": "img/youtube.webp", "w": 511, "h": 255, "posicao": "70% 50%", "alt": "Câmera gravando São Carlos",
-      "link": "#", "botao": "Assistir agora"
+      "imagem": "img/youtube.webp",
+      "w": 511,
+      "h": 255,
+      "posicao": "70% 50%",
+      "alt": "Câmera gravando São Carlos",
+      "link": "#",
+      "botao": "Assistir agora"
     }
-  ]
+  ],
+  "rodape": {
+    "texto": "Conheça nossa agência",
+    "link": "https://sancamidias.com.br/"
+  }
 }
