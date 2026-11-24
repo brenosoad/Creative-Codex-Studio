@@ -305,9 +305,10 @@ async function load() {
     if (!r.ok) throw new Error(r.status === 401 ? 'Chave inválida.' : 'Erro ao carregar.');
     data = await r.json();
   }
-  rows = data.rows; sites = data.sites; isClient = !!data.client;
+  const sig = JSON.stringify(data.rows) + (data.sites || []).join() + new Date().toDateString();
+  rows = DEMO ? data.rows : data.rows.map(([site, day, event, id, n]) => ({ site, day, event, id, n })); sites = data.sites; isClient = !!data.client;
   if (!DEMO && !isClient) {
-    await loadList();
+    if (!ed.list.length || Date.now() - (ed.listAt || 0) > 300000) await loadList();
     const reg = new Set(ed.list.map(c => c.slug));
     rows = rows.filter(x => reg.has(x.site)); sites = ed.list.map(c => c.slug);
   }
@@ -322,7 +323,9 @@ async function load() {
   sel.replaceChildren(new Option('Todos os clientes', ''), ...sites.map(s => new Option(conf[s]?.nome || ed.list.find(c => c.slug === s)?.nome || s, s)));
   if (isClient) sel.replaceChildren(new Option(conf[site]?.nome || site, site));
   sel.value = sites.includes(cur) ? cur : (isClient ? site : ''); site = sel.value;
+  const same = sig === load.sig; load.sig = sig;
   $('#upd').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ' · atualiza sozinho a cada minuto';
+  return !same;
 }
 
 /* ---------- cálculos ---------- */
@@ -466,7 +469,7 @@ function exportCsv() {
 }
 
 async function refresh(silent) {
-  try { await load(); render(); } catch (e) { if (!silent) $('#upd').textContent = e.message || 'Erro ao carregar.'; }
+  try { const ch = await load(); if (silent && ch === false) return; render(); } catch (e) { if (!silent) $('#upd').textContent = e.message || 'Erro ao carregar.'; }
 }
 
 async function enter(k) {
@@ -475,7 +478,7 @@ async function enter(k) {
     await load();
     try { sessionStorage.setItem('k', k); } catch {}
     $('#login').hidden = true; $('#app').hidden = false; render();
-    clearInterval(timer); if (!DEMO) timer = setInterval(() => document.hidden || refresh(true), 60000);
+    clearInterval(timer); if (!DEMO) timer = setInterval(() => (document.hidden || curTab !== 'stats') || refresh(true), 60000);
   } catch (e) { $('#err').textContent = e.message || 'Erro ao carregar.'; }
 }
 
@@ -483,6 +486,7 @@ $('#enter').onclick = () => enter($('#key').value.trim());
 $('#key').onkeydown = e => { if (e.key === 'Enter') $('#enter').click(); };
 $('#site').onchange = e => { site = e.target.value; render(); };
 $('#refresh').onclick = () => refresh(false);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && curTab === 'stats' && !$('#app').hidden) refresh(true); });
 $('#csv').onclick = exportCsv;
 $('#range').onclick = e => {
   const b = e.target.closest('button'); if (!b) return;
@@ -579,7 +583,7 @@ async function loadList() {
   try { const r = await fetch('../clients/index.json', { cache: 'no-store' }); if (r.ok) for (const s of await r.json()) map[s] = { slug: s, nome: s, src: 'arquivo' }; } catch {}
   await Promise.all(Object.keys(map).map(async s => { try { const r = await fetch(`../clients/${s}/config.json`); if (r.ok) map[s].nome = (await r.json()).nome || s; } catch {} }));
   if (!DEMO) { try { const r = await fetch(`${EAPI}/clients?list=1`, { headers: { 'X-Key': key } }); if (r.ok) (await r.json()).clients.forEach(c => (map[c.slug] = { slug: c.slug, nome: c.nome, src: 'editor' })); } catch {} }
-  ed.list = Object.values(map).sort((a, b) => a.nome.localeCompare(b.nome));
+  ed.list = Object.values(map).sort((a, b) => a.nome.localeCompare(b.nome)); ed.listAt = Date.now();
   drawList();
 }
 function drawList() {
