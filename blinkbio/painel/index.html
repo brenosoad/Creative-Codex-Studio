@@ -306,6 +306,11 @@ async function load() {
     data = await r.json();
   }
   rows = data.rows; sites = data.sites; isClient = !!data.client;
+  if (!DEMO && !isClient) {
+    await loadList();
+    const reg = new Set(ed.list.map(c => c.slug));
+    rows = rows.filter(x => reg.has(x.site)); sites = ed.list.map(c => c.slug);
+  }
   await Promise.all(sites.filter(s => !(s in conf)).map(async s => {
     conf[s] = null;
     try { const r = await fetch(`${EAPI}/clients?c=${s}`); if (r.ok) conf[s] = await r.json(); } catch {}
@@ -314,7 +319,7 @@ async function load() {
   if (isClient) { site = sites[0] || ''; document.title = `${data.nome || site} · BlinkBio`; }
   $('#tabs').hidden = isClient; $('#site').hidden = isClient;
   const sel = $('#site'), cur = sel.value || site;
-  sel.replaceChildren(new Option('Todos os clientes', ''), ...sites.map(s => new Option(conf[s]?.nome || s, s)));
+  sel.replaceChildren(new Option('Todos os clientes', ''), ...sites.map(s => new Option(conf[s]?.nome || ed.list.find(c => c.slug === s)?.nome || s, s)));
   if (isClient) sel.replaceChildren(new Option(conf[site]?.nome || site, site));
   sel.value = sites.includes(cur) ? cur : (isClient ? site : ''); site = sel.value;
   $('#upd').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ' · atualiza sozinho a cada minuto';
