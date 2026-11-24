@@ -131,7 +131,9 @@
     }
   ],
   "rodape": {
-    "texto": "Conheça nossa agência",
+    "titulo": "Conheça nossa agência",
+    "texto": "Conheça a Sanca Mídias e veja como podemos ajudar o seu negócio.",
+    "botao": "Visitar site",
     "link": "https://sancamidias.com.br/"
   }
 }

@@ -196,6 +196,9 @@
 
   footer { text-align: center; font-size: 12px; color: #6f6f6f; margin-top: 26px; line-height: 1.7; }
   footer strong { color: #fff; font-size: 14.5px; }
+  .partner.noimg .img { display: none; }
+  .cards > .partner.noimg { grid-column: 1 / -1; }
+  .cards > .partner.noimg .body { padding: 22px; }
   footer .agency { display: inline-flex; align-items: center; gap: 8px; margin: 14px 0 2px; padding: 11px 20px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: #fff; font-weight: 700; font-size: 13.5px; transition: .2s var(--ease); }
   footer .agency:hover { border-color: var(--orange); color: var(--orange-2); }
   footer .credit { display: inline-block; margin-top: 12px; opacity: .8; transition: opacity .2s; }
@@ -267,11 +270,11 @@
     .hero.al-centro h2 { margin-inline: auto; }
     .growth .big { font-size: 120px; }
     .body h3 { font-size: 23px; }
-    .cards > .partner:last-child { grid-column: 1 / -1; flex-direction: row; }
-    .cards > .partner:last-child .img { flex: 0 0 50%; aspect-ratio: auto; min-height: 230px; }
-    .cards > .partner:last-child .body { justify-content: center; padding: 24px; }
-    .cards > .partner:last-child .body p { margin-bottom: 0; }
-    .cards > .partner:last-child .actions { margin-top: 18px; }
+    .cards > .partner.lastp { grid-column: 1 / -1; flex-direction: row; }
+    .cards > .partner.lastp .img { flex: 0 0 50%; aspect-ratio: auto; min-height: 230px; }
+    .cards > .partner.lastp .body { justify-content: center; padding: 24px; }
+    .cards > .partner.lastp .body p { margin-bottom: 0; }
+    .cards > .partner.lastp .actions { margin-top: 18px; }
   }
   @media (min-width: 1100px) {
     main { max-width: 1180px; }
@@ -279,10 +282,12 @@
     .cards > .card { grid-column: span 2; }
     .cards > .hero { grid-column: 1 / -1; }
     .cards > .partner:nth-last-child(-n+2) { grid-column: span 3; flex-direction: column; }
-    .cards > .partner:last-child .img { flex: none; aspect-ratio: 2 / 1; min-height: 0; }
-    .cards > .partner:last-child .body { justify-content: flex-start; padding: 16px; }
-    .cards > .partner:last-child .body p { margin-bottom: 14px; }
-    .cards > .partner:last-child .actions { margin-top: auto; }
+    .cards > .partner.noimg { grid-column: 1 / -1; }
+    .cards:has(> .partner.noimg:last-child) > .partner:nth-last-child(3) { grid-column: span 3; flex-direction: column; }
+    .cards > .partner.lastp .img { flex: none; aspect-ratio: 2 / 1; min-height: 0; }
+    .cards > .partner.lastp .body { justify-content: flex-start; padding: 16px; }
+    .cards > .partner.lastp .body p { margin-bottom: 14px; }
+    .cards > .partner.lastp .actions { margin-top: auto; }
     .hero { min-height: 430px; }
     .growth .big { font-size: 104px; }
   }
@@ -391,7 +396,7 @@
           <div class="actions">${code(c)}${go(c)}</div>
         </article>`;
       return `
-        <article class="card partner${c.claro ? ' light' : ''}${al(c)} reveal"${cat} data-id="${id}">
+        <article class="card partner${c.claro ? ' light' : ''}${c.imagem ? '' : ' noimg'}${c._last ? ' lastp' : ''}${al(c)} reveal"${cat} data-id="${id}">
           <div class="img">${img(c, true)}${c.selo ? `<span class="badge">${esc(c.selo)}</span>` : ''}</div>
           <div class="body">
             <h3>${esc(c.titulo)}</h3>
@@ -415,10 +420,14 @@
         <button class="chip" type="button" data-filter="todos" aria-pressed="true">Todos</button>
         ${usedCats.map(k => `<button class="chip" type="button" data-filter="${esc(k)}" aria-pressed="false">${esc(cats[k])}</button>`).join('')}
       </nav>` : ''}
-      <section class="cards">${(cfg.cards || []).map(card).join('')}</section>
+      <section class="cards">${(() => {
+        const all = [...(cfg.cards || []), ...(cfg.rodape?.titulo && cfg.rodape?.link ? [{ ...cfg.rodape, tipo: 'parceiro', id: 'rodape', cat: undefined }] : [])];
+        let last = -1; all.forEach((c, i) => { if (c.tipo === 'parceiro' && c.imagem) last = i; });
+        if (last >= 0) all[last] = { ...all[last], _last: true };
+        return all.map(card).join('');
+      })()}</section>
       <footer>
         <strong>© ${esc(cfg.nome)}</strong><br>
-        ${cfg.rodape?.texto && cfg.rodape?.link ? `<a class="agency" data-id="rodape" href="${esc(url(cfg.rodape.link))}" target="_blank" rel="noopener">${esc(cfg.rodape.texto)} ${ARROW}</a><br>` : ''}
         <a class="credit" href="https://www.creativecodex.com.br/" target="_blank" rel="noopener" aria-label="Desenvolvido por BlinkBio, Creative Codex Studio"><img src="assets/logo-dark.png" width="120" height="30" alt="BlinkBio by Creative Codex" loading="lazy" decoding="async"></a>
       </footer>`;
     $('#fab-slot').innerHTML = fabC?.texto ? `<a class="fab" id="fab" data-id="${esc(fabC.id || 'fab')}" target="_blank" rel="noopener" aria-label="${esc(fabC.aria || fabC.texto)}" href="${esc(url(fabC.link))}">${esc(fabC.texto)} ${ARROW}</a>` : '';
