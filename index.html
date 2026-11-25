@@ -551,5 +551,10 @@ var id=localStorage.getItem('cc_vid');if(!id){id=Math.random().toString(36).slic
 var b=JSON.stringify({id:id,path:location.pathname,ref:document.referrer});
 if(navigator.sendBeacon)navigator.sendBeacon('/api/track',new Blob([b],{type:'application/json'}));else fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:b,keepalive:true})}catch(e){}})();
 </script>
+<script>
+(function(){var s=document.querySelector('.bb-screen'),f=s&&s.querySelector('iframe');if(!f)return;
+function fit(){var w=s.clientWidth,k=Math.min(1,w/390);f.style.transform='scale('+k+')';f.style.width='390px';f.style.height=(s.clientHeight/k)+'px'}
+fit();addEventListener('resize',fit);addEventListener('load',fit)})();
+</script>
 </body>
 </html>

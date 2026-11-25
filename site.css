@@ -499,3 +499,10 @@ html.js .hero-foot[data-r].in{transform:translateX(-50%)}
 .bb-hint{margin:0;font-size:.85rem;color:rgba(255,255,255,.8);text-align:center}
 @media (max-width:900px){.bb-phones{height:auto;max-width:none}}
 @media (max-width:560px){.bb-phones{height:auto}.bb-device{width:min(396px,100%)}.bb-screen{height:600px}}
+
+/* BlinkBio: iframe sempre renderizado em 390px e reduzido para caber */
+.bb-screen iframe{inset:auto;top:0;left:0;width:390px;height:100%;transform-origin:0 0}
+@media (max-width:1100px) and (min-width:901px){.bb-tiles{grid-template-columns:1fr}.bb-steps{grid-template-columns:1fr;gap:14px}}
+.bb-head .sub,.bb-for,.bb-t span,.bb-steps span{text-align:center;hyphens:none;-webkit-hyphens:none}
+.bb-t span,.bb-steps span,.bb-for{text-align:left}
+@media (max-width:900px){.bb-for{text-align:center}}
