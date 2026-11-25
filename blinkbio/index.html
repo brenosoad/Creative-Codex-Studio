@@ -318,6 +318,9 @@
   .cv .card.dragging { opacity: .45; }
   .cv .card.dt-before { box-shadow: -8px 0 0 var(--orange-2); }
   .cv .card.dt-after { box-shadow: 8px 0 0 var(--orange-2); }
+  body.cv [data-f] { cursor: text; }
+  body.cv [data-f]:hover { outline: 1px dashed rgba(255,255,255,.55); outline-offset: 3px; border-radius: 4px; }
+  body.cv [data-f][contenteditable] { outline: 2px solid #8B7CFF; outline-offset: 3px; border-radius: 4px; cursor: text; user-select: text; -webkit-user-select: text; }
   .cv-bar { position: absolute; top: 8px; right: 8px; z-index: 6; display: flex; gap: 4px; padding: 4px; border-radius: 10px; background: rgba(0,0,0,.78); backdrop-filter: blur(6px); }
   .cv-bar button { all: unset; cursor: pointer; font: 700 12px/1 system-ui, sans-serif; color: #fff; padding: 7px 9px; border-radius: 7px; min-width: 28px; text-align: center; }
   .cv-bar button:hover { background: rgba(255,255,255,.18); }
@@ -406,7 +409,7 @@
     const code = c => c.cupom
       ? `<button class="code" type="button" data-code="${esc(c.cupom)}"><span>${esc(c.cupom)}</span><span class="lbl">Copiar</span></button>` : '';
     const go = (c, extra = '') => c.link
-      ? `<a class="go ${extra}" href="${esc(url(c.link))}" target="_blank" rel="noopener">${esc(c.botao || 'Abrir')}</a>` : '';
+      ? `<a class="go ${extra}" href="${esc(url(c.link))}" target="_blank" rel="noopener" data-f="botao">${esc(c.botao || 'Abrir')}</a>` : '';
 
     const MODE = matchMedia('(min-width: 760px)').matches ? 'pc' : 'cel';
     const LY = cfg.layout?.[MODE] || {}, WM = LY.larg || {};
@@ -418,25 +421,25 @@
         <article class="card hero${al(c)} reveal" id="hero" data-id="${id}">
           <div class="img">${img(c, false)}</div>
           <div class="content">
-            ${c.kicker ? `<span class="kicker">${esc(c.kicker)}</span>` : ''}
-            <h2>${esc(c.titulo)}</h2>
-            ${c.cta ? `<span class="cta">${esc(c.cta)} ${ARROW}</span>` : ''}
+            ${c.kicker ? `<span class="kicker" data-f="kicker">${esc(c.kicker)}</span>` : ''}
+            <h2 data-f="titulo">${esc(c.titulo)}</h2>
+            ${c.cta ? `<span class="cta"><span data-f="cta">${esc(c.cta)}</span> ${ARROW}</span>` : ''}
           </div>
           <a class="link" target="_blank" rel="noopener" aria-label="${esc(c.aria || c.cta || c.titulo)}" href="${esc(url(c.link))}"></a>
         </article>`;
       if (c.tipo === 'destaque') return `
         <article class="card growth${al(c)} reveal"${cat}${wa(c)} data-id="${id}">
-          <div class="brand">${esc(c.marca)}</div>
-          <div class="big">${esc(c.valor)}<small>${esc(c.sufixo)}</small></div>
-          <p>${esc(c.texto)}</p>
+          <div class="brand" data-f="marca">${esc(c.marca)}</div>
+          <div class="big"><span data-f="valor">${esc(c.valor)}</span><small data-f="sufixo">${esc(c.sufixo)}</small></div>
+          <p data-f="texto">${esc(c.texto)}</p>
           <div class="actions">${code(c)}${go(c)}</div>
         </article>`;
       return `
         <article class="card partner${c.claro ? ' light' : ''}${c.imagem ? '' : ' noimg'}${c._last ? ' lastp' : ''}${al(c)} reveal"${cat}${wa(c)} data-id="${id}">
-          <div class="img">${img(c, true)}${c.selo ? `<span class="badge">${esc(c.selo)}</span>` : ''}</div>
+          <div class="img">${img(c, true)}${c.selo ? `<span class="badge" data-f="selo">${esc(c.selo)}</span>` : ''}</div>
           <div class="body">
-            <h3>${esc(c.titulo)}</h3>
-            <p>${esc(c.texto)}</p>
+            <h3 data-f="titulo">${esc(c.titulo)}</h3>
+            <p data-f="texto">${esc(c.texto)}</p>
             <div class="actions">${code(c)}${go(c, c.cupom ? '' : 'full' + (c.destaqueBotao ? ' accent' : ''))}</div>
           </div>
         </article>`;
@@ -449,8 +452,8 @@
       <header class="top reveal">
         <h1 class="sr-only">${esc(cfg.nome)}</h1>
         ${cfg.logo?.arquivo ? `<div class="logo"><img src="${esc(asset(cfg.logo.arquivo))}"${cfg.logo.w ? ` width="${+cfg.logo.w}" height="${+cfg.logo.h}"` : ''} alt="${esc(cfg.nome)}" decoding="async"></div>` : ''}
-        ${cfg.tagline ? `<p class="tagline">${esc(cfg.tagline).replace(/\{([^}]+)\}/g, '<em>$1</em>')}</p>` : ''}
-        ${cfg.numeros?.length ? `<div class="stats" aria-label="Números do perfil">${cfg.numeros.map(n => `<div class="stat"><b>${esc(n.valor)}</b><span>${esc(n.rotulo)}</span></div>`).join('')}</div>` : ''}
+        ${cfg.tagline ? `<p class="tagline" data-f="tagline" data-raw="${esc(cfg.tagline)}">${esc(cfg.tagline).replace(/\{([^}]+)\}/g, '<em>$1</em>')}</p>` : ''}
+        ${cfg.numeros?.length ? `<div class="stats" aria-label="Números do perfil">${cfg.numeros.map((n, i) => `<div class="stat"><b data-f="numeros.${i}.valor">${esc(n.valor)}</b><span data-f="numeros.${i}.rotulo">${esc(n.rotulo)}</span></div>`).join('')}</div>` : ''}
       </header>
       ${usedCats.length > 1 ? `<nav class="filters reveal" aria-label="Filtrar">
         <button class="chip" type="button" data-filter="todos" aria-pressed="true">Todos</button>
@@ -596,8 +599,32 @@
   function initCanvas() {
     let drag = null, drop = null;
     const clear = () => $$('.dt-before,.dt-after,.dragging').forEach(x => x.classList.remove('dt-before', 'dt-after', 'dragging'));
+    let EDIT = null;
+    const endEdit = (save, el) => {
+      if (EDIT !== el) return; EDIT = null;
+      const v = el.textContent.replace(/\s+/g, ' ').trim(), old = el.dataset.old;
+      el.removeAttribute('contenteditable'); const card = el.closest('.cards > .card'); if (card) card.draggable = CANVAS;
+      if (save && v !== old) post({ type: 'bb-text', id: card ? card.dataset.id : '', f: el.dataset.f, v });
+      else el.textContent = el.dataset.f === 'tagline' ? el.dataset.raw.replace(/\{([^}]+)\}/g, '$1') : old;
+    };
+    const startEdit = el => {
+      if (EDIT === el) return; if (EDIT) endEdit(true, EDIT);
+      EDIT = el; const raw = el.dataset.f === 'tagline' ? el.dataset.raw : el.textContent;
+      el.dataset.old = raw; el.textContent = raw;
+      const card = el.closest('.cards > .card'); if (card) card.draggable = false;
+      el.setAttribute('contenteditable', 'plaintext-only'); if (el.contentEditable !== 'plaintext-only') el.contentEditable = 'true';
+      el.focus(); const r = document.createRange(); r.selectNodeContents(el); r.collapse(false); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(r);
+      el.onblur = () => endEdit(true, el);
+      el.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } else if (e.key === 'Escape') { e.preventDefault(); endEdit(false, el); el.blur(); } e.stopPropagation(); };
+    };
     document.addEventListener('click', e => {
       if (!CANVAS) return;
+      if (EDIT && EDIT.contains(e.target)) { e.preventDefault(); return; }
+      const fe = e.target.closest('[data-f]');
+      if (fe && !e.target.closest('[data-cv]')) {
+        e.preventDefault(); e.stopPropagation();
+        startEdit(fe); return;
+      }
       const bt = e.target.closest('[data-cv]'), card = e.target.closest('.cards > .card');
       if (!card) return;
       e.preventDefault(); e.stopPropagation();

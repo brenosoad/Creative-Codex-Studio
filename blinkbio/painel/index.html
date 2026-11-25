@@ -407,7 +407,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="box ed-form" id="edForm"><p class="empty">Escolha um cliente na lista ou crie um novo.</p></div>
     <aside class="ed-prev">
       <div class="prev-bar"><h2>Prévia</h2><div class="seg" id="prevMode" role="group" aria-label="Tamanho da prévia"><button type="button" data-m="cel" aria-pressed="true">Celular</button><button type="button" data-m="pc" aria-pressed="false">PC</button></div><button type="button" class="btn sm" id="cvToggle" aria-pressed="false">Organizar na página</button><a class="btn" id="edOpen" href="#" target="_blank" rel="noopener" hidden>Abrir página ↗</a></div>
-      <div class="cvhint" id="cvHint" hidden><p class="mut">Arraste os cards para reordenar. Clique em um card para escolher a largura. <b>Celular e PC são organizados separadamente.</b></p><button type="button" class="btn sm" id="cvReset">Restaurar organização do Celular</button></div>
+      <div class="cvhint" id="cvHint" hidden><p class="mut">Arraste os cards para reordenar. Clique em um card para escolher a largura. <b>Clique em um texto para editar</b> (Enter confirma, Esc cancela). <b>Celular e PC são organizados separadamente.</b></p><button type="button" class="btn sm" id="cvReset">Restaurar organização do Celular</button></div>
       <div class="phone"><iframe id="edFrame" title="Prévia da página" src="about:blank"></iframe></div>
     </aside>
   </div>
@@ -1086,6 +1086,13 @@ addEventListener('message', e => {
   if (e.origin !== location.origin || e.source !== $('#edFrame').contentWindow || !ed.cfg) return;
   const d = e.data || {}, c = ed.cfg, M = d.m === 'cel' ? 'cel' : 'pc', i = c.cards.findIndex(x => x.id === d.id);
   if (d.type === 'bb-select') return selectCard(d.id);
+  if (d.type === 'bb-text') {
+    const f = String(d.f || ''), v = String(d.v ?? '').slice(0, 280);
+    if (d.id) { if (i < 0 || !/^(kicker|titulo|texto|botao|cta|selo|marca|valor|sufixo)$/.test(f)) return; setP(c.cards[i], f, v); }
+    else if (f === 'tagline' || /^numeros\.\d+\.(valor|rotulo)$/.test(f)) { if (f !== 'tagline' && !getP(c, f.replace(/\.[^.]+$/, ''))) return; setP(c, f, v); }
+    else return;
+    markDirty(); renderForm(); preview(); return;
+  }
   if (d.type === 'bb-order') {
     const ids = (d.ids || []).filter(k => c.cards.some(x => x.id === k));
     if (ids.length === c.cards.length) { lyOf(c, M).ordem = ids; markDirty(); renderForm(); preview(); }
