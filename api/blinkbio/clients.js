@@ -57,7 +57,7 @@ function clean(c) {
   const logo = c.logo?.arquivo ? { arquivo: imgRef(c.logo.arquivo), w: num(c.logo.w), h: num(c.logo.h) } : undefined;
   const fab = c.botaoFlutuante?.texto ? { texto: str(c.botaoFlutuante.texto, 24), id: 'fab', link: link(c.botaoFlutuante.link), aria: str(c.botaoFlutuante.aria, 120) } : undefined;
   return {
-    nome: str(c.nome, 80), titulo: str(c.titulo, 120), descricao: str(c.descricao, 300), tagline: str(c.tagline, 160),
+    nome: str(c.nome, 80), titulo: str(c.titulo, 120), descricao: str(c.descricao, 300), tagline: str(c.tagline, 160), mostrarNome: c.mostrarNome === true ? true : undefined,
     tema: { cor: HEX.test(t.cor) ? t.cor : '#EE5A0C', cor2: HEX.test(t.cor2) ? t.cor2 : '#FF8A3D', fundo: HEX.test(t.fundo) ? t.fundo : '#101214' },
     logo, favicon: imgRef(c.favicon) || undefined, iconeApple: imgRef(c.iconeApple) || undefined, og: imgRef(c.og) || undefined,
     numeros: (Array.isArray(c.numeros) ? c.numeros : []).slice(0, 4).map(n => ({ valor: str(n?.valor, 16), rotulo: str(n?.rotulo, 24) })).filter(n => n.valor),
