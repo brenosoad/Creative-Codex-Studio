@@ -287,9 +287,9 @@
     .cards { grid-template-columns: repeat(6, 1fr); }
     .cards > .card { grid-column: span 2; }
     .cards > .hero { grid-column: 1 / -1; }
-    .cards:not(.manual) > .partner:nth-last-child(-n+2) { grid-column: span 3; flex-direction: column; }
     .cards > .partner.noimg:not([data-w]) { grid-column: 1 / -1; }
-    .cards:not(.manual):has(> .partner.noimg:last-child) > .partner:nth-last-child(3) { grid-column: span 3; flex-direction: column; }
+    .cards > .partner.lastp { grid-column: span 2; flex-direction: column; }
+    .cards > .partner[data-w=meia] { flex-direction: column; }
     .cards > .partner.lastp .img { flex: none; aspect-ratio: 2 / 1; min-height: 0; }
     .cards > .partner.lastp .body { justify-content: flex-start; padding: 16px; }
     .cards > .partner.lastp .body p { margin-bottom: 14px; }
@@ -410,7 +410,7 @@
 
     const MODE = matchMedia('(min-width: 760px)').matches ? 'pc' : 'cel';
     const LY = cfg.layout?.[MODE] || {}, WM = LY.larg || {};
-    const wa = c => (WM[c.id] ? ` data-w="${esc(WM[c.id])}"` : '');
+    const wa = c => ((WM[c.id] || c._w) ? ` data-w="${esc(WM[c.id] || c._w)}"` : '');
     const al = c => (c.alinhar === 'centro' || c.alinhar === 'direita' ? ' al-' + c.alinhar : '');
     const card = c => {
       const id = esc(c.id), cat = c.cat ? ` data-cat="${esc(c.cat)}"` : '';
@@ -464,6 +464,17 @@
         const manual = MODE === 'pc' && Object.keys(WM).length > 0;
         let last = -1; all.forEach((c, i) => { if (c.tipo === 'parceiro' && c.imagem) last = i; });
         if (last >= 0 && !manual) all[last] = { ...all[last], _last: true };
+        if (!manual && MODE === 'pc') {
+          /* auto: fecha cada linha de 3 colunas (sobra 2 -> 2 metades; sobra 1 -> 4 metades) */
+          const full = c => c.tipo === 'capa' || (c.tipo === 'parceiro' && !c.imagem);
+          for (let i = 0; i < all.length;) {
+            if (full(all[i])) { i++; continue; }
+            let j = i; while (j < all.length && !full(all[j])) j++;
+            const n = j - i, k = n % 3 === 2 ? 2 : n % 3 === 1 && n >= 4 ? 4 : 0;
+            for (let m = j - k; m < j; m++) all[m] = { ...all[m], _w: 'meia' };
+            i = j;
+          }
+        }
         return all.map(card).join('');
       })()}</section>
       <footer>

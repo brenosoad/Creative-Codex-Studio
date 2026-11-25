@@ -237,6 +237,11 @@ tr.click:hover td{background:var(--card-2)}
 /* modal */
 .modal{position:fixed;inset:0;background:rgba(5,4,14,.72);display:grid;place-items:center;padding:16px;z-index:100}
 .modal .dlg{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.helpbtn{width:36px;padding:0;font-weight:800;border-radius:50%}
+.tut{list-style:none;padding:0;margin:0 0 14px;display:grid;gap:10px;max-height:60vh;overflow:auto}
+.tut li{color:var(--mut);font-size:13.5px;line-height:1.45}
+.tut b{color:#fff;display:block;font-size:14px;margin-bottom:1px}
+.modal .dlg.wide{max-width:520px}
 .modal h3{font-size:17px;margin-bottom:8px}
 .modal p{color:var(--mut);margin-bottom:14px}
 .modal input{width:100%;background:var(--bg);color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;margin-bottom:14px}
@@ -323,6 +328,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <button data-d="30" aria-pressed="true">30 dias</button>
         <button data-d="90" aria-pressed="false">90 dias</button>
       </div>
+      <button class="btn helpbtn" id="help" type="button" aria-label="Tutorial: como usar o painel" title="Tutorial">?</button>
       <a class="btn" id="openPg" href="#" target="_blank" rel="noopener" hidden>Abrir página ↗</a>
       <button class="btn" id="copyPg" type="button" hidden>Copiar link</button>
       <button class="btn" id="refresh" type="button">Atualizar</button>
@@ -672,6 +678,7 @@ async function enter(k) {
     await load();
     try { sessionStorage.setItem('k', k); } catch {}
     $('#login').hidden = true; $('#app').hidden = false; render();
+    if (isClient) { try { if (!localStorage.getItem('bbtut')) { localStorage.setItem('bbtut', '1'); showHelp(); } } catch {} }
     clearInterval(timer); if (!DEMO) timer = setInterval(() => (document.hidden || curTab !== 'stats') || refresh(true), 60000);
   } catch (e) { $('#err').textContent = e.message || 'Erro ao carregar.'; }
 }
@@ -716,6 +723,28 @@ $('#range').onclick = e => {
   document.querySelectorAll('#range button').forEach(x => x.setAttribute('aria-pressed', x === b));
   render();
 };
+/* tutorial */
+const TUT = [
+  ['Números do topo', 'Visitas, cliques nos seus links, taxa de clique (cliques ÷ visitas) e cupons copiados. A seta compara com o período anterior.'],
+  ['Escolher o período', 'Use Hoje, 7, 30 ou 90 dias. No gráfico, arraste para escolher um período específico ou clique em um dia.'],
+  ['Filtrar clicando', 'Clique em um card, na origem (Instagram, WhatsApp…), no dispositivo, em um horário ou em um dia da semana. Os números e o gráfico se ajustam. Clique de novo, ou em "Limpar filtros", para voltar.'],
+  ['Gráfico de dias', 'Passe o mouse (ou toque) para ver os valores do dia. Clique em "Visitas" ou "Cliques" na legenda para esconder uma linha.'],
+  ['Desempenho por card', 'Mostra quais botões e ofertas mais geram clique e cupom. Use para destacar o que funciona.'],
+  ['Sua página', '"Abrir página" mostra como seus clientes veem. "Copiar link" copia o endereço para colocar na bio.'],
+  ['CSV e limpar dados', '"CSV" baixa os números do período. "Limpar dados" apaga as visitas e cliques registrados e não pode ser desfeito.']
+];
+function showHelp() {
+  if (document.querySelector('.modal')) return;
+  const m = document.createElement('div'); m.className = 'modal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+  m.innerHTML = `<div class="dlg wide"><h3>Como usar o painel</h3><ul class="tut">${TUT.map(([t, d]) => `<li><b>${esc(t)}</b>${esc(d)}</li>`).join('')}</ul><div class="row2"><button type="button" class="btn pri" data-r="1">Entendi</button></div></div>`;
+  const done = () => { m.remove(); document.removeEventListener('keydown', kd); };
+  const kd = e => { if (e.key === 'Escape') done(); };
+  document.addEventListener('keydown', kd);
+  m.onclick = e => { if (e.target === m || e.target.closest('[data-r]')) done(); };
+  document.body.append(m); m.querySelector('[data-r]').focus();
+}
+$('#help').onclick = showHelp;
+
 /* interações estilo BI */
 const act = t => {
   let h;
