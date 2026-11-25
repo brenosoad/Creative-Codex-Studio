@@ -320,7 +320,12 @@
   .cv .card.dt-after { box-shadow: 8px 0 0 var(--orange-2); }
   body.cv [data-f] { cursor: text; }
   body.cv [data-f]:hover { outline: 1px dashed rgba(255,255,255,.55); outline-offset: 3px; border-radius: 4px; }
-  body.cv [data-f][contenteditable] { outline: 2px solid #8B7CFF; outline-offset: 3px; border-radius: 4px; cursor: text; user-select: text; -webkit-user-select: text; }
+  body.cv [data-f][contenteditable] { white-space: pre-wrap; outline: 2px solid #8B7CFF; outline-offset: 3px; border-radius: 4px; cursor: text; user-select: text; -webkit-user-select: text; }
+  .cv-tx { position: fixed; z-index: 50; display: flex; gap: 4px; padding: 4px; border-radius: 10px; background: rgba(0,0,0,.88); backdrop-filter: blur(6px); transform: translateY(-100%); margin-top: -8px; }
+  .cv-tx button { background: transparent; color: #fff; border: 0; border-radius: 7px; min-width: 30px; height: 28px; padding: 0 8px; font: 700 12px system-ui, sans-serif; cursor: pointer; }
+  .cv-tx button:hover { background: rgba(255,255,255,.16); }
+  .cv-tx i { width: 1px; background: rgba(255,255,255,.2); margin: 3px 2px; }
+  .cv-tx span { color: rgba(255,255,255,.7); font: 600 11px system-ui, sans-serif; align-self: center; padding: 0 6px; }
   .cv-bar { position: absolute; top: 8px; right: 8px; z-index: 6; display: flex; gap: 4px; padding: 4px; border-radius: 10px; background: rgba(0,0,0,.78); backdrop-filter: blur(6px); }
   .cv-bar button { all: unset; cursor: pointer; font: 700 12px/1 system-ui, sans-serif; color: #fff; padding: 7px 9px; border-radius: 7px; min-width: 28px; text-align: center; }
   .cv-bar button:hover { background: rgba(255,255,255,.18); }
@@ -409,10 +414,12 @@
     const code = c => c.cupom
       ? `<button class="code" type="button" data-code="${esc(c.cupom)}"><span>${esc(c.cupom)}</span><span class="lbl">Copiar</span></button>` : '';
     const go = (c, extra = '') => c.link
-      ? `<a class="go ${extra}" href="${esc(url(c.link))}" target="_blank" rel="noopener" data-f="botao">${esc(c.botao || 'Abrir')}</a>` : '';
+      ? `<a class="go ${extra}" href="${esc(url(c.link))}" target="_blank" rel="noopener" data-f="botao"${zk(c.id, 'botao')}>${esc(c.botao || 'Abrir')}</a>` : '';
 
     const MODE = matchMedia('(min-width: 760px)').matches ? 'pc' : 'cel';
     const LY = cfg.layout?.[MODE] || {}, WM = LY.larg || {};
+    const nl = t => esc(t).replace(/\n/g, '<br>');
+    const zk = (id, f) => { const k = +cfg.tamanhos?.[id + '.' + f]; return k && k !== 1 ? ` style="zoom:${k}"` : ''; };
     const wa = c => ((WM[c.id] || c._w) ? ` data-w="${esc(WM[c.id] || c._w)}"` : '');
     const al = c => (c.alinhar === 'centro' || c.alinhar === 'direita' ? ' al-' + c.alinhar : '');
     const card = c => {
@@ -421,25 +428,25 @@
         <article class="card hero${al(c)} reveal" id="hero" data-id="${id}">
           <div class="img">${img(c, false)}</div>
           <div class="content">
-            ${c.kicker ? `<span class="kicker" data-f="kicker">${esc(c.kicker)}</span>` : ''}
-            <h2 data-f="titulo">${esc(c.titulo)}</h2>
-            ${c.cta ? `<span class="cta"><span data-f="cta">${esc(c.cta)}</span> ${ARROW}</span>` : ''}
+            ${c.kicker ? `<span class="kicker" data-f="kicker"${zk(c.id, 'kicker')}>${nl(c.kicker)}</span>` : ''}
+            <h2 data-f="titulo"${zk(c.id, 'titulo')}>${nl(c.titulo)}</h2>
+            ${c.cta ? `<span class="cta"><span data-f="cta"${zk(c.id, 'cta')}>${esc(c.cta)}</span> ${ARROW}</span>` : ''}
           </div>
           <a class="link" target="_blank" rel="noopener" aria-label="${esc(c.aria || c.cta || c.titulo)}" href="${esc(url(c.link))}"></a>
         </article>`;
       if (c.tipo === 'destaque') return `
         <article class="card growth${al(c)} reveal"${cat}${wa(c)} data-id="${id}">
-          <div class="brand" data-f="marca">${esc(c.marca)}</div>
-          <div class="big"><span data-f="valor">${esc(c.valor)}</span><small data-f="sufixo">${esc(c.sufixo)}</small></div>
-          <p data-f="texto">${esc(c.texto)}</p>
+          <div class="brand" data-f="marca"${zk(c.id, 'marca')}>${esc(c.marca)}</div>
+          <div class="big"><span data-f="valor"${zk(c.id, 'valor')}>${esc(c.valor)}</span><small data-f="sufixo"${zk(c.id, 'sufixo')}>${esc(c.sufixo)}</small></div>
+          <p data-f="texto"${zk(c.id, 'texto')}>${nl(c.texto)}</p>
           <div class="actions">${code(c)}${go(c)}</div>
         </article>`;
       return `
         <article class="card partner${c.claro ? ' light' : ''}${c.imagem ? '' : ' noimg'}${c._last ? ' lastp' : ''}${al(c)} reveal"${cat}${wa(c)} data-id="${id}">
-          <div class="img">${img(c, true)}${c.selo ? `<span class="badge" data-f="selo">${esc(c.selo)}</span>` : ''}</div>
+          <div class="img">${img(c, true)}${c.selo ? `<span class="badge" data-f="selo"${zk(c.id, 'selo')}>${esc(c.selo)}</span>` : ''}</div>
           <div class="body">
-            <h3 data-f="titulo">${esc(c.titulo)}</h3>
-            <p data-f="texto">${esc(c.texto)}</p>
+            <h3 data-f="titulo"${zk(c.id, 'titulo')}>${nl(c.titulo)}</h3>
+            <p data-f="texto"${zk(c.id, 'texto')}>${nl(c.texto)}</p>
             <div class="actions">${code(c)}${go(c, c.cupom ? '' : 'full' + (c.destaqueBotao ? ' accent' : ''))}</div>
           </div>
         </article>`;
@@ -452,8 +459,8 @@
       <header class="top reveal">
         <h1 class="sr-only">${esc(cfg.nome)}</h1>
         ${cfg.logo?.arquivo ? `<div class="logo"><img src="${esc(asset(cfg.logo.arquivo))}"${cfg.logo.w ? ` width="${+cfg.logo.w}" height="${+cfg.logo.h}"` : ''} alt="${esc(cfg.nome)}" decoding="async"></div>` : ''}
-        ${cfg.tagline ? `<p class="tagline" data-f="tagline" data-raw="${esc(cfg.tagline)}">${esc(cfg.tagline).replace(/\{([^}]+)\}/g, '<em>$1</em>')}</p>` : ''}
-        ${cfg.numeros?.length ? `<div class="stats" aria-label="Números do perfil">${cfg.numeros.map((n, i) => `<div class="stat"><b data-f="numeros.${i}.valor">${esc(n.valor)}</b><span data-f="numeros.${i}.rotulo">${esc(n.rotulo)}</span></div>`).join('')}</div>` : ''}
+        ${cfg.tagline ? `<p class="tagline" data-f="tagline" data-raw="${esc(cfg.tagline)}"${zk('topo', 'tagline')}>${nl(cfg.tagline).replace(/\{([^}]+)\}/g, '<em>$1</em>')}</p>` : ''}
+        ${cfg.numeros?.length ? `<div class="stats" aria-label="Números do perfil">${cfg.numeros.map((n, i) => `<div class="stat"><b data-f="numeros.${i}.valor"${zk('topo', 'numeros' + i + 'valor')}>${esc(n.valor)}</b><span data-f="numeros.${i}.rotulo"${zk('topo', 'numeros' + i + 'rotulo')}>${esc(n.rotulo)}</span></div>`).join('')}</div>` : ''}
       </header>
       ${usedCats.length > 1 ? `<nav class="filters reveal" aria-label="Filtrar">
         <button class="chip" type="button" data-filter="todos" aria-pressed="true">Todos</button>
@@ -599,23 +606,40 @@
   function initCanvas() {
     let drag = null, drop = null;
     const clear = () => $$('.dt-before,.dt-after,.dragging').forEach(x => x.classList.remove('dt-before', 'dt-after', 'dragging'));
-    let EDIT = null;
+    let EDIT = null, TX = null, K = 1, K0 = 1;
+    const szKey = el => { const c = el.closest('.cards > .card'); return (c ? c.dataset.id : 'topo') + '.' + el.dataset.f.replace(/\./g, ''); };
+    const killTx = () => { TX?.remove(); TX = null; };
     const endEdit = (save, el) => {
-      if (EDIT !== el) return; EDIT = null;
-      const v = el.textContent.replace(/\s+/g, ' ').trim(), old = el.dataset.old;
+      if (EDIT !== el) return; EDIT = null; killTx();
+      const v = (el.innerText || '').replace(/\r/g, '').replace(/[ \t]+/g, ' ').replace(/ ?\n ?/g, '\n').replace(/\n{3,}/g, '\n\n').trim(), old = el.dataset.old;
       el.removeAttribute('contenteditable'); const card = el.closest('.cards > .card'); if (card) card.draggable = CANVAS;
-      if (save && v !== old) post({ type: 'bb-text', id: card ? card.dataset.id : '', f: el.dataset.f, v });
-      else el.textContent = el.dataset.f === 'tagline' ? el.dataset.raw.replace(/\{([^}]+)\}/g, '$1') : old;
+      const kk = save && K !== K0;
+      if (save && (v !== old || kk)) post({ type: 'bb-text', id: card ? card.dataset.id : '', f: el.dataset.f, v, k: K, key: szKey(el) });
+      else { el.style.zoom = K0 === 1 ? '' : K0; el.innerHTML = el.dataset.f === 'tagline' ? esc(el.dataset.raw).replace(/\n/g, '<br>').replace(/\{([^}]+)\}/g, '<em>$1</em>') : esc(old).replace(/\n/g, '<br>'); }
     };
+    const ins = t => document.execCommand('insertText', false, t);
     const startEdit = el => {
       if (EDIT === el) return; if (EDIT) endEdit(true, EDIT);
-      EDIT = el; const raw = el.dataset.f === 'tagline' ? el.dataset.raw : el.textContent;
-      el.dataset.old = raw; el.textContent = raw;
+      EDIT = el; const raw = el.dataset.f === 'tagline' ? el.dataset.raw : (el.innerText || el.textContent).replace(/\n$/, '');
+      el.dataset.old = raw; el.textContent = raw; K = K0 = +(el.style.zoom || 1) || 1;
       const card = el.closest('.cards > .card'); if (card) card.draggable = false;
       el.setAttribute('contenteditable', 'plaintext-only'); if (el.contentEditable !== 'plaintext-only') el.contentEditable = 'true';
       el.focus(); const r = document.createRange(); r.selectNodeContents(el); r.collapse(false); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(r);
       el.onblur = () => endEdit(true, el);
-      el.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } else if (e.key === 'Escape') { e.preventDefault(); endEdit(false, el); el.blur(); } e.stopPropagation(); };
+      el.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); el.blur(); } else if (e.key === 'Enter') { e.preventDefault(); ins('\n'); } else if (e.key === 'Escape') { e.preventDefault(); endEdit(false, el); el.blur(); } e.stopPropagation(); };
+      /* barra: tamanho, destaque e quebra de linha */
+      killTx(); TX = document.createElement('div'); TX.className = 'cv-tx';
+      const lbl = () => Math.round(K * 100) + '%';
+      TX.innerHTML = `<button type="button" data-tx="-" title="Diminuir texto">A−</button><span>${lbl()}</span><button type="button" data-tx="+" title="Aumentar texto">A+</button><i></i><button type="button" data-tx="br" title="Quebrar linha aqui (Shift+Enter)">↵ Linha</button>${el.dataset.f === 'tagline' ? '<button type="button" data-tx="em" title="Destacar a palavra selecionada com a cor da marca">Destaque</button>' : ''}`;
+      const rc = el.getBoundingClientRect(); TX.style.left = Math.max(6, Math.min(innerWidth - 230, rc.left)) + 'px'; TX.style.top = Math.max(44, rc.top) + 'px';
+      TX.addEventListener('mousedown', e => e.preventDefault());
+      TX.addEventListener('click', e => {
+        const t = e.target.closest('[data-tx]')?.dataset.tx; if (!t) return;
+        if (t === '-' || t === '+') { K = Math.max(.5, Math.min(2.5, Math.round((K + (t === '+' ? .1 : -.1)) * 100) / 100)); el.style.zoom = K === 1 ? '' : K; TX.querySelector('span').textContent = lbl(); }
+        else if (t === 'br') ins('\n');
+        else if (t === 'em') { const x = getSelection().rangeCount ? getSelection().getRangeAt(0).toString() : ''; if (x && !/[{}]/.test(x)) ins('{' + x + '}'); }
+      });
+      document.body.append(TX);
     };
     document.addEventListener('click', e => {
       if (!CANVAS) return;

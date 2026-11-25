@@ -407,7 +407,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="box ed-form" id="edForm"><p class="empty">Escolha um cliente na lista ou crie um novo.</p></div>
     <aside class="ed-prev">
       <div class="prev-bar"><h2>Prévia</h2><div class="seg" id="prevMode" role="group" aria-label="Tamanho da prévia"><button type="button" data-m="cel" aria-pressed="true">Celular</button><button type="button" data-m="pc" aria-pressed="false">PC</button></div><button type="button" class="btn sm" id="cvToggle" aria-pressed="false">Organizar na página</button><a class="btn" id="edOpen" href="#" target="_blank" rel="noopener" hidden>Abrir página ↗</a></div>
-      <div class="cvhint" id="cvHint" hidden><p class="mut">Arraste os cards para reordenar. Clique em um card para escolher a largura. <b>Clique em um texto para editar</b> (Enter confirma, Esc cancela). <b>Celular e PC são organizados separadamente.</b></p><button type="button" class="btn sm" id="cvReset">Restaurar organização do Celular</button></div>
+      <div class="cvhint" id="cvHint" hidden><p class="mut">Arraste os cards para reordenar. Clique em um card para escolher a largura. <b>Clique em um texto para editar</b>: tamanho (A−/A+), quebra de linha (Shift+Enter) e destaque de palavra. Enter confirma, Esc cancela. <b>Celular e PC são organizados separadamente.</b></p><button type="button" class="btn sm" id="cvReset">Restaurar organização do Celular</button></div>
       <div class="phone"><iframe id="edFrame" title="Prévia da página" src="about:blank"></iframe></div>
     </aside>
   </div>
@@ -866,7 +866,7 @@ function renderForm() {
   box.innerHTML = `
     <button type="button" class="btn sm backb" data-act="back">← Voltar</button>
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap"><h2 style="font-size:15px;color:#fff;letter-spacing:0;text-transform:none">${esc(c.nome || 'Novo cliente')} <span class="mut" style="font-weight:500">/${esc(ed.slug)}</span></h2><span class="dirty" id="edDirty" ${ed.dirty ? '' : 'hidden'}>● alterações não salvas</span></div>
-    ${SEC('geral', 'Geral', `${T('Nome do cliente', 'nome', { max: 80 })}${T('Título da aba do navegador', 'titulo', { max: 120 })}${T('Descrição (compartilhamento)', 'descricao', { area: 1, max: 300 })}${T('Frase de destaque', 'tagline', { max: 160, hint: 'Use {chaves} para destacar uma palavra com a cor da marca. Ex.: Mostrando o que há de {melhor}.' })}`)}
+    ${SEC('geral', 'Geral', `${T('Nome do cliente', 'nome', { max: 80 })}${T('Título da aba do navegador', 'titulo', { max: 120 })}${T('Descrição (compartilhamento)', 'descricao', { area: 1, max: 300 })}${T('Frase de destaque', 'tagline', { area: 1, max: 160, hint: 'Use {chaves} para destacar uma palavra com a cor da marca. Enter quebra a linha. Ex.: Mostrando o que há de {melhor}.' })}`)}
     ${SEC('visual', 'Visual', `<div class="f"><span>Cores</span><div class="colors"><label class="f"><span>Destaque</span><input type="color" data-p="tema.cor" value="${esc(c.tema?.cor || '#6C4DF6')}"></label><label class="f"><span>Destaque 2</span><input type="color" data-p="tema.cor2" value="${esc(c.tema?.cor2 || '#8B7CFF')}"></label><label class="f"><span>Fundo</span><input type="color" data-p="tema.fundo" value="${esc(c.tema?.fundo || '#0D0B1A')}"></label></div></div>${IMG('Logo', 'logo.arquivo', 'logo', 'PNG com fundo transparente, de preferência branca ou clara.')}${IMG('Ícone da aba (favicon)', 'favicon', 'favicon', 'Imagem quadrada. Vira PNG 192×192.')}${IMG('Imagem de compartilhamento', 'og', 'og', '1200×630. Aparece quando o link é enviado no WhatsApp.')}`)}
     ${SEC('numeros', 'Números do perfil', `${nums || '<p class="mut">Nenhum número. Exemplo: +97 mil / Seguidores.</p>'}${(c.numeros || []).length < 4 ? '<button type="button" class="btn sm" data-act="addnum" style="justify-self:start">+ Adicionar número</button>' : ''}`)}
     ${SEC('filtros', 'Filtros', `${cats || '<p class="mut">Sem filtros. Crie filtros (Cupons, Vídeos…) para separar os cards.</p>'}${Object.keys(c.categorias || {}).length < 8 ? '<div style="display:flex;gap:8px"><input type="text" id="newCat" maxlength="30" placeholder="Novo filtro (ex.: Cupons)" style="flex:1;background:var(--card);color:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit"><button type="button" class="btn sm" data-act="addcat">Adicionar</button></div>' : ''}`)}
@@ -1091,6 +1091,7 @@ addEventListener('message', e => {
     if (d.id) { if (i < 0 || !/^(kicker|titulo|texto|botao|cta|selo|marca|valor|sufixo)$/.test(f)) return; setP(c.cards[i], f, v); }
     else if (f === 'tagline' || /^numeros\.\d+\.(valor|rotulo)$/.test(f)) { if (f !== 'tagline' && !getP(c, f.replace(/\.[^.]+$/, ''))) return; setP(c, f, v); }
     else return;
+    if (d.key && /^[A-Za-z0-9_-]{1,40}\.[A-Za-z0-9]{1,40}$/.test(d.key)) { const k = Math.round(+d.k * 100) / 100; const t = (c.tamanhos ||= {}); if (k >= .5 && k <= 2.5 && k !== 1) t[d.key] = k; else delete t[d.key]; if (!Object.keys(t).length) delete c.tamanhos; }
     markDirty(); renderForm(); preview(); return;
   }
   if (d.type === 'bb-order') {
