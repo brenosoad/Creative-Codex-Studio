@@ -448,21 +448,45 @@ html.js .hero-foot[data-r].in{transform:translateX(-50%)}
 @media (max-width:1100px){.sis-cta{flex-wrap:wrap}}
 
 /* BLINKBIO */
-.bb{scroll-margin-top:90px}
-.bb-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(2rem,5vw,4.5rem);align-items:center}
-.bb-phone{display:block;max-width:300px;width:100%;margin-inline:auto;border-radius:34px;padding:9px;background:#1a1a24;box-shadow:0 30px 80px -30px rgba(255,106,26,.45),0 0 0 1px rgba(255,255,255,.12);transition:transform .5s var(--ease)}
-.bb-phone:hover{transform:translateY(-6px)}
-.bb-phone img{display:block;width:100%;height:auto;border-radius:26px}
-.bb-for{margin:0 0 .9rem;line-height:1.5;opacity:.9}
-.bb-for b{color:#fff}
-.sis-note a{text-decoration:underline;text-underline-offset:3px}
-@media (max-width:860px){
+.bb{--txt:#fff;--mut:rgba(255,255,255,.78);color:#fff;background:linear-gradient(135deg,#2E1BA8 0%,#4B32D9 55%,#6A55F0 100%);scroll-margin-top:90px;overflow:hidden}
+.bb-head{text-align:center;max-width:46rem;margin:0 auto clamp(2rem,4vw,3.2rem)}
+.bb-logo{display:inline-block;background:#fff;border-radius:16px;padding:12px 22px;margin-bottom:1.5rem;box-shadow:0 14px 40px -14px rgba(10,5,60,.6)}
+.bb-logo img{display:block;height:50px;width:auto;max-width:100%}
+.bb-head .h2{margin:0 0 1rem;color:#fff}
+.bb-head .sub{margin-inline:auto;color:rgba(255,255,255,.85)}
+.bb-grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(2rem,5vw,4.5rem);align-items:center}
+.bb-phones{position:relative;height:clamp(440px,48vw,600px);max-width:440px;width:100%;margin-inline:auto}
+.bb-phone{position:absolute;display:block;width:57%;border-radius:30px;padding:8px;background:#14111f;box-shadow:0 30px 70px -20px rgba(8,4,50,.7),0 0 0 1px rgba(255,255,255,.14);transition:transform .5s var(--ease)}
+.bb-phone img{display:block;width:100%;height:auto;border-radius:23px}
+.bb-phone.p1{left:0;top:0;z-index:2}
+.bb-phone.p2{right:0;top:11%;transform:rotate(5deg)}
+.bb-phone.p1:hover{transform:translateY(-6px)}
+.bb-tiles{list-style:none;margin:0 0 1.4rem;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.bb-t{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:16px}
+.bb-t .i{flex:none;width:24px;height:24px;color:#fff;margin-top:2px}
+.bb-t b{display:block;font-size:1rem;margin-bottom:4px}
+.bb-t span{display:block;font-size:.88rem;line-height:1.45;color:rgba(255,255,255,.82)}
+.bb-for{margin:0 0 1.4rem;line-height:1.5;color:rgba(255,255,255,.9)}
+.bb-steps{list-style:none;margin:0 0 1.6rem;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;counter-reset:s}
+.bb-steps li{counter-increment:s;border-top:2px solid rgba(255,255,255,.35);padding-top:10px}
+.bb-steps li::before{content:counter(s);display:block;font:700 .8rem var(--f-m);color:rgba(255,255,255,.7);margin-bottom:4px}
+.bb-steps b{display:block;font-size:.98rem}
+.bb-steps span{display:block;font-size:.84rem;line-height:1.4;color:rgba(255,255,255,.78)}
+.bb .bb-btn{background:#fff;color:#2E1BA8}
+.bb .bb-ghost{border-color:rgba(255,255,255,.55);color:#fff}
+.bb-note{margin:1rem 0 0;font-size:.85rem;color:rgba(255,255,255,.75)}
+.bb-note a{text-decoration:underline;text-underline-offset:3px}
+@media (max-width:900px){
   .bb-grid{grid-template-columns:1fr}
-  .bb-txt{text-align:center}
-  .bb-txt .eyebrow{justify-content:center}
-  .bb-txt .sub{margin-inline:auto}
-  .bb-txt .sis-list{text-align:left;max-width:30rem;margin-inline:auto}
+  .bb-phones{height:500px;max-width:380px}
+  .bb-side{text-align:center}
+  .bb-tiles{text-align:left}
+  .bb-steps{text-align:left}
+  .sis-cta{justify-content:center}
 }
-.bb-logo{display:inline-block;background:#fff;border-radius:16px;padding:14px 22px;margin-bottom:1.4rem}
-.bb-logo img{display:block;height:54px;width:auto;max-width:100%}
-@media (max-width:860px){.bb-logo img{height:46px}}
+@media (max-width:560px){
+  .bb-tiles{grid-template-columns:1fr}
+  .bb-steps{grid-template-columns:1fr;gap:14px}
+  .bb-phones{height:440px}
+  .bb-side .sis-cta .btn{width:100%}
+}
