@@ -238,6 +238,14 @@ tr.click:hover td{background:var(--card-2)}
 .modal{position:fixed;inset:0;background:rgba(5,4,14,.72);display:grid;place-items:center;padding:16px;z-index:100}
 .modal .dlg{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .helpbtn{width:36px;padding:0;font-weight:800;border-radius:50%}
+.tutd .tvis{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
+.tutd .tvis svg{width:100%;height:auto;display:block}
+.tstep{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--brand-2);margin-bottom:6px}
+.tutd h3{font-size:19px}
+.tutd p{min-height:66px}
+.tdots{display:flex;gap:6px;justify-content:center;margin-bottom:16px}
+.tdots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.tdots i.on{background:var(--brand-2);width:20px;border-radius:4px}
 .tut{list-style:none;padding:0;margin:0 0 14px;display:grid;gap:10px;max-height:60vh;overflow:auto}
 .tut li{color:var(--mut);font-size:13.5px;line-height:1.45}
 .tut b{color:#fff;display:block;font-size:14px;margin-bottom:1px}
@@ -723,25 +731,41 @@ $('#range').onclick = e => {
   document.querySelectorAll('#range button').forEach(x => x.setAttribute('aria-pressed', x === b));
   render();
 };
-/* tutorial */
+/* tutorial passo a passo */
+const V = {
+  kpi: '<svg viewBox="0 0 240 70"><g fill="#1b1838" stroke="#2A2650"><rect x="2" y="8" width="52" height="54" rx="9"/><rect x="62" y="8" width="52" height="54" rx="9"/><rect x="122" y="8" width="52" height="54" rx="9"/><rect x="182" y="8" width="52" height="54" rx="9"/></g><g fill="#fff" font-size="15" font-weight="800" font-family="sans-serif"><text x="12" y="42">1,2k</text><text x="72" y="42">480</text><text x="132" y="42">40%</text><text x="192" y="42">36</text></g><g fill="#9a98b8" font-size="7" font-family="sans-serif"><text x="12" y="24">VISITAS</text><text x="72" y="24">CLIQUES</text><text x="132" y="24">TAXA</text><text x="192" y="24">CUPONS</text></g><g fill="#3ddc97" font-size="8" font-family="sans-serif"><text x="12" y="56">▲ 8%</text><text x="72" y="56">▲ 12%</text></g></svg>',
+  per: '<svg viewBox="0 0 240 70"><rect x="2" y="4" width="236" height="62" rx="10" fill="#1b1838" stroke="#2A2650"/><rect x="104" y="10" width="62" height="50" rx="6" fill="#8B7CFF" opacity=".25"/><polyline points="12,50 40,36 68,42 96,26 124,32 152,18 180,28 208,14 230,22" fill="none" stroke="#8B7CFF" stroke-width="2.5" stroke-linejoin="round"/><polyline points="12,56 40,50 68,52 96,44 124,48 152,40 180,46 208,38 230,42" fill="none" stroke="#ffb547" stroke-width="2.5" stroke-linejoin="round"/></svg>',
+  fil: '<svg viewBox="0 0 240 70"><g font-family="sans-serif" font-size="8.5" font-weight="700"><rect x="6" y="8" width="112" height="24" rx="12" fill="#8B7CFF" opacity=".2" stroke="#8B7CFF"/><text x="16" y="23.5" fill="#fff">Origem: WhatsApp ×</text><rect x="126" y="8" width="88" height="24" rx="12" fill="#8B7CFF" opacity=".2" stroke="#8B7CFF"/><text x="136" y="23.5" fill="#fff">Só sábados ×</text></g><g><rect x="6" y="42" width="80" height="8" rx="4" fill="#8B7CFF"/><rect x="6" y="56" width="50" height="8" rx="4" fill="#8B7CFF" opacity=".3"/><rect x="100" y="42" width="60" height="8" rx="4" fill="#8B7CFF" opacity=".3"/><rect x="100" y="56" width="90" height="8" rx="4" fill="#8B7CFF" opacity=".3"/></g></svg>',
+  card: '<svg viewBox="0 0 240 70"><g font-family="sans-serif" font-size="9" fill="#fff"><text x="8" y="16">Cupom Growth</text><text x="8" y="40">Sorteio mensal</text><text x="8" y="64">Nosso YouTube</text></g><rect x="110" y="8" width="120" height="8" rx="4" fill="#8B7CFF"/><rect x="110" y="32" width="78" height="8" rx="4" fill="#8B7CFF" opacity=".6"/><rect x="110" y="56" width="44" height="8" rx="4" fill="#8B7CFF" opacity=".35"/></svg>',
+  pag: '<svg viewBox="0 0 240 70"><rect x="6" y="14" width="150" height="40" rx="10" fill="#1b1838" stroke="#2A2650"/><text x="18" y="38" fill="#9a98b8" font-size="10" font-family="sans-serif">creativecodex.com.br/…?c=sua-pagina</text><rect x="164" y="14" width="70" height="40" rx="10" fill="#4B32D9"/><text x="176" y="38" fill="#fff" font-size="10" font-weight="700" font-family="sans-serif">Abrir ↗</text></svg>',
+  csv: '<svg viewBox="0 0 240 70"><g font-family="sans-serif" font-size="11" font-weight="700"><rect x="14" y="18" width="90" height="34" rx="10" fill="#1b1838" stroke="#2A2650"/><text x="46" y="39" fill="#fff">CSV</text><rect x="124" y="18" width="104" height="34" rx="10" fill="#1b1838" stroke="#ff6b6b"/><text x="136" y="39" fill="#ff8a8a">Limpar dados</text></g></svg>'
+};
 const TUT = [
-  ['Números do topo', 'Visitas, cliques nos seus links, taxa de clique (cliques ÷ visitas) e cupons copiados. A seta compara com o período anterior.'],
-  ['Escolher o período', 'Use Hoje, 7, 30 ou 90 dias. No gráfico, arraste para escolher um período específico ou clique em um dia.'],
-  ['Filtrar clicando', 'Clique em um card, na origem (Instagram, WhatsApp…), no dispositivo, em um horário ou em um dia da semana. Os números e o gráfico se ajustam. Clique de novo, ou em "Limpar filtros", para voltar.'],
-  ['Gráfico de dias', 'Passe o mouse (ou toque) para ver os valores do dia. Clique em "Visitas" ou "Cliques" na legenda para esconder uma linha.'],
-  ['Desempenho por card', 'Mostra quais botões e ofertas mais geram clique e cupom. Use para destacar o que funciona.'],
-  ['Sua página', '"Abrir página" mostra como seus clientes veem. "Copiar link" copia o endereço para colocar na bio.'],
-  ['CSV e limpar dados', '"CSV" baixa os números do período. "Limpar dados" apaga as visitas e cliques registrados e não pode ser desfeito.']
+  ['Seus números', 'No topo você vê visitas, cliques nos seus links, taxa de clique (cliques ÷ visitas) e cupons copiados. A seta compara com o período anterior.', 'kpi'],
+  ['Escolha o período', 'Use Hoje, 7, 30 ou 90 dias. No gráfico, arraste para escolher um período específico ou clique em um dia. Passe o mouse (ou toque) para ver os valores.', 'per'],
+  ['Filtre clicando', 'Clique em uma origem (Instagram, WhatsApp…), no dispositivo, em um horário ou em um dia da semana. Os números e o gráfico se ajustam. Clique de novo ou em "Limpar filtros" para voltar.', 'fil'],
+  ['Veja o que funciona', 'Em "Desempenho por card" estão os botões e ofertas que mais geram clique e cupom. Clique em um card para ver só ele no gráfico.', 'card'],
+  ['Sua página', '"Abrir página" mostra como seus clientes veem. "Copiar link" copia o endereço para colocar na bio do Instagram.', 'pag'],
+  ['Exportar e limpar', '"CSV" baixa os números do período. "Limpar dados" apaga as visitas e os cliques registrados e não pode ser desfeito.', 'csv']
 ];
 function showHelp() {
   if (document.querySelector('.modal')) return;
-  const m = document.createElement('div'); m.className = 'modal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
-  m.innerHTML = `<div class="dlg wide"><h3>Como usar o painel</h3><ul class="tut">${TUT.map(([t, d]) => `<li><b>${esc(t)}</b>${esc(d)}</li>`).join('')}</ul><div class="row2"><button type="button" class="btn pri" data-r="1">Entendi</button></div></div>`;
+  let i = 0;
+  const m = document.createElement('div'); m.className = 'modal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-label', 'Tutorial');
+  const draw = () => {
+    const [t, d, v] = TUT[i], last = i === TUT.length - 1;
+    m.innerHTML = `<div class="dlg wide tutd"><div class="tvis">${V[v]}</div><div class="tstep">Passo ${i + 1} de ${TUT.length}</div><h3>${esc(t)}</h3><p>${esc(d)}</p><div class="tdots">${TUT.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div><div class="row2"><button type="button" class="btn" data-n="x">${last ? 'Fechar' : 'Pular'}</button>${i ? '<button type="button" class="btn" data-n="-1">Voltar</button>' : ''}<button type="button" class="btn pri" data-n="${last ? 'x' : '1'}">${last ? 'Entendi' : 'Próximo'}</button></div></div>`;
+    m.querySelector('.btn.pri').focus();
+  };
   const done = () => { m.remove(); document.removeEventListener('keydown', kd); };
-  const kd = e => { if (e.key === 'Escape') done(); };
+  const kd = e => { if (e.key === 'Escape') done(); else if (e.key === 'ArrowRight' && i < TUT.length - 1) { i++; draw(); } else if (e.key === 'ArrowLeft' && i) { i--; draw(); } };
   document.addEventListener('keydown', kd);
-  m.onclick = e => { if (e.target === m || e.target.closest('[data-r]')) done(); };
-  document.body.append(m); m.querySelector('[data-r]').focus();
+  m.onclick = e => {
+    if (e.target === m) return done();
+    const b = e.target.closest('[data-n]'); if (!b) return;
+    if (b.dataset.n === 'x') done(); else { i += +b.dataset.n; draw(); }
+  };
+  draw(); document.body.append(m); m.querySelector('.btn.pri').focus();
 }
 $('#help').onclick = showHelp;
 
