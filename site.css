@@ -446,3 +446,20 @@ html.js .hero-foot[data-r].in{transform:translateX(-50%)}
 .sis-tabs button.on{background:#4B32D9;box-shadow:none;color:#fff}
 .sis-tabs button:focus-visible{outline:2px solid #8B7CFF;outline-offset:2px}
 @media (max-width:1100px){.sis-cta{flex-wrap:wrap}}
+
+/* BLINKBIO */
+.bb{scroll-margin-top:90px}
+.bb-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(2rem,5vw,4.5rem);align-items:center}
+.bb-phone{display:block;max-width:300px;width:100%;margin-inline:auto;border-radius:34px;padding:9px;background:#1a1a24;box-shadow:0 30px 80px -30px rgba(255,106,26,.45),0 0 0 1px rgba(255,255,255,.12);transition:transform .5s var(--ease)}
+.bb-phone:hover{transform:translateY(-6px)}
+.bb-phone img{display:block;width:100%;height:auto;border-radius:26px}
+.bb-for{margin:0 0 .9rem;line-height:1.5;opacity:.9}
+.bb-for b{color:#fff}
+.sis-note a{text-decoration:underline;text-underline-offset:3px}
+@media (max-width:860px){
+  .bb-grid{grid-template-columns:1fr}
+  .bb-txt{text-align:center}
+  .bb-txt .eyebrow{justify-content:center}
+  .bb-txt .sub{margin-inline:auto}
+  .bb-txt .sis-list{text-align:left;max-width:30rem;margin-inline:auto}
+}
