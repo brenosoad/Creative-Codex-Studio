@@ -301,6 +301,16 @@
     .growth .big { font-size: 104px; }
   }
 
+  @media (max-width: 759px) {
+    .cards.mcel { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .cards.mcel > .card { grid-column: span 2; }
+    .cards.mcel > .card[data-w=meia] { grid-column: span 1; }
+    .cards.mcel > .card[data-w=meia] h3 { font-size: 16px; }
+    .cards.mcel > .card[data-w=meia] .body { padding: 12px; }
+    .cards.mcel > .card[data-w=meia] .actions { flex-direction: column; }
+    .cards.mcel > .growth[data-w=meia] .big { font-size: 64px; }
+    .cards.mcel > .growth[data-w=meia] { padding: 14px; }
+  }
   /* Modo organizar (prévia do editor) */
   .cv .card { cursor: grab; user-select: none; }
   .cv .card .link { pointer-events: none; }
@@ -352,6 +362,7 @@
   }
 
   function mount(cfg, slug) {
+    curCfg = cfg; curSlug = slug;
     ac?.abort(); io?.disconnect();
     ac = new AbortController();
     const sig = { signal: ac.signal };
@@ -397,7 +408,9 @@
     const go = (c, extra = '') => c.link
       ? `<a class="go ${extra}" href="${esc(url(c.link))}" target="_blank" rel="noopener">${esc(c.botao || 'Abrir')}</a>` : '';
 
-    const wa = c => (['terco', 'meia', 'cheia'].includes(c.largura) ? ` data-w="${c.largura}"` : '');
+    const MODE = matchMedia('(min-width: 760px)').matches ? 'pc' : 'cel';
+    const LY = cfg.layout?.[MODE] || {}, WM = LY.larg || {};
+    const wa = c => (WM[c.id] ? ` data-w="${esc(WM[c.id])}"` : '');
     const al = c => (c.alinhar === 'centro' || c.alinhar === 'direita' ? ' al-' + c.alinhar : '');
     const card = c => {
       const id = esc(c.id), cat = c.cat ? ` data-cat="${esc(c.cat)}"` : '';
@@ -443,9 +456,12 @@
         <button class="chip" type="button" data-filter="todos" aria-pressed="true">Todos</button>
         ${usedCats.map(k => `<button class="chip" type="button" data-filter="${esc(k)}" aria-pressed="false">${esc(cats[k])}</button>`).join('')}
       </nav>` : ''}
-      <section class="cards${(cfg.cards || []).some(c => c.largura) ? ' manual' : ''}">${(() => {
-        const all = [...(cfg.cards || [])];
-        const manual = all.some(c => c.largura);
+      <section class="cards${MODE === 'pc' && Object.keys(WM).length ? ' manual' : ''}${MODE === 'cel' && Object.values(WM).includes('meia') ? ' mcel' : ''}">${(() => {
+        const base = [...(cfg.cards || [])], all = [];
+        const byId = new Map(base.map(c => [c.id, c]));
+        (LY.ordem || []).forEach(i => { if (byId.has(i)) { all.push(byId.get(i)); byId.delete(i); } });
+        byId.forEach(c => all.push(c));
+        const manual = MODE === 'pc' && Object.keys(WM).length > 0;
         let last = -1; all.forEach((c, i) => { if (c.tipo === 'parceiro' && c.imagem) last = i; });
         if (last >= 0 && !manual) all[last] = { ...all[last], _last: true };
         return all.map(card).join('');
@@ -551,7 +567,7 @@
 
   /* Modo organizar: arrastar, escolher largura e selecionar cards na prévia */
   let CANVAS = false, SEL = '';
-  const post = m => parent.postMessage(m, location.origin);
+  const post = m => parent.postMessage({ ...m, m: matchMedia('(min-width: 760px)').matches ? 'pc' : 'cel' }, location.origin);
   function applyCanvas() {
     document.body.classList.toggle('cv', CANVAS);
     $$('.cv-bar').forEach(x => x.remove());
@@ -559,9 +575,9 @@
       c.draggable = CANVAS;
       c.classList.toggle('sel', CANVAS && c.dataset.id === SEL);
       if (CANVAS && c.dataset.id === SEL) {
-        const w = c.dataset.w || '', hero = c.classList.contains('hero');
+        const w = c.dataset.w || '', hero = c.classList.contains('hero'), pc = matchMedia('(min-width: 760px)').matches;
         const b = (a, t, on, title) => `<button type="button" data-cv="${a}" title="${title}" aria-label="${title}"${on ? ' class="on"' : ''}>${t}</button>`;
-        c.insertAdjacentHTML('beforeend', `<div class="cv-bar">${hero ? '' : b('w:terco', '⅓', w === 'terco', 'Largura 1/3') + b('w:meia', '½', w === 'meia', 'Largura 1/2') + b('w:cheia', '▭', w === 'cheia', 'Largura total') + b('w:auto', 'Auto', !w, 'Largura automática') + '<i></i>'}${b('mv:-1', '←', 0, 'Mover para antes')}${b('mv:1', '→', 0, 'Mover para depois')}${b('dup', '⧉', 0, 'Duplicar')}${b('del', '✕', 0, 'Remover')}</div>`);
+        c.insertAdjacentHTML('beforeend', `<div class="cv-bar">${hero ? '' : (pc ? b('w:terco', '⅓', w === 'terco', 'Largura 1/3') : '') + b('w:meia', '½', w === 'meia', 'Meia largura') + b('w:cheia', '▭', w === 'cheia', 'Largura total') + b('w:auto', 'Auto', !w, 'Largura automática') + '<i></i>'}${b('mv:-1', '←', 0, 'Mover para antes')}${b('mv:1', '→', 0, 'Mover para depois')}${b('dup', '⧉', 0, 'Duplicar')}${b('del', '✕', 0, 'Remover')}</div>`);
       }
     });
     $$('.cards img').forEach(i => (i.draggable = false));
@@ -599,6 +615,10 @@
     });
     document.addEventListener('dragend', () => { drag = drop = null; clear(); });
   }
+
+  /* Troca de layout ao cruzar o ponto de quebra (celular <-> PC) */
+  let curCfg = null, curSlug = '';
+  matchMedia('(min-width: 760px)').addEventListener('change', () => { if (curCfg) mount(curCfg, curSlug); });
 
   /* Início */
   if (EMBED) {

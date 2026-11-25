@@ -67,6 +67,24 @@ select,.btn{background:var(--card);color:#fff;border:1px solid var(--line);borde
 /* layout */
 .grid{display:grid;gap:12px;margin-bottom:12px}
 @media(min-width:900px){.g2{grid-template-columns:1fr 1fr}.g32{grid-template-columns:3fr 2fr}.g3{grid-template-columns:repeat(3,1fr)}}
+
+.fbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px;min-height:34px}
+.fbar .hint{font-size:12.5px;color:var(--mut)}
+.fchip{display:inline-flex;align-items:center;gap:6px;background:rgba(139,124,255,.16);border:1px solid var(--brand-2);color:#fff;border-radius:999px;padding:6px 8px 6px 12px;font-size:12.5px;font-weight:600;cursor:pointer}
+.fchip i{font-style:normal;opacity:.8;font-size:14px;line-height:1}
+.fchip:hover{background:rgba(139,124,255,.28)}
+.fclear{background:none;border:0;color:var(--mut);font-size:12.5px;cursor:pointer;text-decoration:underline;padding:6px}
+.ia{cursor:pointer;transition:opacity .15s}
+.ia:hover{filter:brightness(1.15)}
+.ia:focus-visible{outline:2px solid var(--brand-2);outline-offset:2px;border-radius:6px}
+.dim{opacity:.3!important}
+.sel{outline:1px solid var(--brand-2);outline-offset:3px;border-radius:6px}
+.legend button{background:none;border:0;color:var(--mut);font-size:12px;cursor:pointer;padding:2px 4px;border-radius:6px}
+.legend button[aria-pressed=false]{opacity:.4;text-decoration:line-through}
+.wk div.ia{border-radius:8px}
+tr.ia.sel td{background:rgba(139,124,255,.14)}
+.kpi small.seg-tag{color:var(--brand-2)}
+#chart svg{touch-action:pan-y;user-select:none}
 .insights{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .chip{background:var(--card-2);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px}
 .chip b{color:var(--brand-2)}
@@ -193,7 +211,7 @@ tr.click:hover td{background:var(--card-2)}
 .adv>.ed-body{padding-top:4px}
 .prev-bar{flex-wrap:wrap}
 .phone iframe{transform-origin:0 0}
-.cvhint{font-size:12.5px;margin:-2px 0 10px}
+.cvhint{font-size:12.5px;margin:-2px 0 10px;display:grid;gap:8px;justify-items:start}
 .cardp.flash{box-shadow:0 0 0 2px var(--brand-2)}
 .phone.pc{max-width:none;border-radius:14px;height:min(78vh,720px)}
 @media(min-width:1180px){.ed.pcprev{grid-template-columns:minmax(0,5fr) minmax(0,7fr)!important}}
@@ -305,6 +323,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <button data-d="30" aria-pressed="true">30 dias</button>
         <button data-d="90" aria-pressed="false">90 dias</button>
       </div>
+      <a class="btn" id="openPg" href="#" target="_blank" rel="noopener" hidden>Abrir página ↗</a>
+      <button class="btn" id="copyPg" type="button" hidden>Copiar link</button>
       <button class="btn" id="refresh" type="button">Atualizar</button>
       <button class="btn" id="csv" type="button">CSV</button>
       <button class="btn danger" id="wipe" type="button">Limpar dados</button>
@@ -314,13 +334,14 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div id="statsView">
 <p class="upd" id="upd" style="margin:-6px 0 14px"></p>
 
+  <div class="fbar" id="fbar"></div>
   <div class="kpis" id="kpis"></div>
   <div class="insights" id="insights"></div>
 
   <div class="box chart-head-wrap" style="margin-bottom:12px">
     <div class="chart-head">
       <h2>Visitas e cliques por dia</h2>
-      <div class="legend"><span><i style="background:var(--brand-2)"></i>Visitas</span><span><i style="background:var(--amber)"></i>Cliques</span></div>
+      <div class="legend" id="legend"></div>
     </div>
     <div class="chart" id="chart"></div>
   </div>
@@ -372,7 +393,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="box ed-form" id="edForm"><p class="empty">Escolha um cliente na lista ou crie um novo.</p></div>
     <aside class="ed-prev">
       <div class="prev-bar"><h2>Prévia</h2><div class="seg" id="prevMode" role="group" aria-label="Tamanho da prévia"><button type="button" data-m="cel" aria-pressed="true">Celular</button><button type="button" data-m="pc" aria-pressed="false">PC</button></div><button type="button" class="btn sm" id="cvToggle" aria-pressed="false">Organizar na página</button><a class="btn" id="edOpen" href="#" target="_blank" rel="noopener" hidden>Abrir página ↗</a></div>
-      <p class="mut cvhint" id="cvHint" hidden>Arraste os cards para reordenar. Clique em um card para editar e escolher a largura (⅓, ½ ou total).</p>
+      <div class="cvhint" id="cvHint" hidden><p class="mut">Arraste os cards para reordenar. Clique em um card para escolher a largura. <b>Celular e PC são organizados separadamente.</b></p><button type="button" class="btn sm" id="cvReset">Restaurar organização do Celular</button></div>
       <div class="phone"><iframe id="edFrame" title="Prévia da página" src="about:blank"></iframe></div>
     </aside>
   </div>
@@ -466,86 +487,121 @@ const delta = (cur, prev) => {
   return `<small class="${cls}">${d > 0.5 ? '▲' : d < -0.5 ? '▼' : '●'} ${Math.abs(d).toFixed(0)}% vs período anterior</small>`;
 };
 
+/* ---------- filtros interativos ---------- */
+const S = { day: null, wd: null, seg: null, card: null }, hide = { v: false, c: false };
+const NR = { instagram: 'Instagram', whatsapp: 'WhatsApp', direto: 'Direto', facebook: 'Facebook', google: 'Google', tiktok: 'TikTok', youtube: 'YouTube', outros: 'Outros' };
+const WD = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'], WDL = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+const addDays = (d, n) => new Date(Date.parse(d + 'T12:00:00Z') + n * 864e5).toISOString().slice(0, 10);
+const nDays = (a, b) => Math.round((Date.parse(b + 'T12:00:00Z') - Date.parse(a + 'T12:00:00Z')) / 864e5) + 1;
+const wdOf = d => new Date(d + 'T12:00:00Z').getUTCDay();
+const fd = d => d.split('-').reverse().slice(0, 2).join('/');
+const segName = g => g.k === 'ref' ? NR[g.id] || g.id : g.k === 'dev' ? (g.id === 'celular' ? 'Celular' : 'Computador') : g.id + 'h';
+const isCard = x => !S.card || (x.id === S.card.id && x.site === S.card.s);
+const clr = () => { S.day = S.wd = S.seg = S.card = null; };
+const tog = (k, v, eq) => { S[k] = S[k] && eq(S[k], v) ? null : v; render(); };
+
+function fbar() {
+  const ch = [];
+  if (S.day) ch.push(['day', S.day[0] === S.day[1] ? `Dia ${fd(S.day[0])}` : `${fd(S.day[0])} → ${fd(S.day[1])}`]);
+  if (S.wd != null) ch.push(['wd', 'Só ' + WDL[S.wd] + 's']);
+  if (S.seg) ch.push(['seg', ({ ref: 'Origem', dev: 'Dispositivo', hr: 'Horário' })[S.seg.k] + ': ' + segName(S.seg)]);
+  if (S.card) ch.push(['card', 'Card: ' + cardName(S.card.s, S.card.id)]);
+  $('#fbar').innerHTML = ch.length
+    ? ch.map(([k, t]) => `<button type="button" class="fchip" data-f="${k}" title="Remover filtro">${esc(t)} <i>×</i></button>`).join('') + '<button type="button" class="fclear" data-f="all">Limpar filtros</button>'
+    : '<span class="hint">Clique nos gráficos para filtrar · arraste no gráfico de dias para escolher um período</span>';
+}
+
+const pageUrl = () => site ? new URL(`${location.pathname.replace(/painel\/?(index\.html)?$/, '')}?c=${encodeURIComponent(site)}`, location.origin).href : '';
+function pageLink() { const u = pageUrl(); $('#openPg').hidden = $('#copyPg').hidden = !u; if (u) $('#openPg').href = u; }
+$('#copyPg').onclick = async () => { const u = pageUrl(); try { await navigator.clipboard.writeText(u); ptoast('Link copiado: ' + u); } catch { prompt('Copie o link:', u); } };
+
 /* ---------- render ---------- */
 function render() {
-  const to = dayOf(0), from = dayOf(days - 1), pFrom = dayOf(days * 2 - 1), pTo = dayOf(days);
-  const r = inRange(from, to), p = inRange(pFrom, pTo);
-  const v = sum(r, 'page_view'), c = sum(r, 'abrir_link'), k = sum(r, 'copiar_cupom');
-  const pv = sum(p, 'page_view'), pc = sum(p, 'abrir_link'), pk = sum(p, 'copiar_cupom');
-  const ctr = pct(c, v), pctr = pct(pc, pv);
+  const bTo = dayOf(0), bFrom = dayOf(days - 1);
+  const [from, to] = S.day || [bFrom, bTo], n = nDays(from, to), pFrom = addDays(from, -n), pTo = addDays(from, -1);
+  const wf = r => (S.wd == null ? r : r.filter(x => wdOf(x.day) === S.wd));
+  const r = wf(inRange(from, to)), p = wf(inRange(pFrom, pTo));
+  const vis = rr => S.seg ? sum(rr, S.seg.k, S.seg.id) : sum(rr, 'page_view');
+  const clk = rr => rr.reduce((a, x) => a + (x.event === 'abrir_link' && isCard(x) ? x.n : 0), 0);
+  const cup = rr => rr.reduce((a, x) => a + (x.event === 'copiar_cupom' && isCard(x) ? x.n : 0), 0);
+  const v = vis(r), c = clk(r), k = cup(r), pv = vis(p), pc = clk(p), pk = cup(p);
+  const tv = sum(r, 'page_view'), ptv = sum(p, 'page_view'), ctr = pct(c, tv), pctr = pct(pc, ptv);
+  fbar(); pageLink();
 
+  const tag = (on, t) => on ? ` <small class="seg-tag">· ${esc(t)}</small>` : '';
   $('#kpis').innerHTML = [
-    ['Visitas', nf(v), delta(v, pv)],
-    ['Cliques em links', nf(c), delta(c, pc)],
+    ['Visitas' + tag(S.seg, S.seg ? segName(S.seg) : ''), nf(v), delta(v, pv)],
+    ['Cliques em links' + tag(S.card, S.card ? cardName(S.card.s, S.card.id) : ''), nf(c), delta(c, pc)],
     ['Taxa de clique', ctr.toFixed(1).replace('.', ',') + '%', delta(ctr, pctr)],
     ['Cupons copiados', nf(k), delta(k, pk)]
   ].map(([l, n, d]) => `<div class="box kpi"><h2>${l}</h2><b>${n}</b>${d}</div>`).join('');
 
-  // por dia
-  const seq = [];
-  for (let i = days - 1; i >= 0; i--) { const d = dayOf(i); const rr = r.filter(x => x.day === d); seq.push({ d, v: sum(rr, 'page_view'), c: sum(rr, 'abrir_link') }); }
+  // por dia (contexto do período inteiro; a seleção aparece como faixa)
+  const rp = inRange(bFrom, bTo), seq = [];
+  for (let i = days - 1; i >= 0; i--) { const d = dayOf(i), rr = rp.filter(x => x.day === d); seq.push({ d, v: vis(rr), c: clk(rr), on: S.wd == null || wdOf(d) === S.wd }); }
   chart(seq);
 
   // cards
   const byCard = {}, copies = {};
   r.forEach(x => {
     if (x.event !== 'abrir_link' && x.event !== 'copiar_cupom') return;
-    const k = (site ? '' : x.site + '|') + x.id, t = x.event === 'abrir_link' ? byCard : copies;
-    t[k] = (t[k] || 0) + x.n;
+    const kk = x.site + '|' + x.id, t = x.event === 'abrir_link' ? byCard : copies;
+    t[kk] = (t[kk] || 0) + x.n;
   });
-  const lab = k => { const [a, b] = k.includes('|') ? k.split('|') : [site, k]; return { n: cardName(a, b), c: site ? '' : (conf[a]?.nome || a) }; };
+  const lab = kk => { const [a, b] = kk.split('|'); return { n: cardName(a, b), c: site ? '' : (conf[a]?.nome || a) }; };
   const list = Object.entries(byCard).sort((a, b) => b[1] - a[1]);
-  const mx = list[0]?.[1] || 1;
+  const ct = list.reduce((a, x) => a + x[1], 0), mx = list[0]?.[1] || 1;
+  const cs = S.card ? S.card.s + '|' + S.card.id : '';
   $('#cards').innerHTML = list.length
     ? `<div class="scroll"><table><thead><tr><th>Card</th><th>Cliques</th><th>% do total</th><th>Cupons</th></tr></thead><tbody>${list.map(([id, n]) =>
-      `<tr><td>${esc(lab(id).n)}${lab(id).c ? ` <span class="mut" style="font-weight:500">· ${esc(lab(id).c)}</span>` : ''}<div class="bar"><i style="width:${n / mx * 100}%"></i></div></td><td>${nf(n)}</td><td>${pct(n, c).toFixed(0)}%</td><td>${copies[id] ? nf(copies[id]) : '–'}</td></tr>`).join('')}</tbody></table></div>`
+      `<tr class="ia${id === cs ? ' sel' : cs ? ' dim' : ''}" data-card="${esc(id)}" tabindex="0" role="button" aria-pressed="${id === cs}"><td>${esc(lab(id).n)}${lab(id).c ? ` <span class="mut" style="font-weight:500">· ${esc(lab(id).c)}</span>` : ''}<div class="bar"><i style="width:${n / mx * 100}%"></i></div></td><td>${nf(n)}</td><td>${pct(n, ct).toFixed(0)}%</td><td>${copies[id] ? nf(copies[id]) : '–'}</td></tr>`).join('')}</tbody></table></div>`
     : '<p class="empty">Sem cliques no período.</p>';
 
-  // origem
-  const NR = { instagram: 'Instagram', whatsapp: 'WhatsApp', direto: 'Direto', facebook: 'Facebook', google: 'Google', tiktok: 'TikTok', youtube: 'YouTube', outros: 'Outros' };
-  bars('#refs', group(r, 'ref'), id => NR[id] || id, 'Sem dados de origem ainda.');
-  bars('#devs', group(r, 'dev'), id => id === 'celular' ? 'Celular' : 'Computador', 'Sem dados ainda.');
+  // origem / dispositivo
+  bars('#refs', group(r, 'ref'), id => NR[id] || id, 'Sem dados de origem ainda.', 'ref');
+  bars('#devs', group(r, 'dev'), id => id === 'celular' ? 'Celular' : 'Computador', 'Sem dados ainda.', 'dev');
 
   // horas
   const hr = group(r, 'hr'), hv = Array.from({ length: 24 }, (_, i) => hr[String(i).padStart(2, '0')] || 0), hm = Math.max(...hv);
+  const hs = S.seg?.k === 'hr' ? S.seg.id : '';
   $('#hours').innerHTML = hm
-    ? `<div class="hours">${hv.map((n, i) => `<i class="${n === hm ? 'max' : ''}" style="height:${n / hm * 100}%" title="${i}h: ${n}"></i>`).join('')}</div><div class="hl"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span></div>`
+    ? `<div class="hours">${hv.map((n, i) => { const id = String(i).padStart(2, '0'); return `<i class="ia${n === hm ? ' max' : ''}${hs ? (hs === id ? ' sel' : ' dim') : ''}" data-hr="${id}" style="height:${n / hm * 100}%" title="${i}h: ${n}" tabindex="0" role="button" aria-label="${i}h: ${n} visitas"></i>`; }).join('')}</div><div class="hl"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span></div>`
     : '<p class="empty">Sem dados de horário ainda.</p>';
 
-  // dia da semana
+  // dia da semana (visitas, sem o filtro de dia da semana para servir de seletor)
   const wd = Array(7).fill(0);
-  r.filter(x => x.event === 'page_view').forEach(x => { wd[new Date(x.day + 'T12:00:00Z').getUTCDay()] += x.n; });
+  inRange(from, to).filter(x => x.event === 'page_view').forEach(x => { wd[wdOf(x.day)] += x.n; });
   const wm = Math.max(...wd);
   $('#wk').innerHTML = wm
-    ? `<div class="wk">${['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((l, i) => `<div title="${nf(wd[i])}"><i style="background:rgba(139,124,255,${(0.12 + 0.88 * wd[i] / wm).toFixed(2)})"></i>${l}</div>`).join('')}</div>`
+    ? `<div class="wk">${WD.map((l, i) => `<div class="ia${S.wd === i ? ' sel' : S.wd != null ? ' dim' : ''}" data-wd="${i}" title="${nf(wd[i])} visitas" tabindex="0" role="button" aria-pressed="${S.wd === i}"><i style="background:rgba(139,124,255,${(0.12 + 0.88 * wd[i] / wm).toFixed(2)})"></i>${l}</div>`).join('')}</div>`
     : '<p class="empty">Sem dados.</p>';
 
   // clientes
   $('#clientsBox').hidden = !!site || sites.length < 2;
   if (!site) {
     $('#clients').innerHTML = `<div class="scroll"><table><thead><tr><th>Cliente</th><th>Visitas</th><th>Cliques</th><th>CTR</th><th>Variação</th><th class="hide-s">Tendência</th></tr></thead><tbody>${sites.map(s => {
-      const rs = inRange(from, to, s), ps = inRange(pFrom, pTo, s);
+      const rs = wf(inRange(from, to, s)), ps = wf(inRange(pFrom, pTo, s));
       const sv = sum(rs, 'page_view'), sc = sum(rs, 'abrir_link'), spv = sum(ps, 'page_view');
       const d = spv ? (sv - spv) / spv * 100 : 0;
-      const pts = []; for (let i = days - 1; i >= 0; i--) pts.push(sum(rs.filter(x => x.day === dayOf(i)), 'page_view'));
+      const pts = []; for (let i = n - 1; i >= 0; i--) pts.push(sum(rs.filter(x => x.day === addDays(to, -i)), 'page_view'));
       return { s, sv, sc, d, spk: spark(pts), nome: conf[s]?.nome || s };
     }).sort((a, b) => b.sv - a.sv).map(o => `<tr class="click" data-s="${esc(o.s)}"><td>${esc(o.nome)}</td><td>${nf(o.sv)}</td><td>${nf(o.sc)}</td><td>${pct(o.sc, o.sv).toFixed(1).replace('.', ',')}%</td><td class="${o.d > .5 ? 'up' : o.d < -.5 ? 'down' : 'flat'}">${o.d > .5 ? '▲' : o.d < -.5 ? '▼' : '●'} ${Math.abs(o.d).toFixed(0)}%</td><td class="hide-s">${o.spk}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
   // destaques
-  const top = list[0], bh = hm ? hv.indexOf(hm) : -1, bd = wm ? ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'][wd.indexOf(wm)] : '';
+  const top = list[0], bh = hm ? hv.indexOf(hm) : -1, bd = wm ? WDL[wd.indexOf(wm)] : '';
   const best = seq.reduce((a, b) => (b.v > a.v ? b : a), { v: -1 });
   const ins = [];
   if (top) ins.push(`Card mais clicado: <b>${esc(lab(top[0]).n)}</b>${lab(top[0]).c ? ' · ' + esc(lab(top[0]).c) : ''}`);
   if (bh >= 0) ins.push(`Melhor horário: <b>${bh}h</b>`);
   if (bd) ins.push(`Melhor dia: <b>${bd}</b>`);
-  if (best.v > 0) ins.push(`Pico: <b>${best.d.split('-').reverse().slice(0, 2).join('/')}</b> com ${nf(best.v)} visitas`);
+  if (best.v > 0) ins.push(`Pico: <b>${fd(best.d)}</b> com ${nf(best.v)} visitas`);
   $('#insights').innerHTML = ins.map(t => `<span class="chip">${t}</span>`).join('');
 }
 
-function bars(sel, obj, label, empty) {
-  const l = Object.entries(obj).sort((a, b) => b[1] - a[1]), t = l.reduce((a, x) => a + x[1], 0);
-  $(sel).innerHTML = l.length ? l.map(([id, n]) => `<div class="row"><div class="top"><span>${esc(label(id))}</span><span>${pct(n, t).toFixed(0)}%</span></div><div class="bar"><i style="width:${pct(n, t)}%"></i></div></div>`).join('') : `<p class="empty">${empty}</p>`;
+function bars(sel, obj, label, empty, k) {
+  const l = Object.entries(obj).sort((a, b) => b[1] - a[1]), t = l.reduce((a, x) => a + x[1], 0), cur = S.seg?.k === k ? S.seg.id : '';
+  $(sel).innerHTML = l.length ? l.map(([id, n]) => `<div class="row ia${cur ? (cur === id ? ' sel' : ' dim') : ''}" data-k="${k}" data-id="${esc(id)}" tabindex="0" role="button" aria-pressed="${cur === id}"><div class="top"><span>${esc(label(id))}</span><span>${pct(n, t).toFixed(0)}%</span></div><div class="bar"><i style="width:${pct(n, t)}%"></i></div></div>`).join('') : `<p class="empty">${empty}</p>`;
 }
 
 function spark(pts) {
@@ -555,37 +611,52 @@ function spark(pts) {
 }
 
 function chart(seq) {
-  const W = 800, H = 230, L = 34, B = 24, T = 10, R = 8;
-  const max = Math.max(1, ...seq.map(s => s.v)), nice = Math.pow(10, Math.floor(Math.log10(max))), top = Math.ceil(max / nice) * nice;
-  const x = i => L + (seq.length < 2 ? 0 : i / (seq.length - 1)) * (W - L - R), y = n => T + (1 - n / top) * (H - T - B);
+  const W = 800, H = 230, L = 34, B = 24, T = 10, R = 8, N = seq.length;
+  const vs = hide.v ? [] : seq.map(s => s.v), cs = hide.c ? [] : seq.map(s => s.c);
+  const max = Math.max(1, ...vs, ...cs), nice = Math.pow(10, Math.floor(Math.log10(max))), top = Math.ceil(max / nice) * nice;
+  const x = i => L + (N < 2 ? 0 : i / (N - 1)) * (W - L - R), y = n => T + (1 - n / top) * (H - T - B);
   const line = key => seq.map((s, i) => `${x(i).toFixed(1)},${y(s[key]).toFixed(1)}`).join(' ');
   const grid = [0, .25, .5, .75, 1].map(f => { const yy = y(top * f); return `<line x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}" stroke="#2A2650" stroke-width="1"/><text x="${L - 6}" y="${yy + 4}" text-anchor="end" fill="#9a98b8" font-size="11">${nf(top * f)}</text>`; }).join('');
-  const step = Math.ceil(seq.length / 7);
-  const xl = seq.map((s, i) => (i % step === 0 || i === seq.length - 1) ? `<text x="${x(i)}" y="${H - 6}" text-anchor="middle" fill="#9a98b8" font-size="11">${s.d.split('-').reverse().slice(0, 2).join('/')}</text>` : '').join('');
-  const area = `${x(0)},${y(0)} ${line('v')} ${x(seq.length - 1)},${y(0)}`;
+  const step = Math.ceil(N / 7);
+  const xl = seq.map((s, i) => (i % step === 0 || i === N - 1) ? `<text x="${x(i)}" y="${H - 6}" text-anchor="middle" fill="#9a98b8" font-size="11">${fd(s.d)}</text>` : '').join('');
+  const area = `${x(0)},${y(0)} ${line('v')} ${x(N - 1)},${y(0)}`;
+  const dots = key => (N <= 45 ? seq.map((s, i) => s.on ? `<circle cx="${x(i).toFixed(1)}" cy="${y(s[key]).toFixed(1)}" r="${S.wd != null ? 3.6 : 2.4}" fill="${key === 'v' ? '#8B7CFF' : '#ffb547'}"/>` : '').join('') : '');
+  const ia = S.day ? seq.findIndex(s => s.d >= S.day[0]) : -1, ib = S.day ? N - 1 - [...seq].reverse().findIndex(s => s.d <= S.day[1]) : -1;
+  const band = ia >= 0 && ib >= ia ? `<rect x="${x(ia) - (N < 2 ? 0 : (W - L - R) / (N - 1) / 2)}" y="${T}" width="${Math.max(6, (ib - ia) * (W - L - R) / Math.max(1, N - 1) + (N < 2 ? 0 : (W - L - R) / (N - 1)))}" height="${H - T - B}" fill="#8B7CFF" opacity=".16" rx="4"/>` : '';
   $('#chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Visitas e cliques por dia">
     <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8B7CFF" stop-opacity=".35"/><stop offset="1" stop-color="#8B7CFF" stop-opacity="0"/></linearGradient></defs>
-    ${grid}${xl}<polygon points="${area}" fill="url(#ga)"/>
-    <polyline points="${line('v')}" fill="none" stroke="#8B7CFF" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
-    <polyline points="${line('c')}" fill="none" stroke="#ffb547" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    ${grid}${xl}${band}${hide.v ? '' : `<polygon points="${area}" fill="url(#ga)"/><polyline points="${line('v')}" fill="none" stroke="#8B7CFF" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>${dots('v')}`}
+    ${hide.c ? '' : `<polyline points="${line('c')}" fill="none" stroke="#ffb547" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>${dots('c')}`}
     <line id="cur" y1="${T}" y2="${H - B}" stroke="#8B7CFF" stroke-width="1" stroke-dasharray="3 3" opacity="0"/>
-    <rect id="hit" x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent"/></svg><div class="tip" id="tip" hidden></div>`;
-  const hit = $('#hit'), svg = $('#chart svg'), tip = $('#tip'), cur = $('#cur');
+    <rect id="brush" y="${T}" height="${H - T - B}" fill="#8B7CFF" opacity="0" rx="4"/>
+    <rect id="hit" x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent" style="cursor:crosshair"/></svg><div class="tip" id="tip" hidden></div>`;
+  $('#legend').innerHTML = `<button type="button" data-lg="v" aria-pressed="${!hide.v}"><i style="background:var(--brand-2)"></i>Visitas${S.seg ? ' · ' + esc(segName(S.seg)) : ''}</button><button type="button" data-lg="c" aria-pressed="${!hide.c}"><i style="background:var(--amber)"></i>Cliques${S.card ? ' · ' + esc(cardName(S.card.s, S.card.id)) : ''}</button>`;
+  const hit = $('#hit'), svg = $('#chart svg'), tip = $('#tip'), cur = $('#cur'), br = $('#brush');
+  const idx = e => { const b = svg.getBoundingClientRect(), px = (e.clientX - b.left) / b.width * W; return Math.max(0, Math.min(N - 1, Math.round((px - L) / (W - L - R) * (N - 1)))); };
+  let i0 = -1, i1 = -1;
+  const paint = () => { const a = Math.min(i0, i1), b = Math.max(i0, i1), hw = N < 2 ? 0 : (W - L - R) / (N - 1) / 2; br.setAttribute('x', x(a) - hw); br.setAttribute('width', x(b) - x(a) + hw * 2); br.setAttribute('opacity', .3); };
   const move = e => {
-    const b = svg.getBoundingClientRect(), px = ((e.clientX ?? e.touches?.[0]?.clientX) - b.left) / b.width * W;
-    const i = Math.max(0, Math.min(seq.length - 1, Math.round((px - L) / (W - L - R) * (seq.length - 1)))), s = seq[i];
+    const i = idx(e), s = seq[i]; i1 = i; if (i0 >= 0) paint();
+    const b = svg.getBoundingClientRect();
     cur.setAttribute('x1', x(i)); cur.setAttribute('x2', x(i)); cur.setAttribute('opacity', 1);
-    tip.hidden = false; tip.style.left = (x(i) / W * b.width) + 'px'; tip.style.top = (y(s.v) / H * b.height) + 'px';
-    tip.innerHTML = `<b>${s.d.split('-').reverse().join('/')}</b>${nf(s.v)} visitas<br>${nf(s.c)} cliques`;
+    tip.hidden = false; tip.style.left = (x(i) / W * b.width) + 'px'; tip.style.top = (y(Math.max(hide.v ? 0 : s.v, hide.c ? 0 : s.c)) / H * b.height) + 'px';
+    tip.innerHTML = `<b>${s.d.split('-').reverse().join('/')} · ${WD[wdOf(s.d)]}</b>${nf(s.v)} visitas<br>${nf(s.c)} cliques${s.v ? `<br>CTR ${pct(s.c, s.v).toFixed(1).replace('.', ',')}%` : ''}`;
   };
-  hit.addEventListener('mousemove', move); hit.addEventListener('touchmove', move, { passive: true });
-  hit.addEventListener('mouseleave', () => { tip.hidden = true; cur.setAttribute('opacity', 0); });
+  hit.addEventListener('pointerdown', e => { i0 = i1 = idx(e); hit.setPointerCapture(e.pointerId); paint(); });
+  hit.addEventListener('pointermove', move);
+  hit.addEventListener('pointerup', e => {
+    if (i0 < 0) return; const a = Math.min(i0, i1), b = Math.max(i0, i1); i0 = -1;
+    const nd = [seq[a].d, seq[b].d];
+    S.day = S.day && S.day[0] === nd[0] && S.day[1] === nd[1] ? null : nd; render();
+  });
+  hit.addEventListener('pointerleave', () => { if (i0 < 0) { tip.hidden = true; cur.setAttribute('opacity', 0); } });
+  hit.addEventListener('pointercancel', () => { i0 = -1; br.setAttribute('opacity', 0); });
 }
 
 /* ---------- ações ---------- */
 function exportCsv() {
-  const to = dayOf(0), from = dayOf(days - 1);
-  const lines = ['cliente;dia;evento;id;quantidade', ...inRange(from, to).sort((a, b) => a.day.localeCompare(b.day)).map(x => [x.site, x.day, x.event, x.id, x.n].join(';'))];
+  const [from, to] = S.day || [dayOf(days - 1), dayOf(0)];
+  const lines = ['cliente;dia;evento;id;quantidade', ...inRange(from, to).filter(x => S.wd == null || wdOf(x.day) === S.wd).sort((a, b) => a.day.localeCompare(b.day)).map(x => [x.site, x.day, x.event, x.id, x.n].join(';'))];
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
   a.download = `blinkbio-${site || 'todos'}-${to}.csv`; a.click(); URL.revokeObjectURL(a.href);
@@ -607,7 +678,7 @@ async function enter(k) {
 
 $('#enter').onclick = () => enter($('#key').value.trim());
 $('#key').onkeydown = e => { if (e.key === 'Enter') $('#enter').click(); };
-$('#site').onchange = e => { site = e.target.value; render(); };
+$('#site').onchange = e => { site = e.target.value; clr(); render(); };
 $('#refresh').onclick = () => refresh(false);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && curTab === 'stats' && !$('#app').hidden) refresh(true); });
 $('#csv').onclick = exportCsv;
@@ -641,13 +712,37 @@ $('#wipe').onclick = async () => {
 };
 $('#range').onclick = e => {
   const b = e.target.closest('button'); if (!b) return;
-  days = +b.dataset.d;
+  days = +b.dataset.d; S.day = null;
   document.querySelectorAll('#range button').forEach(x => x.setAttribute('aria-pressed', x === b));
   render();
 };
+/* interações estilo BI */
+const act = t => {
+  let h;
+  if (h = t.closest('[data-card]')) { const [a, b] = h.dataset.card.split('|'); return tog('card', { s: a, id: b }, (o, v) => o.s === v.s && o.id === v.id); }
+  if (h = t.closest('[data-k]')) return tog('seg', { k: h.dataset.k, id: h.dataset.id }, (o, v) => o.k === v.k && o.id === v.id);
+  if (h = t.closest('[data-hr]')) return tog('seg', { k: 'hr', id: h.dataset.hr }, (o, v) => o.k === v.k && o.id === v.id);
+  if (h = t.closest('[data-wd]')) return tog('wd', +h.dataset.wd, (o, v) => o === v);
+};
+['#cards', '#refs', '#devs', '#hours', '#wk'].forEach(q => {
+  $(q).addEventListener('click', e => act(e.target));
+  $(q).addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('ia')) { e.preventDefault(); act(e.target); } });
+});
+$('#fbar').onclick = e => {
+  const b = e.target.closest('[data-f]'); if (!b) return;
+  if (b.dataset.f === 'all') clr(); else S[b.dataset.f] = null;
+  render();
+};
+$('#legend').onclick = e => {
+  const b = e.target.closest('[data-lg]'); if (!b) return;
+  const o = b.dataset.lg, other = o === 'v' ? 'c' : 'v';
+  if (!hide[o] && hide[other]) return;
+  hide[o] = !hide[o]; render();
+};
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && curTab === 'stats' && !document.querySelector('.modal')) { clr(); render(); } });
 $('#clients').onclick = e => {
   const tr = e.target.closest('tr[data-s]'); if (!tr) return;
-  site = tr.dataset.s; $('#site').value = site; render(); scrollTo({ top: 0, behavior: 'smooth' });
+  site = tr.dataset.s; $('#site').value = site; clr(); render(); scrollTo({ top: 0, behavior: 'smooth' });
 };
 let saved = ''; try { saved = sessionStorage.getItem('k') || ''; } catch {}
 if (DEMO) enter(''); else if (saved) enter(saved);
@@ -686,7 +781,6 @@ const T = (label, p, o = {}) => `<label class="f"><span>${label}</span>${o.area
   : `<input type="${o.type || 'text'}" data-p="${p}" maxlength="${o.max || 120}" value="${val(p)}" placeholder="${esc(o.ph || '')}">`}${o.hint ? `<small>${o.hint}</small>` : ''}</label>`;
 const CHK = (label, p) => `<label class="f" style="grid-template-columns:auto 1fr;align-items:center;gap:8px"><input type="checkbox" data-p="${p}" data-t="bool" ${getP(ed.cfg, p) ? 'checked' : ''}><span style="font-size:13px;color:#fff">${label}</span></label>`;
 const SEL = (label, p, opts) => `<label class="f"><span>${label}</span><select data-p="${p}">${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(getP(ed.cfg, p) ?? '') === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`;
-const LAR = [['', 'Automática'], ['terco', '1/3 da linha'], ['meia', '1/2 da linha'], ['cheia', 'Linha inteira']];
 const ALN = [['', 'Esquerda'], ['centro', 'Centro'], ['direita', 'Direita']];
 const POS = [['', 'Centro'], ['50% 0%', 'Topo'], ['50% 100%', 'Base'], ['0% 50%', 'Esquerda'], ['100% 50%', 'Direita']];
 const IMG = (label, p, kind, hint) => {
@@ -703,8 +797,8 @@ function cardHTML(c, i) {
   const LINK = (p, label = 'Link') => T(label, p, { type: 'url', max: 600, ph: 'https://…' });
   let f = '';
   if (t === 'capa') f = `${T('Título', base + 'titulo')}${IMG('Foto de capa', base + 'imagem', 'card', 'Foto horizontal. O texto aparece sobre ela.')}<div class="two">${T('Texto do botão', base + 'cta', { max: 40, ph: 'Saiba mais' })}${LINK(base + 'link', 'Link do botão')}</div>${adv(`${T('Etiqueta acima do título', base + 'kicker', { max: 40, ph: 'Ex.: Novidade' })}<div class="two">${SEL('Parte da foto em destaque', base + 'posicao', POS)}${SEL('Alinhamento do texto', base + 'alinhar', ALN)}</div>`)}`;
-  if (t === 'destaque') f = `${T('Marca', base + 'marca', { max: 60 })}<div class="two">${T('Valor grande (ex.: 10)', base + 'valor', { max: 12 })}${T('Sufixo (ex.: % OFF)', base + 'sufixo', { max: 20 })}</div>${T('Descrição', base + 'texto', { area: 1 })}<div class="two">${T('Cupom (opcional)', base + 'cupom', { max: 30 })}${T('Texto do botão', base + 'botao', { max: 30, ph: 'Ir à loja' })}</div>${LINK(base + 'link')}${adv(`<div class="two">${SEL('Aparece no filtro', base + 'cat', catOpts())}${SEL('Alinhamento do texto', base + 'alinhar', ALN)}</div>${SEL('Largura no computador', base + 'largura', LAR)}`)}`;
-  if (t === 'parceiro') f = `${T('Título', base + 'titulo')}${T('Descrição', base + 'texto', { area: 1 })}${IMG('Foto', base + 'imagem', 'card', 'Foto horizontal (2:1). Sem foto, o card fica só com texto.')}<div class="two">${T('Texto do botão', base + 'botao', { max: 30, ph: 'Ir à loja' })}${T('Cupom (opcional)', base + 'cupom', { max: 30 })}</div>${LINK(base + 'link')}${adv(`<div class="two">${T('Selo na foto (ex.: R$ 30 OFF)', base + 'selo', { max: 30 })}${SEL('Aparece no filtro', base + 'cat', catOpts())}</div><div class="two">${SEL('Parte da foto em destaque', base + 'posicao', POS)}${SEL('Alinhamento do texto', base + 'alinhar', ALN)}</div>${SEL('Largura no computador', base + 'largura', LAR)}${T('Descrição da foto (para leitores de tela)', base + 'alt', { max: 140 })}<div>${CHK('Card branco (claro)', base + 'claro')}${CHK('Botão na cor de destaque', base + 'destaqueBotao')}</div>`)}`;
+  if (t === 'destaque') f = `${T('Marca', base + 'marca', { max: 60 })}<div class="two">${T('Valor grande (ex.: 10)', base + 'valor', { max: 12 })}${T('Sufixo (ex.: % OFF)', base + 'sufixo', { max: 20 })}</div>${T('Descrição', base + 'texto', { area: 1 })}<div class="two">${T('Cupom (opcional)', base + 'cupom', { max: 30 })}${T('Texto do botão', base + 'botao', { max: 30, ph: 'Ir à loja' })}</div>${LINK(base + 'link')}${adv(`<div class="two">${SEL('Aparece no filtro', base + 'cat', catOpts())}${SEL('Alinhamento do texto', base + 'alinhar', ALN)}</div>`)}`;
+  if (t === 'parceiro') f = `${T('Título', base + 'titulo')}${T('Descrição', base + 'texto', { area: 1 })}${IMG('Foto', base + 'imagem', 'card', 'Foto horizontal (2:1). Sem foto, o card fica só com texto.')}<div class="two">${T('Texto do botão', base + 'botao', { max: 30, ph: 'Ir à loja' })}${T('Cupom (opcional)', base + 'cupom', { max: 30 })}</div>${LINK(base + 'link')}${adv(`<div class="two">${T('Selo na foto (ex.: R$ 30 OFF)', base + 'selo', { max: 30 })}${SEL('Aparece no filtro', base + 'cat', catOpts())}</div><div class="two">${SEL('Parte da foto em destaque', base + 'posicao', POS)}${SEL('Alinhamento do texto', base + 'alinhar', ALN)}</div>${T('Descrição da foto (para leitores de tela)', base + 'alt', { max: 140 })}<div>${CHK('Card branco (claro)', base + 'claro')}${CHK('Botão na cor de destaque', base + 'destaqueBotao')}</div>`)}`;
   const nome = { capa: 'Capa', destaque: 'Destaque', parceiro: 'Card' }[t], u = c.imagem ? imgUrl(c.imagem) : '';
   return `<details class="cardp" data-cid="${esc(c.id)}" ${ed.open.has(c.id) ? 'open' : ''}><summary>${u ? `<span class="cth" style="background-image:url('${esc(u)}')"></span>` : ''}<span class="tag">${nome}</span><b data-ttl>${esc(c.titulo || c.marca || '(sem título)')}</b>
     <button type="button" class="ibtn" data-act="up" data-i="${i}" ${i === 0 ? 'disabled' : ''} title="Subir" aria-label="Subir">↑</button><button type="button" class="ibtn" data-act="down" data-i="${i}" ${i === n - 1 ? 'disabled' : ''} title="Descer" aria-label="Descer">↓</button><button type="button" class="ibtn" data-act="dupcard" data-i="${i}" title="Duplicar" aria-label="Duplicar">⧉</button><button type="button" class="ibtn" data-act="delcard" data-i="${i}" title="Remover" aria-label="Remover">✕</button></summary><div class="ed-body">${f}</div></details>`;
@@ -917,7 +1011,6 @@ function fitPrev() {
 $('#cvToggle').onclick = () => {
   prev.canvas = !prev.canvas; $('#cvToggle').setAttribute('aria-pressed', prev.canvas); $('#cvToggle').classList.toggle('pri', prev.canvas);
   $('#cvHint').hidden = !prev.canvas;
-  if (prev.canvas && prev.mode !== 'pc') $('#prevMode [data-m=pc]').click();
   preview();
 };
 function selectCard(id) {
@@ -926,26 +1019,44 @@ function selectCard(id) {
   const el = document.querySelector(`[data-cid="${id}"]`);
   if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1200); }
 }
+const ordemDe = (c, M) => {
+  const L = c.layout?.[M]?.ordem || [], byId = new Map(c.cards.map(x => [x.id, x])), out = [];
+  L.forEach(i => { if (byId.has(i)) { out.push(i); byId.delete(i); } }); byId.forEach((_, i) => out.push(i)); return out;
+};
+const lyOf = (c, M) => ((c.layout ||= {})[M] ||= { larg: {} });
+const tidyLy = c => { if (!c.layout) return; ['pc', 'cel'].forEach(M => { const L = c.layout[M]; if (L && !L.ordem && !Object.keys(L.larg || {}).length) delete c.layout[M]; }); if (!Object.keys(c.layout).length) delete c.layout; };
+$('#cvReset').onclick = () => {
+  if (!ed.cfg?.layout) return ptoast('Já está automática.');
+  const M = prev.mode === 'pc' ? 'pc' : 'cel'; delete ed.cfg.layout[M]; tidyLy(ed.cfg); markDirty(); renderForm(); preview(); ptoast('Organização restaurada.');
+};
 addEventListener('message', e => {
   if (e.origin !== location.origin || e.source !== $('#edFrame').contentWindow || !ed.cfg) return;
-  const d = e.data || {}, c = ed.cfg, i = c.cards.findIndex(x => x.id === d.id);
+  const d = e.data || {}, c = ed.cfg, M = d.m === 'cel' ? 'cel' : 'pc', i = c.cards.findIndex(x => x.id === d.id);
   if (d.type === 'bb-select') return selectCard(d.id);
   if (d.type === 'bb-order') {
-    const m = new Map(c.cards.map(x => [x.id, x])), next = (d.ids || []).map(k => m.get(k)).filter(Boolean);
-    if (next.length === c.cards.length) { c.cards = next; markDirty(); renderForm(); preview(); }
+    const ids = (d.ids || []).filter(k => c.cards.some(x => x.id === k));
+    if (ids.length === c.cards.length) { lyOf(c, M).ordem = ids; markDirty(); renderForm(); preview(); }
     return;
   }
   if (d.type !== 'bb-act' || i < 0) return;
-  if (d.act === 'w') { if (d.v === 'auto') delete c.cards[i].largura; else c.cards[i].largura = d.v; }
-  else if (d.act === 'mv') { const j = i + (+d.v || 0); if (j < 0 || j >= c.cards.length) return; [c.cards[i], c.cards[j]] = [c.cards[j], c.cards[i]]; }
-  else if (d.act === 'dup') { const o = JSON.parse(JSON.stringify(c.cards[i])); o.id = o.tipo + '-' + rid(); if (o.titulo) o.titulo += ' (cópia)'; c.cards.splice(i + 1, 0, o); ed.sel = o.id; }
-  else if (d.act === 'del') { if (!confirm('Remover este card?')) return; c.cards.splice(i, 1); ed.sel = ''; }
+  const L = lyOf(c, M);
+  if (d.act === 'w') { if (d.v === 'auto') delete L.larg[d.id]; else L.larg[d.id] = d.v; }
+  else if (d.act === 'mv') { const o = ordemDe(c, M), p = o.indexOf(d.id), j = p + (+d.v || 0); if (j < 0 || j >= o.length) return; [o[p], o[j]] = [o[j], o[p]]; L.ordem = o; }
+  else if (d.act === 'dup') {
+    const o = JSON.parse(JSON.stringify(c.cards[i])); o.id = o.tipo + '-' + rid(); if (o.titulo) o.titulo += ' (cópia)'; c.cards.splice(i + 1, 0, o); ed.sel = o.id;
+    ['pc', 'cel'].forEach(m => { const l = c.layout?.[m]; if (l?.ordem) { const p = l.ordem.indexOf(d.id); l.ordem.splice(p + 1, 0, o.id); } if (l?.larg?.[d.id]) l.larg[o.id] = l.larg[d.id]; });
+  }
+  else if (d.act === 'del') {
+    if (!confirm('Remover este card?')) return;
+    c.cards.splice(i, 1); ed.sel = '';
+    ['pc', 'cel'].forEach(m => { const l = c.layout?.[m]; if (l) { l.ordem = l.ordem?.filter(k => k !== d.id); if (l.ordem && !l.ordem.length) delete l.ordem; delete l.larg?.[d.id]; } });
+  }
   else return;
-  markDirty(); renderForm(); preview();
+  tidyLy(c); markDirty(); renderForm(); preview();
 });
 $('#prevMode').onclick = e => {
   const b = e.target.closest('button'); if (!b) return;
-  prev.mode = b.dataset.m; document.querySelectorAll('#prevMode button').forEach(x => x.setAttribute('aria-pressed', x === b)); fitPrev();
+  prev.mode = b.dataset.m; $('#cvReset').textContent = `Restaurar organização do ${prev.mode === 'pc' ? 'PC' : 'Celular'}`; document.querySelectorAll('#prevMode button').forEach(x => x.setAttribute('aria-pressed', x === b)); fitPrev();
 };
 new ResizeObserver(() => { if (prev.mode === 'pc') fitPrev(); }).observe(document.querySelector('#editor .phone'));
 $('#edNew').onclick = renderNew; $('#gNew').onclick = renderNew; $('#cgrid').addEventListener('click', onAct); $('#cSearch').addEventListener('input', drawGrid);

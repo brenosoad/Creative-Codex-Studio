@@ -22,13 +22,25 @@ function cleanCard(c, i) {
     marca: str(c.marca, 60), valor: str(c.valor, 12), sufixo: str(c.sufixo, 20),
     cupom: str(c.cupom, 30), link: link(c.link), botao: str(c.botao, 30),
     imagem: imgRef(c.imagem), alt: str(c.alt, 140), posicao: /^[\d.%a-z\s-]{1,30}$/i.test(c.posicao || '') ? c.posicao : undefined,
-    largura: ['terco', 'meia', 'cheia'].includes(c.largura) ? c.largura : undefined,
     alinhar: c.alinhar === 'centro' || c.alinhar === 'direita' ? c.alinhar : undefined,
     w: num(c.w), h: num(c.h),
     claro: c.claro ? true : undefined, destaqueBotao: c.destaqueBotao ? true : undefined
   };
   Object.keys(o).forEach(k => (o[k] === '' || o[k] === undefined) && delete o[k]);
   return o;
+}
+
+const LARG = { pc: ['terco', 'meia', 'cheia'], cel: ['meia', 'cheia'] };
+function cleanLayout(l) {
+  const out = {};
+  for (const m of ['pc', 'cel']) {
+    const x = l && l[m]; if (!x || typeof x !== 'object') continue;
+    const ordem = (Array.isArray(x.ordem) ? x.ordem : []).filter(i => typeof i === 'string' && SLUG.test(i)).slice(0, 40);
+    const larg = {};
+    Object.entries(x.larg && typeof x.larg === 'object' ? x.larg : {}).slice(0, 40).forEach(([k, v]) => { if (SLUG.test(k) && LARG[m].includes(v)) larg[k] = v; });
+    if (ordem.length || Object.keys(larg).length) out[m] = { ordem: ordem.length ? ordem : undefined, larg: Object.keys(larg).length ? larg : undefined };
+  }
+  return Object.keys(out).length ? out : undefined;
 }
 
 function clean(c) {
@@ -41,7 +53,7 @@ function clean(c) {
     tema: { cor: HEX.test(t.cor) ? t.cor : '#EE5A0C', cor2: HEX.test(t.cor2) ? t.cor2 : '#FF8A3D', fundo: HEX.test(t.fundo) ? t.fundo : '#101214' },
     logo, favicon: imgRef(c.favicon) || undefined, iconeApple: imgRef(c.iconeApple) || undefined, og: imgRef(c.og) || undefined,
     numeros: (Array.isArray(c.numeros) ? c.numeros : []).slice(0, 4).map(n => ({ valor: str(n?.valor, 16), rotulo: str(n?.rotulo, 24) })).filter(n => n.valor),
-    categorias: cats, botaoFlutuante: fab,
+    categorias: cats, botaoFlutuante: fab, layout: cleanLayout(c.layout),
     cards: (Array.isArray(c.cards) ? c.cards : []).slice(0, 40).map(cleanCard).filter(Boolean)
   };
 }
