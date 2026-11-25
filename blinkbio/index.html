@@ -11,7 +11,7 @@
 <script>document.documentElement.classList.add('js');</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@500;700;800&family=Bebas+Neue&family=Oswald:wght@500;700&family=Montserrat:wght@500;800&family=Poppins:wght@500;700&family=Playfair+Display:wght@500;800&family=Dancing+Script:wght@600;700&family=Cinzel:wght@500;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #101214;
@@ -328,6 +328,9 @@
   .cv-tx { position: fixed; z-index: 50; display: flex; gap: 4px; padding: 4px; border-radius: 10px; background: rgba(0,0,0,.88); backdrop-filter: blur(6px); transform: translateY(-100%); margin-top: -8px; }
   .cv-tx button { background: transparent; color: #fff; border: 0; border-radius: 7px; min-width: 30px; height: 28px; padding: 0 8px; font: 700 12px system-ui, sans-serif; cursor: pointer; }
   .cv-tx button:hover { background: rgba(255,255,255,.16); }
+  .cv-tx .cv-mv { cursor: grab; font-size: 15px; }
+  .cv-tx u { text-decoration: none; color: #b9adff; }
+  body.cv [data-f].moving { outline: 2px solid #8B7CFF; cursor: grabbing; z-index: 20; }
   .cv-tx i { width: 1px; background: rgba(255,255,255,.2); margin: 3px 2px; }
   .cv-tx span { color: rgba(255,255,255,.7); font: 600 11px system-ui, sans-serif; align-self: center; padding: 0 6px; }
   .cv-bar { position: absolute; top: 8px; right: 8px; z-index: 6; display: flex; gap: 4px; padding: 4px; border-radius: 10px; background: rgba(0,0,0,.78); backdrop-filter: blur(6px); }
@@ -423,7 +426,13 @@
     const MODE = matchMedia('(min-width: 760px)').matches ? 'pc' : 'cel';
     const LY = cfg.layout?.[MODE] || {}, WM = LY.larg || {};
     const nl = t => esc(t).replace(/\n/g, '<br>');
-    const zk = (id, f) => { const k = +cfg.tamanhos?.[id + '.' + f]; return k && k !== 1 ? ` style="zoom:${k}"` : ''; };
+    const zk = (id, f) => {
+      const key = id + '.' + f, k = +cfg.tamanhos?.[key] || 1, fo = cfg.fontes?.[key], p = cfg.posicoes?.[key]?.[matchMedia('(min-width: 760px)').matches ? 'pc' : 'cel'], a = [];
+      if (k !== 1) a.push(`zoom:${k}`);
+      if (FONTS.includes(fo)) a.push(`font-family:'${fo}',sans-serif`);
+      if (p && (p[0] || p[1])) a.push(`position:relative;left:${(p[0] / k).toFixed(1)}px;top:${(p[1] / k).toFixed(1)}px`);
+      return a.length ? ` style="${a.join(';')}"` : '';
+    };
     const wa = c => ((WM[c.id] || c._w) ? ` data-w="${esc(WM[c.id] || c._w)}"` : '');
     const al = c => (c.alinhar === 'centro' || c.alinhar === 'direita' ? ' al-' + c.alinhar : '');
     const card = c => {
@@ -592,6 +601,7 @@
   }
 
   /* Modo organizar: arrastar, escolher largura e selecionar cards na prévia */
+  const FONTS = ['Anton', 'Bebas Neue', 'Oswald', 'Montserrat', 'Poppins', 'Playfair Display', 'Dancing Script', 'Cinzel'];
   let CANVAS = false, SEL = '';
   const post = m => parent.postMessage({ ...m, m: matchMedia('(min-width: 760px)').matches ? 'pc' : 'cel' }, location.origin);
   function applyCanvas() {
@@ -611,36 +621,69 @@
   function initCanvas() {
     let drag = null, drop = null;
     const clear = () => $$('.dt-before,.dt-after,.dragging').forEach(x => x.classList.remove('dt-before', 'dt-after', 'dragging'));
-    let EDIT = null, TX = null, K = 1, K0 = 1;
+    let EDIT = null, TX = null, K = 1, K0 = 1, F = '', F0 = '', JM = false;
+    const FL = ['', ...FONTS];
     const szKey = el => { const c = el.closest('.cards > .card'); return (c ? c.dataset.id : 'topo') + '.' + el.dataset.f.replace(/\./g, ''); };
+    const kOf = el => +(el.style.zoom || 1) || 1;
+    const posOf = el => { const k = kOf(el); return [Math.round((parseFloat(el.style.left) || 0) * k), Math.round((parseFloat(el.style.top) || 0) * k)]; };
+    const setPos = (el, x, y) => { const k = kOf(el); el.style.position = 'relative'; el.style.left = (x / k) + 'px'; el.style.top = (y / k) + 'px'; };
+    const fontOf = el => { const m = /["']([^"']+)["']/.exec(el.style.fontFamily || ''); return m ? m[1] : ''; };
     const killTx = () => { TX?.remove(); TX = null; };
+    const full = el => ({ k: kOf(el), font: fontOf(el), pos: posOf(el) });
     const endEdit = (save, el) => {
       if (EDIT !== el) return; EDIT = null; killTx();
       const v = (el.innerText || '').replace(/\r/g, '').replace(/[ \t]+/g, ' ').replace(/ ?\n ?/g, '\n').replace(/\n{3,}/g, '\n\n').trim(), old = el.dataset.old;
       el.removeAttribute('contenteditable'); const card = el.closest('.cards > .card'); if (card) card.draggable = CANVAS;
-      const kk = save && K !== K0;
-      if (save && (v !== old || kk)) post({ type: 'bb-text', id: card ? card.dataset.id : '', f: el.dataset.f, v, k: K, key: szKey(el) });
-      else { el.style.zoom = K0 === 1 ? '' : K0; el.innerHTML = el.dataset.f === 'tagline' ? esc(el.dataset.raw).replace(/\n/g, '<br>').replace(/\{([^}]+)\}/g, '<em>$1</em>') : esc(old).replace(/\n/g, '<br>'); }
+      const chg = K !== K0 || F !== F0 || el.dataset.p0 !== posOf(el).join();
+      if (save && (v !== old || chg)) post({ type: 'bb-text', id: card ? card.dataset.id : '', f: el.dataset.f, v, key: szKey(el), ...full(el) });
+      else { el.style.zoom = K0 === 1 ? '' : K0; el.style.fontFamily = F0 ? `'${F0}',sans-serif` : ''; const [x, y] = (el.dataset.p0 || '0,0').split(',').map(Number); setPos(el, x, y); el.innerHTML = el.dataset.f === 'tagline' ? esc(el.dataset.raw).replace(/\n/g, '<br>').replace(/\{([^}]+)\}/g, '<em>$1</em>') : esc(old).replace(/\n/g, '<br>'); }
     };
     const ins = t => document.execCommand('insertText', false, t);
+    /* mover arrastando (texto fora da edição, ou pela alça ✥ durante a edição) */
+    const startMove = (el, e0, onEnd) => {
+      const [x0, y0] = posOf(el); let moved = false;
+      const mv = e => {
+        const dx = e.clientX - e0.clientX, dy = e.clientY - e0.clientY;
+        if (!moved && Math.hypot(dx, dy) < 5) return; moved = true; el.classList.add('moving');
+        setPos(el, Math.round(x0 + dx), Math.round(y0 + dy));
+      };
+      const up = () => {
+        removeEventListener('pointermove', mv, true); removeEventListener('pointerup', up, true); el.classList.remove('moving');
+        if (moved) { JM = true; setTimeout(() => (JM = false), 60); }
+        onEnd(moved);
+      };
+      addEventListener('pointermove', mv, true); addEventListener('pointerup', up, true);
+    };
+    document.addEventListener('pointerdown', e => {
+      if (!CANVAS || e.button) return;
+      const h = e.target.closest?.('.cv-mv'), el = h ? EDIT : e.target.closest?.('[data-f]');
+      if (!el || (!h && EDIT === el)) return;
+      const card = el.closest('.cards > .card'); if (card && !h) card.draggable = false;
+      if (h) e.preventDefault();
+      startMove(el, e, moved => {
+        if (card && !EDIT) card.draggable = CANVAS;
+        if (moved && !EDIT) post({ type: 'bb-text', id: card ? card.dataset.id : '', f: el.dataset.f, key: szKey(el), ...full(el) });
+      });
+    }, true);
     const startEdit = el => {
       if (EDIT === el) return; if (EDIT) endEdit(true, EDIT);
       EDIT = el; const raw = el.dataset.f === 'tagline' ? el.dataset.raw : (el.innerText || el.textContent).replace(/\n$/, '');
-      el.dataset.old = raw; el.textContent = raw; K = K0 = +(el.style.zoom || 1) || 1;
+      el.dataset.old = raw; el.dataset.p0 = posOf(el).join(); el.textContent = raw; K = K0 = kOf(el); F = F0 = fontOf(el);
       const card = el.closest('.cards > .card'); if (card) card.draggable = false;
       el.setAttribute('contenteditable', 'plaintext-only'); if (el.contentEditable !== 'plaintext-only') el.contentEditable = 'true';
       el.focus(); const r = document.createRange(); r.selectNodeContents(el); r.collapse(false); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(r);
       el.onblur = () => endEdit(true, el);
       el.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); el.blur(); } else if (e.key === 'Enter') { e.preventDefault(); ins('\n'); } else if (e.key === 'Escape') { e.preventDefault(); endEdit(false, el); el.blur(); } e.stopPropagation(); };
-      /* barra: tamanho, destaque e quebra de linha */
       killTx(); TX = document.createElement('div'); TX.className = 'cv-tx';
-      const lbl = () => Math.round(K * 100) + '%';
-      TX.innerHTML = `<button type="button" data-tx="-" title="Diminuir texto">A−</button><span>${lbl()}</span><button type="button" data-tx="+" title="Aumentar texto">A+</button><i></i><button type="button" data-tx="br" title="Quebrar linha aqui (Shift+Enter)">↵ Linha</button>${el.dataset.f === 'tagline' ? '<button type="button" data-tx="em" title="Destacar a palavra selecionada com a cor da marca">Destaque</button>' : ''}`;
-      const rc = el.getBoundingClientRect(); TX.style.left = Math.max(6, Math.min(innerWidth - 230, rc.left)) + 'px'; TX.style.top = Math.max(44, rc.top) + 'px';
+      const lbl = () => Math.round(K * 100) + '%', fl = () => (F || 'Padrão');
+      TX.innerHTML = `<button type="button" class="cv-mv" title="Arraste para mover o texto">✥</button><i></i><button type="button" data-tx="-" title="Diminuir texto">A−</button><span>${lbl()}</span><button type="button" data-tx="+" title="Aumentar texto">A+</button><i></i><button type="button" data-tx="font" title="Trocar a fonte (clique para alternar)">Fonte: <u>${fl()}</u></button><i></i><button type="button" data-tx="br" title="Quebrar linha (Shift+Enter)">↵</button>${el.dataset.f === 'tagline' ? '<button type="button" data-tx="em" title="Destacar a palavra selecionada com a cor da marca">Destaque</button>' : ''}<button type="button" data-tx="reset" title="Voltar ao original">↺</button>`;
+      const rc = el.getBoundingClientRect(); TX.style.left = Math.max(6, Math.min(innerWidth - 330, rc.left)) + 'px'; TX.style.top = Math.max(44, rc.top) + 'px';
       TX.addEventListener('mousedown', e => e.preventDefault());
       TX.addEventListener('click', e => {
         const t = e.target.closest('[data-tx]')?.dataset.tx; if (!t) return;
-        if (t === '-' || t === '+') { K = Math.max(.5, Math.min(2.5, Math.round((K + (t === '+' ? .1 : -.1)) * 100) / 100)); el.style.zoom = K === 1 ? '' : K; TX.querySelector('span').textContent = lbl(); }
+        if (t === '-' || t === '+') { const p = posOf(el); K = Math.max(.5, Math.min(2.5, Math.round((K + (t === '+' ? .1 : -.1)) * 100) / 100)); el.style.zoom = K === 1 ? '' : K; setPos(el, p[0], p[1]); TX.querySelector('span').textContent = lbl(); }
+        else if (t === 'font') { F = FL[(FL.indexOf(F) + 1) % FL.length]; el.style.fontFamily = F ? `'${F}',sans-serif` : ''; TX.querySelector('u').textContent = fl(); }
+        else if (t === 'reset') { K = 1; F = ''; el.style.zoom = ''; el.style.fontFamily = ''; setPos(el, 0, 0); el.style.position = ''; el.style.left = el.style.top = ''; TX.querySelector('span').textContent = lbl(); TX.querySelector('u').textContent = fl(); }
         else if (t === 'br') ins('\n');
         else if (t === 'em') { const x = getSelection().rangeCount ? getSelection().getRangeAt(0).toString() : ''; if (x && !/[{}]/.test(x)) ins('{' + x + '}'); }
       });
@@ -648,6 +691,7 @@
     };
     document.addEventListener('click', e => {
       if (!CANVAS) return;
+      if (JM) { e.preventDefault(); e.stopPropagation(); return; }
       if (EDIT && EDIT.contains(e.target)) { e.preventDefault(); return; }
       const fe = e.target.closest('[data-f]');
       if (fe && !e.target.closest('[data-cv]')) {

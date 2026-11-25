@@ -51,6 +51,23 @@ function cleanTam(t) {
   });
   return Object.keys(o).length ? o : undefined;
 }
+const FONTES = ['Anton', 'Bebas Neue', 'Oswald', 'Montserrat', 'Poppins', 'Playfair Display', 'Dancing Script', 'Cinzel'];
+const KEY = /^[A-Za-z0-9_-]{1,40}(\.[A-Za-z0-9]{1,12}){1,3}$/;
+function cleanFontes(t) {
+  const o = {};
+  Object.entries(t && typeof t === 'object' ? t : {}).slice(0, 60).forEach(([k, v]) => { if (KEY.test(k) && FONTES.includes(v)) o[k] = v; });
+  return Object.keys(o).length ? o : undefined;
+}
+function cleanPos(t) {
+  const o = {};
+  Object.entries(t && typeof t === 'object' ? t : {}).slice(0, 60).forEach(([k, v]) => {
+    if (!KEY.test(k) || !v || typeof v !== 'object') return;
+    const r = {};
+    ['pc', 'cel'].forEach(m => { const a = v[m]; if (Array.isArray(a)) { const x = Math.round(+a[0]), y = Math.round(+a[1]); if (Math.abs(x) <= 1500 && Math.abs(y) <= 3000 && (x || y)) r[m] = [x, y]; } });
+    if (Object.keys(r).length) o[k] = r;
+  });
+  return Object.keys(o).length ? o : undefined;
+}
 function clean(c) {
   const t = c.tema || {}, cats = {};
   Object.entries(c.categorias || {}).slice(0, 8).forEach(([k, v]) => { if (SLUG.test(k)) cats[k] = str(v, 30); });
@@ -61,7 +78,7 @@ function clean(c) {
     tema: { cor: HEX.test(t.cor) ? t.cor : '#EE5A0C', cor2: HEX.test(t.cor2) ? t.cor2 : '#FF8A3D', fundo: HEX.test(t.fundo) ? t.fundo : '#101214' },
     logo, favicon: imgRef(c.favicon) || undefined, iconeApple: imgRef(c.iconeApple) || undefined, og: imgRef(c.og) || undefined,
     numeros: (Array.isArray(c.numeros) ? c.numeros : []).slice(0, 4).map(n => ({ valor: str(n?.valor, 16), rotulo: str(n?.rotulo, 24) })).filter(n => n.valor),
-    categorias: cats, botaoFlutuante: fab, layout: cleanLayout(c.layout), tamanhos: cleanTam(c.tamanhos),
+    categorias: cats, botaoFlutuante: fab, layout: cleanLayout(c.layout), tamanhos: cleanTam(c.tamanhos), fontes: cleanFontes(c.fontes), posicoes: cleanPos(c.posicoes),
     cards: (Array.isArray(c.cards) ? c.cards : []).slice(0, 40).map(cleanCard).filter(Boolean)
   };
 }

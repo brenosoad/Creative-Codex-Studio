@@ -407,7 +407,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     <div class="box ed-form" id="edForm"><p class="empty">Escolha um cliente na lista ou crie um novo.</p></div>
     <aside class="ed-prev">
       <div class="prev-bar"><h2>Prévia</h2><div class="seg" id="prevMode" role="group" aria-label="Tamanho da prévia"><button type="button" data-m="cel" aria-pressed="true">Celular</button><button type="button" data-m="pc" aria-pressed="false">PC</button></div><button type="button" class="btn sm" id="cvToggle" aria-pressed="false">Organizar na página</button><a class="btn" id="edOpen" href="#" target="_blank" rel="noopener" hidden>Abrir página ↗</a></div>
-      <div class="cvhint" id="cvHint" hidden><p class="mut">Arraste os cards para reordenar. Clique em um card para escolher a largura. <b>Clique em um texto para editar</b>: tamanho (A−/A+), quebra de linha (Shift+Enter) e destaque de palavra. Enter confirma, Esc cancela. <b>Celular e PC são organizados separadamente.</b></p><button type="button" class="btn sm" id="cvReset">Restaurar organização do Celular</button></div>
+      <div class="cvhint" id="cvHint" hidden><p class="mut">Arraste os cards para reordenar. Clique em um card para escolher a largura. <b>Clique em um texto para editar</b>: tamanho (A−/A+), quebra de linha (Shift+Enter) e destaque de palavra. Para mover, arraste o texto (ou a alça ✥ da barra). Enter confirma, Esc cancela. <b>Celular e PC são organizados separadamente.</b></p><button type="button" class="btn sm" id="cvReset">Restaurar organização do Celular</button></div>
       <div class="phone"><iframe id="edFrame" title="Prévia da página" src="about:blank"></iframe></div>
     </aside>
   </div>
@@ -1088,10 +1088,18 @@ addEventListener('message', e => {
   if (d.type === 'bb-select') return selectCard(d.id);
   if (d.type === 'bb-text') {
     const f = String(d.f || ''), v = String(d.v ?? '').slice(0, 280);
-    if (d.id) { if (i < 0 || !/^(kicker|titulo|texto|botao|cta|selo|marca|valor|sufixo)$/.test(f)) return; setP(c.cards[i], f, v); }
-    else if (f === 'tagline' || /^numeros\.\d+\.(valor|rotulo)$/.test(f)) { if (f !== 'tagline' && !getP(c, f.replace(/\.[^.]+$/, ''))) return; setP(c, f, v); }
+    const hasV = d.v !== undefined;
+    if (d.id) { if (i < 0 || !/^(kicker|titulo|texto|botao|cta|selo|marca|valor|sufixo)$/.test(f)) return; if (hasV) setP(c.cards[i], f, v); }
+    else if (f === 'tagline' || /^numeros\.\d+\.(valor|rotulo)$/.test(f)) { if (f !== 'tagline' && !getP(c, f.replace(/\.[^.]+$/, ''))) return; if (hasV) setP(c, f, v); }
     else return;
-    if (d.key && /^[A-Za-z0-9_-]{1,40}\.[A-Za-z0-9]{1,40}$/.test(d.key)) { const k = Math.round(+d.k * 100) / 100; const t = (c.tamanhos ||= {}); if (k >= .5 && k <= 2.5 && k !== 1) t[d.key] = k; else delete t[d.key]; if (!Object.keys(t).length) delete c.tamanhos; }
+    if (d.key && /^[A-Za-z0-9_-]{1,40}\.[A-Za-z0-9]{1,40}$/.test(d.key)) {
+      const put = (nome, val) => { const t = (c[nome] ||= {}); if (val === undefined) delete t[d.key]; else t[d.key] = val; if (!Object.keys(t).length) delete c[nome]; };
+      const k = Math.round(+d.k * 100) / 100; put('tamanhos', k >= .5 && k <= 2.5 && k !== 1 ? k : undefined);
+      put('fontes', d.font || undefined);
+      const px = Math.round(+d.pos?.[0]) || 0, py = Math.round(+d.pos?.[1]) || 0;
+      const pp = { ...(c.posicoes?.[d.key] || {}) }; if (px || py) pp[M] = [px, py]; else delete pp[M];
+      put('posicoes', Object.keys(pp).length ? pp : undefined);
+    }
     markDirty(); renderForm(); preview(); return;
   }
   if (d.type === 'bb-order') {
