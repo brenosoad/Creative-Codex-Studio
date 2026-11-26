@@ -424,7 +424,8 @@ const NOMES = { 'capa-anuncie': 'Anuncie (capa)', 'fab-anunciar': 'Botão Anunci
 const $ = s => document.querySelector(s);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nf = n => Math.round(n).toLocaleString('pt-BR');
-const DEMO = location.search.includes('demo');
+const DEMO = location.search.includes('demo'), DEMO_CLI = /demo=cliente/.test(location.search);
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 const brt = t => new Date(t - 3 * 3600e3).toISOString().slice(0, 10);
 const dayOf = off => brt(Date.now() - off * 864e5);
 
@@ -432,23 +433,24 @@ let rows = [], sites = [], conf = {}, days = 30, site = '', key = '', timer = 0,
 
 /* ---------- dados ---------- */
 function demoRows() {
+  seed = 7;
   const out = [], cl = {
-    sancaporai: ['capa-anuncie', 'growth', 'letz', 'petiko', 'sorteio', 'youtube', 'fab-anunciar'],
-    'academia-forte': ['capa-anuncie', 'planos', 'aula-gratis', 'whatsapp'],
-    'restaurante-sabor': ['capa-anuncie', 'cardapio', 'delivery', 'reservas']
-  }, base = { sancaporai: 160, 'academia-forte': 70, 'restaurante-sabor': 110 };
+    'clinica-vida': ['capa', 'agendar', 'convenios', 'local', 'whatsapp'],
+    'academia-forte': ['capa', 'planos', 'aula-gratis', 'cupom-semana', 'mapa', 'whatsapp'],
+    'restaurante-sabor': ['capa', 'cardapio', 'delivery', 'reservas']
+  }, base = { 'clinica-vida': 150, 'academia-forte': 90, 'restaurante-sabor': 110 };
   Object.entries(cl).forEach(([s, ids]) => {
     for (let i = 0; i < 120; i++) {
       const day = dayOf(i), wd = new Date(day + 'T12:00:00Z').getUTCDay();
-      const v = Math.round(base[s] * (0.7 + Math.random() * 0.6) * (wd === 0 || wd === 6 ? 1.25 : 1) * (1 + (120 - i) / 400));
+      const v = Math.round(base[s] * (0.7 + rnd() * 0.6) * (wd === 0 || wd === 6 ? 1.25 : 1) * (1 + (120 - i) / 400));
       out.push({ site: s, day, event: 'page_view', id: '-', n: v });
       out.push({ site: s, day, event: 'dev', id: 'celular', n: Math.round(v * 0.9) });
       out.push({ site: s, day, event: 'dev', id: 'computador', n: v - Math.round(v * 0.9) });
       [['instagram', .72], ['whatsapp', .12], ['direto', .1], ['outros', .06]].forEach(([r, p]) => out.push({ site: s, day, event: 'ref', id: r, n: Math.round(v * p) }));
       for (let h = 0; h < 24; h++) { const w = [1, 1, 0, 0, 0, 1, 2, 4, 5, 5, 6, 8, 9, 7, 6, 6, 7, 9, 12, 14, 13, 9, 5, 2][h]; out.push({ site: s, day, event: 'hr', id: String(h).padStart(2, '0'), n: Math.round(v * w / 130) }); }
       ids.forEach((id, j) => {
-        out.push({ site: s, day, event: 'abrir_link', id, n: Math.round(v * Math.max(.04, .24 - j * .03) * Math.random()) });
-        if (j && j < 4) out.push({ site: s, day, event: 'copiar_cupom', id, n: Math.round(v * .07 * Math.random()) });
+        out.push({ site: s, day, event: 'abrir_link', id, n: Math.round(v * Math.max(.04, .24 - j * .03) * rnd()) });
+        if (j && j < 4) out.push({ site: s, day, event: 'copiar_cupom', id, n: Math.round(v * .07 * rnd()) });
       });
     }
   });
@@ -457,7 +459,8 @@ function demoRows() {
 
 async function load() {
   let data;
-  if (DEMO) data = { sites: ['academia-forte', 'restaurante-sabor', 'sancaporai'], rows: demoRows() };
+  if (DEMO_CLI) { data = { sites: ['academia-forte'], rows: demoRows().filter(x => x.site === 'academia-forte'), client: true, nome: 'Studio Fit Academia' }; conf['academia-forte'] = { nome: 'Studio Fit Academia', cards: [{ id: 'capa', titulo: 'Aula experimental grátis' }, { id: 'planos', titulo: 'Planos a partir de R$ 89' }, { id: 'aula-gratis', titulo: 'Aula grátis' }, { id: 'cupom-semana', titulo: 'Primeira semana grátis' }, { id: 'mapa', titulo: 'Como chegar' }, { id: 'whatsapp', titulo: 'Falar no WhatsApp' }] }; }
+  else if (DEMO) data = { sites: ['academia-forte', 'restaurante-sabor', 'clinica-vida'], rows: demoRows() };
   else {
     const r = await fetch(API, { headers: { 'X-Key': key }, cache: 'no-store' });
     if (!r.ok) throw new Error(r.status === 401 ? 'Chave inválida.' : 'Erro ao carregar.');
@@ -526,7 +529,7 @@ function fbar() {
 }
 
 const pageUrl = () => site ? new URL(`${location.pathname.replace(/painel\/?(index\.html)?$/, '')}?c=${encodeURIComponent(site)}`, location.origin).href : '';
-function pageLink() { const u = pageUrl(); $('#openPg').hidden = $('#copyPg').hidden = !u; if (u) $('#openPg').href = u; }
+function pageLink() { const u = DEMO ? '' : pageUrl(); $('#openPg').hidden = $('#copyPg').hidden = !u; if (u) $('#openPg').href = u; }
 $('#copyPg').onclick = async () => { const u = pageUrl(); try { await navigator.clipboard.writeText(u); ptoast('Link copiado: ' + u); } catch { prompt('Copie o link:', u); } };
 
 /* ---------- render ---------- */
@@ -686,7 +689,7 @@ async function enter(k) {
     await load();
     try { sessionStorage.setItem('k', k); } catch {}
     $('#login').hidden = true; $('#app').hidden = false; render();
-    if (isClient) { try { if (!localStorage.getItem('bbtut')) { localStorage.setItem('bbtut', '1'); showHelp(); } } catch {} }
+    if (isClient && !DEMO) { try { if (!localStorage.getItem('bbtut')) { localStorage.setItem('bbtut', '1'); showHelp(); } } catch {} }
     clearInterval(timer); if (!DEMO) timer = setInterval(() => (document.hidden || curTab !== 'stats') || refresh(true), 60000);
   } catch (e) { $('#err').textContent = e.message || 'Erro ao carregar.'; }
 }
@@ -798,13 +801,18 @@ $('#clients').onclick = e => {
   site = tr.dataset.s; $('#site').value = site; clr(); render(); scrollTo({ top: 0, behavior: 'smooth' });
 };
 let saved = ''; try { saved = sessionStorage.getItem('k') || ''; } catch {}
+if (DEMO) {
+  const w = $('#wipe'); if (w) w.style.display = 'none';
+  const lo = $('#logout'); if (lo) lo.onclick = () => { location.href = '/#blinkbio'; };
+  const wr = $('#whoRole'); if (wr) [300, 1500].forEach(t => setTimeout(() => { wr.textContent = 'Demonstração · dados fictícios'; }, t));
+}
 if (DEMO) enter(''); else if (saved) enter(saved);
 
 /* ================= EDITOR DE CLIENTES ================= */
 const SITE_BASE = location.pathname.replace(/painel\/?(index\.html)?$/, '');
 const ed = { slug: '', cfg: null, src: '', dirty: false, list: [], open: new Set(), sec: new Set(['geral']), ready: false, target: null, ckey: null };
 const slugify = t => String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 32);
-const rid = () => Math.random().toString(36).slice(2, 5);
+const rid = () => rnd().toString(36).slice(2, 5);
 const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
 const setP = (o, p, v) => { const ks = p.split('.'); const last = ks.pop(); const t = ks.reduce((a, k) => (a[k] ??= {}), o); if (v === '' || v === undefined) delete t[last]; else t[last] = v; };
 const ptoast = (m, err) => { const t = $('#ptoast'); t.textContent = m; t.classList.toggle('err', !!err); t.classList.add('show'); clearTimeout(ptoast.t); ptoast.t = setTimeout(() => t.classList.remove('show'), 2600); };
