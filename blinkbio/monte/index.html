@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monte o seu BlinkBio | Creative Codex</title>
+<meta name="description" content="Monte uma prévia do seu BlinkBio: escolha cores, textos e cards e veja o link da sua bio ganhar cara de site.">
+<link rel="icon" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0B1A;--bg2:#17142B;--line:rgba(255,255,255,.12);--txt:#F4F3F8;--mut:#A29FB8;--pr:#4B32D9;--pr2:#8B7CFF;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--txt);font:15px/1.5 'DM Sans',system-ui,-apple-system,sans-serif;min-height:100vh}
+a{color:inherit}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px max(16px,3vw);border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(13,11,26,.92);backdrop-filter:blur(8px);z-index:20}
+header img{height:34px;display:block;background:#fff;border-radius:8px;padding:4px 8px}
+header a.back{font-size:.88rem;color:var(--mut);text-decoration:none}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:32px;max-width:1180px;margin:0 auto;padding:24px max(16px,3vw) 90px;align-items:start}
+.intro h1{font-size:clamp(1.5rem,3vw,2.1rem);line-height:1.15;margin:0 0 6px}
+.intro p{margin:0 0 18px;color:var(--mut);max-width:42rem}
+.sec{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.sec h2{font-size:1rem;margin:0 0 12px}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.row3{grid-template-columns:repeat(3,minmax(0,1fr))}
+label{display:grid;gap:5px;font-size:.8rem;color:var(--mut);min-width:0}
+input[type=text],input[type=tel],select,textarea{font:inherit;color:var(--txt);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.6rem .7rem;width:100%;min-width:0}
+textarea{resize:vertical;min-height:64px}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--pr2);outline-offset:1px}
+input[type=color]{width:100%;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:3px}
+.hint{font-size:.78rem;color:var(--mut);margin:6px 0 0}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.sw{width:44px;height:44px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;position:relative;overflow:hidden}
+.sw i{position:absolute;inset:0}
+.sw.on{border-color:#fff}
+.btn{font:inherit;font-weight:700;border:0;border-radius:12px;padding:.7rem 1.1rem;cursor:pointer;background:var(--pr);color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.s{background:transparent;border:1px solid var(--line);color:var(--txt);font-weight:600;padding:.5rem .8rem;font-size:.85rem}
+.btn.d{background:transparent;color:#ff8f8f;border:1px solid rgba(255,143,143,.4);padding:.4rem .7rem;font-size:.8rem;font-weight:600}
+.card-ed{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:rgba(255,255,255,.03);display:grid;gap:10px}
+.card-ed .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card-ed .top b{font-size:.88rem}
+.file{font-size:.8rem}
+.thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--line);background:var(--bg)}
+.fr{display:flex;align-items:center;gap:10px}
+.prev{position:sticky;top:70px}
+.device{width:min(396px,100%);margin-inline:auto;border-radius:44px;padding:11px;background:#14111f;box-shadow:0 30px 70px -24px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.16)}
+.screen{position:relative;border-radius:34px;overflow:hidden;background:#111;height:min(720px,calc(100vh - 150px));min-height:520px}
+.screen iframe{position:absolute;top:0;left:0;width:390px;border:0;transform-origin:0 0;background:#111}
+.cta{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(13,11,26,.96);border-top:1px solid var(--line);padding:10px max(16px,3vw) calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.cta span{font-size:.85rem;color:var(--mut)}
+.tabs{display:none}
+@media (max-width:980px){
+  .wrap{grid-template-columns:1fr;padding-bottom:130px}
+  .tabs{display:flex;gap:6px;position:sticky;top:57px;z-index:15;background:var(--bg);padding:8px 0;margin-bottom:6px}
+  .tabs button{flex:1;font:inherit;font-weight:700;padding:.6rem;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);cursor:pointer}
+  .tabs button.on{background:var(--pr);border-color:var(--pr)}
+  .prev{position:static}
+  body[data-tab=ver] .form{display:none}
+  body[data-tab=editar] .prev{display:none}
+  .screen{height:min(640px,calc(100vh - 230px))}
+}
+@media (max-width:520px){.row3{grid-template-columns:1fr}.cta span{display:none}.cta .btn{width:100%}}
+</style>
+</head>
+<body data-tab="editar">
+<header>
+  <img src="../assets/logo.png" alt="BlinkBio by Creative Codex" onerror="this.style.display='none'">
+  <a class="back" href="/#blinkbio">Voltar ao site</a>
+</header>
+<div class="wrap">
+  <div class="form">
+    <div class="intro">
+      <h1>Monte o seu BlinkBio</h1>
+      <p>Preencha os campos e veja a prévia mudar ao lado. É um teste: nada é publicado. Quando gostar, envie para a Creative Codex e deixamos a página pronta.</p>
+    </div>
+    <div class="tabs" role="tablist"><button type="button" data-t="editar" class="on">Editar</button><button type="button" data-t="ver">Ver prévia</button></div>
+
+    <section class="sec"><h2>Seu negócio</h2>
+      <div class="row">
+        <label>Nome<input type="text" id="nome" maxlength="40" value="Studio Fit Academia"></label>
+        <label>Seu WhatsApp (com DDD)<input type="tel" id="wa" inputmode="tel" placeholder="(16) 99999-9999" maxlength="20"></label>
+      </div>
+      <label style="margin-top:10px">Frase de apresentação<input type="text" id="tag" maxlength="90" value="Treine perto de casa e sinta a diferença"></label>
+      <label style="margin-top:10px">Palavra em destaque (opcional)<input type="text" id="dest" maxlength="30" value="diferença"></label>
+      <div class="fr" style="margin-top:12px"><img class="thumb" id="logoThumb" alt="" hidden><label class="file">Logo (PNG com fundo transparente, clara)<input type="file" id="logo" accept="image/*"></label></div>
+    </section>
+
+    <section class="sec"><h2>Cores</h2>
+      <div class="swatches" id="sw"></div>
+      <div class="row row3">
+        <label>Destaque<input type="color" id="c1"></label>
+        <label>Destaque 2<input type="color" id="c2"></label>
+        <label>Fundo<input type="color" id="c3"></label>
+      </div>
+    </section>
+
+    <section class="sec"><h2>Números do seu negócio (opcional)</h2>
+      <div id="nums"></div>
+      <p class="hint">Mostre sua prova social: alunos, anos de casa, avaliações.</p>
+    </section>
+
+    <section class="sec"><h2>Capa</h2>
+      <div class="row">
+        <label>Título<input type="text" id="capaT" maxlength="70" value="Aula experimental grátis"></label>
+        <label>Texto do botão<input type="text" id="capaB" maxlength="24" value="Chamar no WhatsApp"></label>
+      </div>
+      <div class="fr" style="margin-top:12px"><img class="thumb" id="capaThumb" alt="" hidden><label class="file">Foto de capa (opcional)<input type="file" id="capaImg" accept="image/*"></label></div>
+    </section>
+
+    <section class="sec"><h2>Cards</h2>
+      <div id="cards"></div>
+      <button type="button" class="btn s" id="add">+ Adicionar card</button>
+      <p class="hint">Até 6 cards. Use para planos, ofertas, cardápio, localização, vídeos e parcerias.</p>
+    </section>
+  </div>
+
+  <aside class="prev">
+    <div class="device"><div class="screen" id="screen"><iframe id="fr" title="Prévia do seu BlinkBio" src="../?embed=1"></iframe></div></div>
+  </aside>
+</div>
+<div class="cta">
+  <span>Gostou? Envie sua prévia e montamos a sua página.</span>
+  <a class="btn" id="send" href="#" target="_blank" rel="noopener">Quero este BlinkBio</a>
+</div>
+
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)};
+var PRESETS=[['#6C4DF6','#8B7CFF','#0D0B1A','Roxo'],['#EE5A0C','#FF8A3D','#101214','Laranja'],['#16A34A','#4ADE80','#0B1410','Verde'],['#E11D48','#FB7185','#140B0E','Vermelho'],['#0EA5E9','#7DD3FC','#0A121A','Azul'],['#D4A24C','#F0D08A','#14110B','Dourado']];
+var S={cards:[
+ {tipo:'parceiro',titulo:'Planos a partir de R$ 89',texto:'Musculação, funcional e aulas coletivas inclusas.',botao:'Quero me matricular',link:'',img:''},
+ {tipo:'destaque',marca:'Primeira semana',valor:'0',sufixo:' R$',texto:'Treine sem pagar nada e conheça a estrutura.',cupom:'SEMANA1',botao:'Resgatar',link:''},
+ {tipo:'parceiro',titulo:'Como chegar',texto:'Rua Exemplo, 123, Centro. Estacionamento gratuito.',botao:'Abrir no mapa',link:'',img:''}
+],logo:'',capaImg:'',nums:[{v:'+800',r:'Alunos'},{v:'12 anos',r:'De história'},{v:'4,9',r:'No Google'}],pi:1};
+var fr=$('#fr'),screen=$('#screen'),ready=false;
+try{var d=JSON.parse(localStorage.getItem('bb_monte')||'null');if(d&&d.cards&&d.cards.length){S=d.S||S;}}catch(e){}
+
+/* campos simples */
+var ids=['nome','wa','tag','dest','capaT','capaB','c1','c2','c3'];
+function restoreFields(){try{var f=JSON.parse(localStorage.getItem('bb_monte_f')||'null');if(f)ids.forEach(function(i){if(f[i]!=null)$('#'+i).value=f[i]})}catch(e){}}
+var p0=PRESETS[0];$('#c1').value=p0[0];$('#c2').value=p0[1];$('#c3').value=p0[2];
+restoreFields();
+
+/* presets */
+var sw=$('#sw');
+PRESETS.forEach(function(p,i){var b=document.createElement('button');b.type='button';b.className='sw';b.title=p[3];b.setAttribute('aria-label','Cores '+p[3]);b.innerHTML='<i style="background:linear-gradient(135deg,'+p[2]+' 50%,'+p[0]+' 50%)"></i>';
+ b.onclick=function(){$('#c1').value=p[0];$('#c2').value=p[1];$('#c3').value=p[2];sync()};sw.appendChild(b)});
+
+/* números */
+var nums=$('#nums');
+function drawNums(){nums.innerHTML='';S.nums.forEach(function(n,i){var r=document.createElement('div');r.className='row';r.style.marginBottom='8px';
+ r.innerHTML='<label>Número<input type="text" maxlength="12" value=""></label><label>Rótulo<input type="text" maxlength="18" value=""></label>';
+ var ins=r.querySelectorAll('input');ins[0].value=n.v;ins[1].value=n.r;ins[0].oninput=function(){n.v=ins[0].value;sync()};ins[1].oninput=function(){n.r=ins[1].value;sync()};nums.appendChild(r)})}
+
+/* cards */
+var cardsEl=$('#cards');
+function drawCards(){cardsEl.innerHTML='';S.cards.forEach(function(c,i){
+ var el=document.createElement('div');el.className='card-ed';
+ var h='<div class="top"><b>Card '+(i+1)+'</b><button type="button" class="btn d" data-rm>Remover</button></div>'+
+ '<label>Tipo<select data-k="tipo"><option value="parceiro">Link com foto e botão</option><option value="destaque">Cupom ou oferta</option></select></label>';
+ if(c.tipo==='destaque'){
+  h+='<div class="row"><label>Marca ou oferta<input type="text" data-k="marca" maxlength="30"></label><label>Cupom<input type="text" data-k="cupom" maxlength="16"></label></div>'+
+  '<div class="row"><label>Valor<input type="text" data-k="valor" maxlength="6"></label><label>Complemento (ex.: % OFF)<input type="text" data-k="sufixo" maxlength="10"></label></div>';
+ }else{
+  h+='<label>Título<input type="text" data-k="titulo" maxlength="40"></label>';
+ }
+ h+='<label>Texto<textarea data-k="texto" maxlength="120"></textarea></label><div class="row"><label>Texto do botão<input type="text" data-k="botao" maxlength="22"></label><label>Link do botão<input type="text" data-k="link" placeholder="https://..." maxlength="200"></label></div>';
+ if(c.tipo!=='destaque')h+='<div class="fr"><img class="thumb" alt="" '+(c.img?'src="'+c.img+'"':'hidden')+'><label class="file">Foto (opcional)<input type="file" accept="image/*" data-img></label></div>';
+ el.innerHTML=h;
+ el.querySelectorAll('[data-k]').forEach(function(f){var k=f.dataset.k;if(f.tagName==='SELECT'){f.value=c[k];f.onchange=function(){c.tipo=f.value;drawCards();sync()}}else{f.value=c[k]||'';f.oninput=function(){c[k]=f.value;sync()}}});
+ var im=el.querySelector('[data-img]');if(im)im.onchange=function(){shrink(im.files[0],900,function(u,w,hh){c.img=u;c.w=w;c.h=hh;drawCards();sync()})};
+ el.querySelector('[data-rm]').onclick=function(){S.cards.splice(i,1);drawCards();sync()};
+ cardsEl.appendChild(el)});
+ $('#add').disabled=S.cards.length>=6}
+$('#add').onclick=function(){if(S.cards.length<6){S.cards.push({tipo:'parceiro',titulo:'Novo card',texto:'',botao:'Saiba mais',link:'',img:''});drawCards();sync()}};
+
+function shrink(file,max,cb){if(!file)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var k=Math.min(1,max/Math.max(im.width,im.height)),w=Math.round(im.width*k),h=Math.round(im.height*k),cv=document.createElement('canvas');cv.width=w;cv.height=h;var x=cv.getContext('2d');x.drawImage(im,0,0,w,h);var png=/png|svg|webp/.test(file.type);cb(cv.toDataURL(png?'image/png':'image/jpeg',.82),w,h)};im.src=r.result};r.readAsDataURL(file)}
+$('#logo').onchange=function(){shrink(this.files[0],500,function(u,w,h){S.logo=u;S.lw=w;S.lh=h;$('#logoThumb').src=u;$('#logoThumb').hidden=false;sync()})};
+$('#capaImg').onchange=function(){shrink(this.files[0],1200,function(u,w,h){S.capaImg=u;S.cw=w;S.ch=h;$('#capaThumb').src=u;$('#capaThumb').hidden=false;sync()})};
+if(S.logo){$('#logoThumb').src=S.logo;$('#logoThumb').hidden=false}
+if(S.capaImg){$('#capaThumb').src=S.capaImg;$('#capaThumb').hidden=false}
+
+/* config */
+var digits=function(v){return String(v||'').replace(/\D/g,'')};
+function waLink(txt){var n=digits($('#wa').value);if(n.length<10)return '';if(n.length<=11)n='55'+n;return 'https://api.whatsapp.com/send?phone='+n+'&text='+encodeURIComponent(txt||'')}
+function mkUrl(v){v=(v||'').trim();if(!v)return '';if(/^https?:\/\//i.test(v))return v;if(/^[\w-]+\.[\w.-]+/.test(v))return 'https://'+v;return ''}
+function build(){
+ var nome=$('#nome').value.trim()||'Seu negócio',tag=$('#tag').value.trim(),dest=$('#dest').value.trim();
+ if(tag&&dest&&tag.indexOf(dest)>-1)tag=tag.replace(dest,'{'+dest+'}');
+ var cfg={nome:nome,titulo:nome,descricao:'',tagline:tag,tema:{cor:$('#c1').value,cor2:$('#c2').value,fundo:$('#c3').value},categorias:{},cards:[]};
+ if(S.logo)cfg.logo={arquivo:S.logo,w:S.lw,h:S.lh};
+ var ns=S.nums.filter(function(n){return n.v.trim()});if(ns.length)cfg.numeros=ns.map(function(n){return{valor:n.v,rotulo:n.r}});
+ var w=waLink('Olá! Vim pelo link da bio.');
+ if(w)cfg.botaoFlutuante={texto:'WhatsApp',id:'fab',aria:'Chamar no WhatsApp',link:w};
+ cfg.cards.push({tipo:'capa',id:'capa',kicker:'',titulo:$('#capaT').value||'Título da capa',cta:$('#capaB').value||'Saiba mais',link:w||'',aria:$('#capaB').value||'Saiba mais',imagem:S.capaImg||grad(),w:S.capaImg?S.cw:1200,h:S.capaImg?S.ch:600,alt:''});
+ S.cards.forEach(function(c,i){
+  var base={id:'c'+i,cat:'',link:mkUrl(c.link)||w||'',botao:c.botao||'Abrir',texto:c.texto||''};
+  if(c.tipo==='destaque')cfg.cards.push(Object.assign(base,{tipo:'destaque',marca:c.marca||'Oferta',valor:c.valor||'',sufixo:c.sufixo||'',cupom:c.cupom||''}));
+  else cfg.cards.push(Object.assign(base,{tipo:'parceiro',titulo:c.titulo||'Card',imagem:c.img||undefined,w:c.w,h:c.h,alt:''}));
+ });
+ return cfg}
+
+var GK='',GU='';
+function grad(){var k=$('#c1').value+$('#c2').value+$('#c3').value;if(k===GK)return GU;var cv=document.createElement('canvas');cv.width=1200;cv.height=600;var x=cv.getContext('2d'),g=x.createLinearGradient(0,0,1200,600);g.addColorStop(0,$('#c1').value);g.addColorStop(.55,$('#c2').value);g.addColorStop(1,$('#c3').value);x.fillStyle=g;x.fillRect(0,0,1200,600);GK=k;GU=cv.toDataURL('image/jpeg',.8);return GU}
+function fit(){var k=Math.min(1,screen.clientWidth/390);fr.style.transform='scale('+k+')';fr.style.height=(screen.clientHeight/k)+'px'}
+var T;function sync(){clearTimeout(T);T=setTimeout(function(){
+ try{localStorage.setItem('bb_monte',JSON.stringify({S:S}));var f={};ids.forEach(function(i){f[i]=$('#'+i).value});localStorage.setItem('bb_monte_f',JSON.stringify(f))}catch(e){}
+ if(ready&&fr.contentWindow)fr.contentWindow.postMessage({type:'bb-config',cfg:build(),slug:'monte',canvas:false,sel:''},location.origin);
+ updateSend()},150)}
+function updateSend(){
+ var c=build(),L=['Olá! Montei uma prévia do BlinkBio e quero a minha.','','Negócio: '+c.nome,'Frase: '+($('#tag').value||'-'),'Cores: '+c.tema.cor+', '+c.tema.cor2+', fundo '+c.tema.fundo,'Cards: '+(S.cards.map(function(x){return x.tipo==='destaque'?(x.marca||'Oferta'):(x.titulo||'Card')}).join('; ')||'-')];
+ if(digits($('#wa').value).length>=10)L.push('Meu WhatsApp: '+$('#wa').value);
+ $('#send').href='https://wa.me/5516997837454?text='+encodeURIComponent(L.join('\n'))}
+addEventListener('message',function(e){if(e.origin===location.origin&&e.data&&e.data.type==='bb-ready'){ready=true;sync()}});
+ids.forEach(function(i){$('#'+i).addEventListener('input',sync)});
+document.querySelectorAll('.tabs button').forEach(function(b){b.onclick=function(){document.body.dataset.tab=b.dataset.t;document.querySelectorAll('.tabs button').forEach(function(x){x.classList.toggle('on',x===b)});setTimeout(fit,30);sync()}});
+addEventListener('resize',fit);fit();drawNums();drawCards();updateSend();
+})();
+</script>
+</body>
+</html>
